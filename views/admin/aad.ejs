@@ -1,0 +1,420 @@
+<!-- views/addProduct.ejs -->
+<%- include("../partials/admin/header") %>
+
+<head>
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+</head>
+
+<div class="container">
+    <!-- Sidebar -->
+    <%- include("../partials/admin/sidebar") %>
+
+    <body>
+        <!-- Main Content -->
+        <div class="main">
+            <h1>Add New Product</h1>
+
+            <div class="form-container">
+                <h2>Product Information</h2>
+                <form id="productForm" action="/admin/products/add" method="POST" enctype="multipart/form-data">
+
+                    <!-- Product Name -->
+                    <div class="form-group">
+                        <label for="productName">Product Name</label>
+                        <input type="text" id="productName" name="name" class="form-control">
+                        <div id="nameError" class="error-message"></div>
+                    </div>
+
+                    <!-- Category Dropdown -->
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" name="category" class="form-control">
+                            <option value="">Select Category</option>
+                            <% if (categories && categories.length> 0) { %>
+                                <% categories.forEach(category=> { %>
+                                    <option value="<%= category._id %>">
+                                        <%= category.name %>
+                                    </option>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <option disabled>No categories available</option>
+                                            <% } %>
+                        </select>
+                        <div id="categoryError" class="error-message"></div>
+                    </div>
+
+                    <!-- Brand -->
+                    <div class="form-group">
+                        <label for="brand">Brand</label>
+                        <select name="brand" id="brand" class="form-control">
+                            <option value="">Select Brand</option>
+                            <% if (brands && brands.length> 0) { %>
+                                <% brands.forEach(brand=> { %>
+                                    <option value="<%= brand._id %>">
+                                        <%= brand.name %>
+                                    </option>
+                                    <% }) %>
+                                        <% } %>
+                        </select>
+                        <div id="brandError" class="error-message"></div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" class="form-control"></textarea>
+                    </div>
+
+                    <!-- Product Variants -->
+                    <div class="form-group">
+                        <label>Product Variants</label>
+                        <button type="button" class="add-variant-btn" id="addVariantBtn">+ Add Variant</button>
+                        <div id="variantsContainer">
+                            <!-- Variants will be added here dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Save Product</button>
+                        <button type="button" class="btn btn-outline" onclick="window.history.back()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM Content Loaded - Product Form");
+
+        // Show message if any
+        const message = "<%= message %>";
+        const type = "<%= type %>";
+        if (message) {
+            Swal.fire({
+                icon: type,
+                text: message,
+                confirmButtonColor: '#007bff'
+            });
+        }
+
+        // Basic variables
+        const form = document.getElementById("productForm");
+        const nameInput = document.getElementById("productName");
+        const nameError = document.getElementById("nameError");
+        const categoryInput = document.getElementById("category");
+        const categoryError = document.getElementById("categoryError");
+        const brandInput = document.getElementById("brand");
+        const brandError = document.getElementById("brandError");
+        const descriptionInput = document.getElementById("description");
+        const addVariantBtn = document.getElementById("addVariantBtn");
+        const variantsContainer = document.getElementById("variantsContainer");
+        
+        let variantCount = 0; // Counter for variants
+        let allVariants = []; // Array to store variant data
+
+        // Step 1: Add variant functionality
+        addVariantBtn.addEventListener("click", function () {
+            addNewVariant();
+        });
+
+        // Function to add a new variant
+        function addNewVariant() {
+            variantCount++;
+            const variantId = `variant-${variantCount}`;
+            
+            const variantHtml = `
+                <div class="variant" id="${variantId}">
+                    <div class="variant-header">
+                        <hr class="variant-divider">
+                        <h4>Variant ${variantCount}</h4>
+                        <button type="button" class="remove-variant" data-variant-id="${variantId}">Remove Variant</button>
+                    </div>
+                    
+                    <div class="variant-content">
+                        <!-- Color -->
+                        <div class="form-group">
+                            <label for="color-${variantCount}">Color</label>
+                            <input type="text" id="color-${variantCount}" name="variants[${variantCount}][color]" class="form-control variant-color" required>
+                            <div class="color-error error-message"></div>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="form-group">
+                            <label for="price-${variantCount}">Price (₹)</label>
+                            <input type="number" id="price-${variantCount}" name="variants[${variantCount}][price]" class="form-control variant-price" min="1" required>
+                            <div class="price-error error-message"></div>
+                        </div>
+
+                        <!-- Stock -->
+                        <div class="form-group">
+                            <label for="stock-${variantCount}">Stock Quantity</label>
+                            <input type="number" id="stock-${variantCount}" name="variants[${variantCount}][stock]" class="form-control variant-stock" min="0" required>
+                            <div class="stock-error error-message"></div>
+                        </div>
+
+                        <!-- Images -->
+                        <div class="form-group">
+                            <label for="images-${variantCount}">Product Images (Max 4 images)</label>
+                            <input type="file" id="images-${variantCount}" name="variants[${variantCount}][images]" class="variant-images" accept="image/*" multiple>
+                            <small>You can select multiple images</small>
+                            <div class="images-error error-message"></div>
+                            
+                            <!-- Image preview area -->
+                            <div id="imagePreview-${variantCount}" class="image-preview" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            variantsContainer.insertAdjacentHTML('beforeend', variantHtml);
+
+            // Add remove functionality
+            const removeBtn = document.querySelector(`[data-variant-id="${variantId}"]`);
+            removeBtn.addEventListener('click', function() {
+                removeVariant(variantId);
+            });
+
+            // Add image preview functionality
+            setupImagePreview(variantCount);
+
+            // Initialize variant data
+            allVariants.push({
+                id: variantId,
+                color: '',
+                price: '',
+                stock: '',
+                images: []
+            });
+
+            console.log(`Variant ${variantCount} added. Total variants:`, allVariants);
+        }
+
+        // Function to remove variant
+        function removeVariant(variantId) {
+            const variantElement = document.getElementById(variantId);
+            if (variantElement) {
+                variantElement.remove();
+                
+                // Remove from array
+                allVariants = allVariants.filter(variant => variant.id !== variantId);
+                console.log(`Variant ${variantId} removed. Total variants:`, allVariants);
+            }
+        }
+
+        // Basic image preview functionality (without cropping for now)
+        function setupImagePreview(variantIndex) {
+            const imageInput = document.getElementById(`images-${variantIndex}`);
+            const previewContainer = document.getElementById(`imagePreview-${variantIndex}`);
+
+            imageInput.addEventListener('change', function() {
+                previewContainer.innerHTML = ''; // Clear previous previews
+                
+                if (this.files.length > 4) {
+                    alert('Maximum 4 images allowed');
+                    this.value = '';
+                    return;
+                }
+
+                // Display image previews
+                for (let i = 0; i < this.files.length; i++) {
+                    const file = this.files[i];
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.width = '100px';
+                        img.style.height = '100px';
+                        img.style.objectFit = 'cover';
+                        img.style.margin = '5px';
+                        img.style.border = '1px solid #ddd';
+                        img.style.borderRadius = '4px';
+                        
+                        previewContainer.appendChild(img);
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+
+                // Update variant data
+                updateVariantData(variantIndex, 'images', Array.from(this.files));
+            });
+        }
+
+        // Function to update variant data
+        function updateVariantData(variantIndex, field, value) {
+            const variant = allVariants.find(v => v.id === `variant-${variantIndex}`);
+            if (variant) {
+                variant[field] = value;
+                console.log(`Updated variant ${variantIndex}:`, field, value);
+            }
+        }
+
+        // Basic validation
+        function validateForm() {
+            let isValid = true;
+
+            // Product name validation
+            if (!nameInput.value.trim()) {
+                nameError.textContent = "Product name is required";
+                isValid = false;
+            } else {
+                nameError.textContent = "";
+            }
+
+            // Category validation
+            if (!categoryInput.value) {
+                categoryError.textContent = "Please select a category";
+                isValid = false;
+            } else {
+                categoryError.textContent = "";
+            }
+
+            // Brand validation
+            if (!brandInput.value) {
+                brandError.textContent = "Please select a brand";
+                isValid = false;
+            } else {
+                brandError.textContent = "";
+            }
+
+            // Variant validation
+            if (allVariants.length === 0) {
+                alert("Please add at least one variant");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Product name uniqueness check
+        nameInput.addEventListener("blur", async function() {
+            const productName = this.value.trim();
+            if (productName) {
+                try {
+                    const exists = await checkProductName(productName);
+                    if (exists) {
+                        nameError.textContent = "Product name already exists";
+                    } else {
+                        nameError.textContent = "";
+                    }
+                } catch (error) {
+                    console.error("Error checking product name:", error);
+                }
+            }
+        });
+
+        // Form submission
+        form.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = "Saving...";
+            submitBtn.disabled = true;
+
+            try {
+                // Create FormData object
+                const formData = new FormData();
+                
+                // Add basic product data
+                formData.append("name", nameInput.value.trim());
+                formData.append("category", categoryInput.value);
+                formData.append("brand", brandInput.value);
+                formData.append("description", descriptionInput.value.trim());
+
+                // Add variants data
+                allVariants.forEach((variant, index) => {
+                    formData.append(`variants[${index}][color]`, variant.color);
+                    formData.append(`variants[${index}][price]`, variant.price);
+                    formData.append(`variants[${index}][stock]`, variant.stock);
+                    
+                    // Add images for each variant
+                    variant.images.forEach((image, imgIndex) => {
+                        formData.append(`variants[${index}][images]`, image);
+                    });
+                });
+
+                // Submit form
+                const response = await fetch("/admin/products/add", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: result.message,
+                        confirmButtonColor: '#007bff'
+                    }).then(() => {
+                        window.location.href = "/admin/products";
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.message,
+                        confirmButtonColor: '#007bff'
+                    });
+                }
+
+            } catch (error) {
+                console.error("Form submission error:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Something went wrong. Please try again.'
+                });
+            } finally {
+                // Restore button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Real-time variant data updates
+        variantsContainer.addEventListener('input', function(e) {
+            if (e.target.classList.contains('variant-color')) {
+                const variantIndex = e.target.id.split('-')[1];
+                updateVariantData(variantIndex, 'color', e.target.value);
+            }
+            if (e.target.classList.contains('variant-price')) {
+                const variantIndex = e.target.id.split('-')[1];
+                updateVariantData(variantIndex, 'price', e.target.value);
+            }
+            if (e.target.classList.contains('variant-stock')) {
+                const variantIndex = e.target.id.split('-')[1];
+                updateVariantData(variantIndex, 'stock', e.target.value);
+            }
+        });
+    });
+
+    // Product name check function
+    async function checkProductName(name) {
+        try {
+            const response = await fetch(`/admin/products/check-name?name=${encodeURIComponent(name)}`);
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            const data = await response.json();
+            return data.exists;
+        } catch (error) {
+            console.error("Error checking product name:", error);
+            return false;
+        }
+    }
+</script>

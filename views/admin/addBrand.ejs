@@ -1,0 +1,43 @@
+<!-- views/addCategory.ejs -->
+<%- include("../partials/admin/header") %>
+
+    <head>
+        <link rel="stylesheet" href="/css/sidebar.css">
+        <link rel="stylesheet" href="/css/addCategory.css">
+    </head>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <%- include("../partials/admin/sidebar") %>
+
+            <!-- Main Content -->
+            <div class="content">
+                <div class="header">Add  Brand</div>
+
+                <div class="form-container">
+                    <form action="/admin/brand" method="POST">
+                        <label for="brandName">Brand Name</label>
+                        <input type="text" id="brandName" name="name" required>
+                        <label for="discription">Brand Discription</label>
+                        <input type="text" id="descrip" name="descrip" >
+                        <button type="submit">Save</button>
+                    </form>
+                </div>
+            </div>
+    </div>
+
+    <%- include("../partials/admin/footer") %>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const message = "<%= message %>";
+                const type = "<%= type %>";
+                if (message) {
+                    Swal.fire({
+                        icon: type,
+                        text: message,
+                        confirmButtonColor: '#007bff'
+                    });
+                }
+        })
+    </script>

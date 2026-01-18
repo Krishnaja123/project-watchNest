@@ -1,0 +1,266 @@
+<!-- views/brand.ejs -->
+<%- include("../partials/admin/header") %>
+
+    <head>
+        <link rel="stylesheet" href="/css/sidebar.css">
+        <link rel="stylesheet" href="/css/categories.css">
+
+    </head>
+
+    <body>
+        <div class="container">
+            <!-- Sidebar -->
+            <%- include("../partials/admin/sidebar") %>
+
+                <!-- Main Content -->
+                <div class="main">
+                    <h1>Brands</h1>
+
+                    <!-- Add Brand -->
+                    <button id="add-category">+ Add Brand</button>
+
+                    <!-- Search -->
+                    <div class="search-box">
+                        <input type="text" placeholder="Search" id="search">
+                        <span id="clear-btn">x</span>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-container">
+                        <table id="table">
+                            <thead id="thead">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Name</th>
+                                    <th>View</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination"></div>
+                </div>
+        </div>
+    </body>
+
+    <%- include("../partials/admin/footer") %>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const message = "<%= message %>";
+                const type = "<%= type %>";
+                if (message) {
+                    Swal.fire({
+                        icon: type,
+                        text: message,
+                        confirmButtonColor: '#007bff'
+                    });
+                }
+
+                const addBrand = document.getElementById("add-category");
+                addBrand.addEventListener("click", function () {
+                    window.location.href = "/admin/brand";
+                })
+                const searchInput = document.getElementById("search");
+                const clearBtn = document.getElementById("clear-btn");
+
+                searchInput.addEventListener("input", function () {
+                    clearBtn.style.display = searchInput.value ? "inline" : "none";
+                })
+
+                clearBtn.addEventListener("click", function () {
+                    searchInput.value = "";
+                    clearBtn.style.display = "none";
+                    searchInput.focus();
+                    fetchBrand();
+                })
+                let page = "<%= page %>";
+                console.log("page :", page);
+
+                fetchBrand(page);
+
+                searchInput.addEventListener("input", function (e) {
+                    let searchValue = e.target.value;
+                    fetchBrand(1, searchValue);
+                })
+
+                const tbody = document.getElementById("tbody");
+                tbody.addEventListener("click", function (e) {
+                    if (e.target && e.target.classList.contains("btn-delete")) {
+                        e.preventDefault();
+                        //console.log("clicked delete button");
+
+                        const BrandtId = e.target.getAttribute("data-id");
+                        const page = e.target.getAttribute("data-page");
+                        console.log(BrandtId);
+
+                        if (window.confirm("Are you sure you want to delete this?")) {
+                            console.log("entered into the confirmation block");
+
+                            deleteBrand(BrandtId, page);
+                        } else {
+                            Swal.fire({
+                                text: 'Delete canceled'
+                            });
+                        }
+                    }
+                })
+
+                async function fetchBrand(page = 1, search = "") {
+                    try {
+                        const response = await fetch(`/admin/fetchBrands?page=${page}&search=${search}`);
+                        console.log("response from fetchBrand: ", response);
+
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+                        const data = await response.json();
+                        //console.log("data", data);
+
+                        await renderBrands(data.brands, data.currentPage);
+                        console.log("1")
+                        renderPagination(data.totalPages, data.currentPage);
+
+                    } catch (error) {
+                        console.log("Error fetching brands:", error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to load brands'
+                        });
+                    }
+                }
+
+                function renderBrands(brands, currentPage) {
+                    const tbody = document.getElementById("tbody");
+                    tbody.innerHTML = "";
+
+                    brands.forEach(brand => {
+                        const tr = document.createElement("tr");
+
+                        const cells = [
+                            brand._id,
+                            brand.name
+                        ]
+                        cells.forEach(data => {
+                            const td = document.createElement("td");
+                            td.textContent = data;
+                            tr.appendChild(td);
+                        });
+
+                        const td = document.createElement("td");
+                        const viewBtn = document.createElement("button");
+                        viewBtn.textContent = brand.view ? "Listed" : "Unlisted";
+
+                        viewBtn.className = brand.view ? "btn btn-listed" : "btn btn-unlisted";
+                        viewBtn.setAttribute("data-id", brand._id);
+                        td.appendChild(viewBtn);
+                        tr.appendChild(td);
+
+                        viewBtn.addEventListener("click", async function () {
+                            const response = await fetch(`/admin/viewBrand/${brand._id}`, { method: "PUT" });
+                            if (!response.ok) {
+                                throw new Error("Network response was not ok");
+
+                            }
+                            const data = await response.json();
+                            if (data.view) {
+                                viewBtn.textContent = "Listed";
+                                viewBtn.className = "btn btn-listed";
+                            } else {
+                                viewBtn.textContent = "Unlisted";
+                                viewBtn.className = "btn btn-unlisted";
+                            }
+                        })
+
+                        const actionTd = document.createElement("td");
+                        const editLink = document.createElement("a");
+                        editLink.href = `/admin/editBrand/${brand._id}?page=${currentPage}`;
+                        editLink.className = "btn btn-edit";
+                        editLink.textContent = "Edit";
+
+                        const deletBtn = document.createElement("button");
+                        deletBtn.className = "btn btn-delete";
+                        deletBtn.textContent = "Delete";
+                        deletBtn.setAttribute("data-id", brand._id);
+                        deletBtn.setAttribute("data-page", currentPage);
+
+                        actionTd.appendChild(editLink);
+                        actionTd.appendChild(deletBtn);
+
+                        tr.appendChild(actionTd);
+                        tbody.appendChild(tr);
+                    });
+                }
+
+
+
+                async function deleteBrand(id, page) {
+                    try {
+
+                        const response = await fetch(`/admin/brands/${id}`, { method: "PUT" });
+                        console.log(response);
+
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+                        const data = await response.json();
+
+                        Swal.fire({
+                            icon: "success",
+                            text: "Brand deleted successfully!"
+                        });
+
+                        await fetchBrand(page, "");
+
+                    } catch (error) {
+
+                        console.error("Error deleting brand:", error);
+                        Swal.fire({
+                            icon: "error",
+                            text: "Failed to delete brand"
+                        });
+                    }
+                }
+
+                function renderPagination(totalPages, currentPage) {
+                    console.log("get in to renderPagination");
+
+                    const pagination = document.querySelector(".pagination");
+                    pagination.innerHTML = "";
+
+                    if (currentPage > 1) {
+                        const prevBtn = document.createElement("button");
+                        prevBtn.textContent = "<<";
+                        prevBtn.className = "btn";
+                        search = searchInput.value;
+                        prevBtn.onclick = () => fetchBrand(currentPage - 1, search);
+                        pagination.appendChild(prevBtn);
+                    }
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageBtn = document.createElement("button");
+                        pageBtn.textContent = i;
+                        pageBtn.className = (i === currentPage) ? "btn btn-edit" : "btn";
+                        search = searchInput.value;
+                        pageBtn.onclick = () => fetchBrand(i, search);
+                        pagination.appendChild(pageBtn);
+                    }
+                    console.log("total page:", totalPages);
+                    if (currentPage < totalPages) {
+                        const nextBtn = document.createElement("button");
+                        nextBtn.textContent = ">>";
+                        nextBtn.className = "btn";
+                        search = searchInput.value;
+                        nextBtn.onclick = () => fetchBrand(currentPage + 1, search);
+                        pagination.appendChild(nextBtn);
+                    }
+                }
+            });
+
+
+
+
+
+        </script>

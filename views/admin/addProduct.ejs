@@ -1,0 +1,584 @@
+<!-- views/addProduct.ejs -->
+<%- include("../partials/admin/header") %>
+
+    <head>
+        <link rel="stylesheet" href="/css/sidebar.css">
+        <link rel="stylesheet" href="/css/products.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+    </head>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <%- include("../partials/admin/sidebar") %>
+
+            <body>
+                <!-- Main Content -->
+                <div class="main">
+                    <h1>Add New Product</h1>
+
+                    <div class="form-container">
+                        <h2>Product Information</h2>
+                        <form id="productForm" action="/admin/product" method="POST" enctype="multipart/form-data">
+
+                            <!-- Product Name -->
+                            <div class="form-group">
+                                <label for="productName">Product Name*</label>
+                                <input type="text" id="productName" name="name" class="form-control">
+                                <div id="nameError" class="error-message"></div>
+                            </div>
+
+                            <!-- Category Dropdown -->
+                            <div class="form-group">
+                                <label for="category">Category*</label>
+                                <select id="category" name="category[]" class="form-control" multiple>
+                                    <option value="">Select Category</option>
+                                    <% if (categories && categories.length> 0) { %>
+                                        <% categories.forEach(category=> { %>
+                                            <option value="<%= category._id %>">
+                                                <%= category.name %>
+                                            </option>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <option disabled>No categories available</option>
+                                                    <% } %>
+                                </select>
+                                <div id="categoryError" class="error-message"></div>
+                            </div>
+
+                            <!-- Brand -->
+                            <div class="form-group">
+                                <label for="brand">Brand*
+                                    <a href="/admin/brand" style="margin-left: 8px; font-size: 14px;">Add New Brand</a>
+                                </label>
+                                <select name="brand" id="brand" class="form-control">
+                                    <option value="">Select Brand</option>
+                                    <% if (brands && brands.length> 0) { %>
+                                        <% brands.forEach(brand=> { %>
+                                            <option value="<%= brand._id %>">
+                                                <%= brand.name %>
+                                            </option>
+                                            <% }) %>
+                                                <% } %>
+                                </select>
+                                <div id="brandError" class="error-message"></div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea id="description" name="descrip" class="form-control"></textarea>
+                            </div>
+
+                            <!-- Product Variants -->
+                            <div class="form-group">
+                                <label>Product Variants</label>
+
+                                <div id="variantsContainer">
+                                    <!-- variant 1 -->
+                                    <div class="variant" id="${variantId}">
+                                        <div class="variant-header">
+                                            <hr class="variant-divider">
+                                            <h4>Variant 1</h4>
+                                        </div>
+
+                                        <div class="variant-content">
+                                            <!-- Strap Color -->
+                                            <div class="form-group">
+                                                <label for="strap_color-${variantCount}">Strap Color*</label>
+                                                <input type="text" id="strap_color-${variantCount}"
+                                                    name="variants[${variantCount}][strap_color]"
+                                                    class="form-control variant-strap_color">
+                                                <div class="strap_color-error error-message"></div>
+                                            </div>
+
+                                            <!-- Dial Color -->
+                                            <div class="form-group">
+                                                <label for="dial_color-${variantCount}">Dial Color*</label>
+                                                <input type="text" id="dial_color-${variantCount}"
+                                                    name="variants[${variantCount}][dial_color]"
+                                                    class="form-control variant-dial_color">
+                                                <div class="dial_color-error error-message"></div>
+                                            </div>
+
+                                            <!-- Price -->
+                                            <div class="form-group">
+                                                <label for="price-${variantCount}">Price (₹)*</label>
+                                                <input type="number" id="price-${variantCount}"
+                                                    name="variants[${variantCount}][price]"
+                                                    class="form-control variant-price" min="1">
+                                                <div class="price-error error-message"></div>
+                                            </div>
+
+                                            <!-- Offer -->
+                                            <div class="form-group">
+                                                <label for="offer-${variantCount}">Offer*</label>
+                                                <input type="number" id="offer-${variantCount}"
+                                                    name="variants[${variantCount}][offer]"
+                                                    class="form-control variant-offer" min="0">
+                                                <div class="stock-error error-message"></div>
+                                            </div>
+
+                                            <!-- Stock -->
+                                            <div class="form-group">
+                                                <label for="stock-${variantCount}">Stock Quantity*</label>
+                                                <input type="number" id="stock-${variantCount}"
+                                                    name="variants[${variantCount}][stock]"
+                                                    class="form-control variant-stock" min="0">
+                                                <div class="stock-error error-message"></div>
+                                            </div>
+
+                                            <!-- Images -->
+
+                                            <!-- Image 1 -->
+                                            <div class="form-group">
+                                                <label for="images-1-1">Product Image 1</label>
+                                                <input type="file" id="images-1-1" name="variants[1][images][]"
+                                                    class="variant-images" accept="image/*">
+
+                                                <div class="image-preview-wrapper">
+                                                    <img id="preview-1-1" style="max-width:300px; display:none;">
+                                                </div>
+
+                                                <div class="image-actions">
+                                                    <button type="button" id="cropBtn-1-1"
+                                                        style="display:none;">Crop</button>
+                                                    <button type="button" id="closeBtn-1-1"
+                                                        style="display:none;">Cancel</button>
+                                                </div>
+
+                                                <div id="croppedGallery-1-1"
+                                                    style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                            </div>
+
+                                            <!-- Image 2 -->
+                                            <div class="form-group">
+                                                <label for="images-1-2">Product Image 2</label>
+                                                <input type="file" id="images-1-2" name="variants[1][images][]"
+                                                    class="variant-images" accept="image/*">
+
+                                                <div class="image-preview-wrapper">
+                                                    <img id="preview-1-2" style="max-width:300px; display:none;">
+                                                </div>
+
+                                                <div class="image-actions">
+                                                    <button type="button" id="cropBtn-1-2"
+                                                        style="display:none;">Crop</button>
+                                                    <button type="button" id="closeBtn-1-2"
+                                                        style="display:none;">Cancel</button>
+                                                </div>
+
+                                                <div id="croppedGallery-1-2"
+                                                    style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                            </div>
+
+                                            <!-- Image 3 -->
+                                            <div class="form-group">
+                                                <label for="images-1-3">Product Image 3</label>
+                                                <input type="file" id="images-1-3" name="variants[1][images][]"
+                                                    class="variant-images" accept="image/*">
+
+                                                <div class="image-preview-wrapper">
+                                                    <img id="preview-1-3" style="max-width:300px; display:none;">
+                                                </div>
+
+                                                <div class="image-actions">
+                                                    <button type="button" id="cropBtn-1-3"
+                                                        style="display:none;">Crop</button>
+                                                    <button type="button" id="closeBtn-1-3"
+                                                        style="display:none;">Cancel</button>
+                                                </div>
+
+                                                <div id="croppedGallery-1-3"
+                                                    style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                            </div>
+
+                                            <!-- Image 4 -->
+                                            <div class="form-group">
+                                                <label for="images-1-4">Product Image 4</label>
+                                                <input type="file" id="images-1-4" name="variants[1][images][]"
+                                                    class="variant-images" accept="image/*">
+
+                                                <div class="image-preview-wrapper">
+                                                    <img id="preview-1-4" style="max-width:300px; display:none;">
+                                                </div>
+
+                                                <div class="image-actions">
+                                                    <button type="button" id="cropBtn-1-4"
+                                                        style="display:none;">Crop</button>
+                                                    <button type="button" id="closeBtn-1-4"
+                                                        style="display:none;">Cancel</button>
+                                                </div>
+
+                                                <div id="croppedGallery-1-4"
+                                                    style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                            </div>
+
+                                            <div class="images-error error-message"></div>
+
+
+                                        </div>
+                                        <!-- Variants will be added here dynamically -->
+                                    </div>
+
+                                    <button type="button" class="add-variant-btn" id="addVariantBtn">+ Add
+                                        Variant</button>
+
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary">Save Product</button>
+                                    <button type="button" class="btn btn-outline"
+                                        onclick="window.history.back()">Cancel</button>
+                                </div>
+                        </form>
+                    </div>
+                </div>
+
+
+
+            </body>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#category').select2({
+                placeholder: "Select categories",
+                allowClear: true,
+                closeOnSelect: false // keeps dropdown open after selecting
+            });
+        });
+    </script>
+
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const message = "<%= message %>";
+            const type = "<%= type %>";
+            if (message) {
+                Swal.fire({
+                    icon: type,
+                    text: message,
+                    confirmButtonColor: '#007bff',
+                    timer: 5000, // closes after 2 seconds (2000 ms)
+                });
+            }
+
+
+            const form = document.getElementById("productForm");
+            const nameInput = document.getElementById("productName");
+            const nameError = document.getElementById("nameError");
+            const categoryInput = document.getElementById("category");
+            const categoryError = document.getElementById("categoryError");
+            const brandInput = document.getElementById("brand");
+            const brandError = document.getElementById("brandError");
+            const descriptionInput = document.getElementById("description");
+            const addVariantBtn = document.getElementById("addVariantBtn");
+            const variantsContainer = document.getElementById("variantsContainer");
+
+            let variantCount = 1; // Counter for variants
+            let allVariants = []; // Array to store variant data
+            let variantImages = {};
+            let originalImages = {};
+
+            addVariantBtn.addEventListener("click", function () {
+                addNewVariant();
+            });
+            const IMAGE_COUNT = 4;
+            function addNewVariant() {
+                variantCount++;
+                const variantId = `variant-${variantCount}`;
+
+                const variantHtml = `<div class="variant" id="${variantId}">
+                    <div class="variant-header"> 
+                        <hr class="variant-divider">
+                        <h4>Variant ${variantCount}</h4>
+                        <button type="button" class="remove-variant" data-variant-id="${variantId}">Remove Variant</button>
+                    </div>
+                    
+                    <div class="variant-content">
+                        <!-- Strap Color -->
+                        <div class="form-group">
+                            <label for="strap_color-${variantCount}">Strap Color*</label>
+                            <input type="text" id="strap_color-${variantCount}" name="variants[${variantCount}][strap_color]" class="form-control variant-strap_color">
+                            <div class="strap_color-error error-message"></div>
+                        </div>
+
+                         <!-- Dial Color -->
+                        <div class="form-group">
+                            <label for="dial_color-${variantCount}">Dial Color*</label>
+                            <input type="text" id="dial_color-${variantCount}" name="variants[${variantCount}][dial_color]" class="form-control variant-dial_color">
+                            <div class="dial_color-error error-message"></div>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="form-group">
+                            <label for="price-${variantCount}">Price (₹)*</label>
+                            <input type="number" id="price-${variantCount}" name="variants[${variantCount}][price]" class="form-control variant-price" min="1">
+                            <div class="price-error error-message"></div>
+                        </div>
+
+                        <!-- Offer -->
+                        <div class="form-group">
+                            <label for="offer-${variantCount}">Offer*</label>
+                            <input type="number" id="offer-${variantCount}" name="variants[${variantCount}][offer]" class="form-control variant-offer" min="0">
+                            <div class="stock-error error-message"></div>
+                        </div>
+
+                        <!-- Stock -->
+                        <div class="form-group">
+                            <label for="stock-${variantCount}">Stock Quantity*</label>
+                            <input type="number" id="stock-${variantCount}" name="variants[${variantCount}][stock]" class="form-control variant-stock" min="0">
+                            <div class="stock-error error-message"></div>
+                        </div>
+
+                        <!-- Images -->
+                    
+                            ${generateImageFields(variantCount, 4)}
+                            
+                            <div class="images-error error-message"></div>
+
+
+                </div>`;
+
+                const addVariantBtn = document.getElementById("addVariantBtn");
+                addVariantBtn.insertAdjacentHTML("beforebegin", variantHtml);
+
+                const removeBtn = document.querySelector(`[data-variant-id="${variantId}"]`);
+                removeBtn.addEventListener("click", () => {
+                    removeVariant(variantId);
+                });
+
+            }
+
+            function generateImageFields(variantCount, imageCount = 4) {
+                let imageHtml = "";
+
+                for (let i = 1; i <= imageCount; i++) {
+                    imageHtml += `
+        <div class="form-group">
+            <label for="images-${variantCount}-${i}">Product Image ${i}</label>
+            <input 
+                type="file" 
+                id="images-${variantCount}-${i}" 
+                name="variants[${variantCount}][images][]" 
+                class="variant-images" 
+                accept="image/*"
+            >
+            
+            <!-- Preview -->
+            <div class="image-preview-wrapper">
+                <img 
+                    id="preview-${variantCount}-${i}" 
+                    style="max-width:300px; display:none;"
+                >
+            </div>
+
+            <!-- Buttons -->
+            <div class="image-actions">
+                <button 
+                    type="button"
+                    id="cropBtn-${variantCount}-${i}"
+                    style="display:none;"
+                >Crop</button>
+
+                <button 
+                    type="button"
+                    id="closeBtn-${variantCount}-${i}"
+                    style="display:none;"
+                >Cancel</button>
+            </div>
+
+            <!-- Cropped images -->
+            <div 
+                id="croppedGallery-${variantCount}-${i}" 
+                style="display:flex; gap:10px; flex-wrap:wrap;"
+            >
+            </div>
+        </div>
+        `;
+                }
+
+                return imageHtml;
+            }
+
+            const cropper = {};
+
+
+            function removeVariant(id) {
+                const variable = document.getElementById(id);
+                if (variable) {
+                    variable.remove();
+                }
+
+                allVariants = allVariants.filter(variant => variant.id !== id);
+                console.log(allVariants);
+
+            }
+
+            function validateForm() {
+                let isValid = true;
+
+                nameError.textContent = "";
+                categoryError.textContent = "";
+                brandError.textContent = "";
+
+                if (nameInput.value.trim() === "") {
+                    nameError.textContent = "Please enter a product name";
+                    isValid = false;
+                } else if (nameInput.value.trim().length < 4) {
+                    nameError.textContent = "Name must be at least 4 characters long";
+                    isValid = false;
+                }
+
+                if (categoryInput.value.trim() === "") {
+                    categoryError.textContent = "Please select a category";
+                    isValid = false;
+                }
+
+                if (brandInput.value.trim() === "") {
+                    brandError.textContent = "Please select a brand";
+                    isValid = false;
+                }
+                const variants = document.querySelectorAll(".variant");
+                variants.forEach((variant, index) => {
+                    const strapColorInput = variant.querySelector(".variant-strap_color");
+                    const dialColorInput = variant.querySelector(".variant-dial_color");
+                    const priceInput = variant.querySelector(".variant-price");
+                    const stockInput = variant.querySelector(".variant-stock");
+                    const strapError = variant.querySelector(".strap_color-error");
+                    const dialError = variant.querySelector(".dial_color-error");
+                    const priceError = variant.querySelector(".price-error");
+                    const stockError = variant.querySelector(".stock-error");
+                    // const imageError = variant.querySelector(".images-error");
+
+                    strapError.textContent = "";
+                    dialError.textContent = "";
+                    priceError.textContent = "";
+                    stockError.textContent = "";
+                    // imageError.textContent = "";
+
+                    if (strapColorInput.value.trim() === "") {
+                        strapError.textContent = "Please enter strap color";
+                        isValid = false;
+                    }
+
+                    if (dialColorInput.value.trim() === "") {
+                        dialError.textContent = "Please enter dial color";
+                        isValid = false;
+                    }
+
+                    if (!priceInput.value || parseFloat(priceInput.value) <= 0) {
+                        priceError.textContent = "Please enter a valid price";
+                        isValid = false;
+                    }
+
+                    if (!stockInput.value || parseInt(stockInput.value) < 0) {
+                        stockError.textContent = "Please enter valid stock quantity";
+                        isValid = false;
+                    }
+
+                    // const images = variantImages[index + 1] || [];
+                    // if (images.length === 0) {
+                    //     imageError.textContent = "Please upload at least one image";
+                    //     isValid = false;
+                    // }
+                })
+
+                return isValid;
+
+            }
+
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+                try {
+
+                    if (!validateForm()) {
+                        return;
+                    }
+
+                    const formData = new FormData();
+
+                    formData.append("name", e.target.name.value);
+                    //console.log("e.target.category.selectedOptions: ", e.target.category.selectedOptions);
+
+                    const selectedCategories = Array.from(e.target.category.selectedOptions).map(opt => opt.value);
+                    selectedCategories.forEach(catId => {
+                        formData.append("category[]", catId);
+                    });
+                    formData.append("brand", e.target.brand.value);
+                    formData.append("descrip", e.target.description.value);
+
+                    const variants = document.querySelectorAll(".variant");
+
+                    console.log(variants);
+                    variants.forEach((variant, index) => {
+                        const strapColor = variant.querySelector(".variant-strap_color").value;
+                        const dialColor = variant.querySelector(".variant-dial_color").value;
+                        const price = variant.querySelector(".variant-price").value;
+                        const stock = variant.querySelector(".variant-stock").value;
+
+                        formData.append(`variants[${index}][strap_color]`, strapColor);
+                        formData.append(`variants[${index}][dial_color]`, dialColor);
+                        formData.append(`variants[${index}][price]`, price);
+                        formData.append(`variants[${index}][stock]`, stock);
+
+                    });
+
+                    const response = await fetch("/admin/product", {
+                        method: "POST",
+                        body: formData
+                    });
+                    console.log(response);
+
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    const data = await response.json();
+                    console.log("Upload success: ", data);
+
+                    if (data.success) {
+
+                        Swal.fire({
+                            icon: data.type || "success",
+                            text: data.message || "Successfully created product",
+                            confirmButtonColor: '#007bff',
+                            timer: 2000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // redirect after alert closes
+                            window.location.href = "/admin/products";
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: data.type || "error",
+                            text: data.message || "Something went wrong",
+                            confirmButtonColor: '#007bff'
+                        });
+                    }
+
+                } catch (error) {
+                    console.error("Form submit error:", error);
+                }
+            })
+
+        })
+
+
+    </script>

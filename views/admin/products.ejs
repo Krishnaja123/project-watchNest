@@ -1,0 +1,434 @@
+<!-- views/category.ejs -->
+<%- include("../partials/admin/header") %>
+
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/css/sidebar.css">
+        <link rel="stylesheet" href="/css/categories.css">
+
+
+        <!-- Bootstrap JS (REQUIRED for modal) -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <!-- Sidebar -->
+            <%- include("../partials/admin/sidebar") %>
+
+                <!-- Main Content -->
+                <div class="main">
+                    <h1>Products</h1>
+
+                    <!-- Add Category -->
+                    <button id="add-category">+ Add Product</button>
+
+                    <!-- Search -->
+                    <div class="search-box">
+                        <input type="text" placeholder="Search" id="search">
+                        <span id="clear-btn">x</span>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-container">
+                        <table id="table">
+                            <thead id="thead">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Product Name</th>
+                                    <th>Image</th>
+                                    <th>Category</th>
+                                    <th>Brand</th>
+                                    <th>Variants</th>
+                                    <th>Action</th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination"></div>
+                </div>
+        </div>
+
+        <!-- Variants Modal -->
+        <div class="modal fade" id="variantsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Product Variants</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Image</th>
+                                    <th>Strap color</th>
+                                    <th>Dial color</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="variantsModalBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+
+
+
+    <%- include("../partials/admin/footer") %>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const message = "<%= message %>";
+                const type = "<%= type %>";
+                if (message) {
+                    Swal.fire({
+                        icon: type,
+                        text: message,
+                        confirmButtonColor: '#007bff',
+                        timer: 10000, // closes after 2 seconds (2000 ms)
+                    });
+                }
+
+                let currentPage = "<%= page %>"
+
+                const addProduct = document.getElementById("add-category");
+                addProduct.addEventListener("click", () => {
+                    window.location.href = "/admin/product";
+                })
+
+                const searchInput = document.getElementById("search");
+                const clearBtn = document.getElementById("clear-btn");
+
+                searchInput.addEventListener("input", () => {
+                    clearBtn.style.display = searchInput.value ? "inline" : "none";
+                })
+
+                clearBtn.addEventListener("click", () => {
+                    searchInput.value = "";
+                    clearBtn.style.display = "none";
+                    searchInput.focus();
+                    fetchProducts();
+                })
+
+                fetchProducts(currentPage);
+
+                searchInput.addEventListener("input", function (event) {
+                    let searchInput = event.target.value;
+                    fetchProducts(1, searchInput);
+                })
+
+                async function fetchProducts(page = 1, search = "") {
+                    try {
+                        const response = await fetch(`/admin/fetchProducts?page=${page}&search=${search}`);
+                        console.log(response);
+
+                        if (!response.ok) {
+                            throw new Error(`Network response was not ok ${response.status}`);
+                        }
+
+                        const data = await response.json();
+
+                        console.log(data);
+
+                        await renderProducts(data.products, data.currentPage);
+                        renderPagination(data.totalPages, data.currentPage);
+
+                    } catch (error) {
+                        console.log("Error fetching products:", error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to load products'
+                        });
+                    }
+                }
+
+                function renderProducts(products, currentPage) {
+                    const tbody = document.getElementById("tbody");
+                    tbody.innerHTML = "";
+
+                    products.forEach(product => {
+                        const variantCount = product.variants.length;
+                        for (let i = 0; i < variantCount; i++) {
+
+                            const tr = document.createElement("tr");
+                            let cells = [
+                                product._id,
+                                product.name,
+                            ]
+                            cells.forEach(data => {
+                                const td = document.createElement("td");
+                                td.textContent = data;
+                                tr.appendChild(td);
+                            });
+
+                            const imgTd = document.createElement("td");
+                            const img = document.createElement("img");
+                            img.src = product.variants[i].images?.[0] || "/images/default.jpg";
+                            //imag.alt = product.name;
+                            img.width = 50;
+                            img.height = 50;
+                            img.style.objectFit = "cover";
+                            img.style.borderRadius = "6px";
+                            img.style.marginLeft = "8px";
+
+                            imgTd.appendChild(img);
+                            tr.appendChild(imgTd);
+
+                            const categories = product.cat_id?.map(cat => cat.name).join(",") || "";
+
+                            // cells = [
+                            //     categories,
+                            //     product.brand_id?.name || "",
+                            //     product.variants.length,
+                            // ]
+                            // //console.log(cells);
+                            // cells.forEach(data => {
+                            //     const td = document.createElement("td");
+                            //     td.textContent = data;
+                            //     tr.appendChild(td);
+                            // });
+
+                            // Category
+                            const categoryTd = document.createElement("td");
+                            categoryTd.textContent = categories;
+                            tr.appendChild(categoryTd);
+
+                            // Brand
+                            const brandTd = document.createElement("td");
+                            brandTd.textContent = product.brand_id?.name || "";
+                            tr.appendChild(brandTd);
+
+                            const variantTd = document.createElement("td");
+
+                            const variantCountSpan = document.createElement("span");
+                            variantCountSpan.textContent = product.variants.length;
+                            variantCountSpan.style.marginRight = "10px";
+                            variantTd.appendChild(variantCountSpan);
+
+                            const viewVariantBtn = document.createElement("button");
+                            viewVariantBtn.textContent = "View";
+                            viewVariantBtn.className = "btn btn-view";
+                            variantTd.appendChild(viewVariantBtn);
+
+                            tr.appendChild(variantTd);
+
+                            viewVariantBtn.addEventListener("click", () => {
+                                openVariantsModal(product._id, product.variants);
+                            })
+
+                            // const td = document.createElement("td");
+                            // const viewBtn = document.createElement("button");
+                            // viewBtn.textContent = product.variants[i].view ? "Listed" : "Unlisted";
+
+                            // viewBtn.className = product.variants[i].view ? "btn btn-listed" : "btn btn-unlisted";
+                            // // viewBtn.setAttribute("product-id", product._id);
+                            // //viewBtn.setAttribute("variant-id", product.variants[i]._id);
+
+                            // td.appendChild(viewBtn);
+                            // tr.appendChild(td);
+
+                            // viewBtn.addEventListener("click", async function (event) {
+                            //     //const variant_id = event.target.getAttribute("variant-id");
+                            //     const variant_id = product.variants[i]._id
+                            //     const response = await fetch(`/admin/viewProduct/${product._id}/variant/${variant_id}`,
+                            //         { method: "PUT" });
+
+                            //     if (!response) {
+                            //         throw new Error(`Network response was not ok, ${response.status}`);
+                            //     }
+
+                            //     const data = await response.json();
+                            //     console.log("data: ", data);
+
+                            //     if (data.product.variants[i].view) {
+                            //         viewBtn.textContent = "Listed";
+                            //         viewBtn.className = "btn btn-listed";
+                            //     } else {
+                            //         viewBtn.textContent = "Unlisted";
+                            //         viewBtn.className = "btn btn-unlisted";
+                            //     }
+                            // })
+
+                            const actionTd = document.createElement("td");
+                            const editLink = document.createElement("a");
+                            editLink.href = `/admin/editProduct/${product._id}?page=${currentPage}`;
+                            editLink.className = "btn btn-edit";
+                            editLink.textContent = "Edit";
+
+                            const deletBtn = document.createElement("button");
+                            deletBtn.className = "btn btn-delete";
+                            deletBtn.textContent = "Delete";
+                            //deletBtn.setAttribute("data-id", product._id);
+                            //deletBtn.setAttribute("data-page", currentPage);
+
+                            actionTd.appendChild(editLink);
+                            actionTd.appendChild(deletBtn);
+
+                            tr.appendChild(actionTd);
+                            tbody.appendChild(tr);
+
+                            deletBtn.addEventListener("click", async () => {
+
+                                const confirmed = confirm("Deleting this product will also delete all its associated variants. Are you sure you want to continue?");
+                                if (!confirmed) return;
+
+                                const response = await fetch(`/admin/product/${product._id}`, { method: "PUT" });
+
+                                if (!response.ok) {
+                                    throw new Error(`Network response was not ok: ${response.status}`);
+                                }
+
+                                const data = await response.json();
+
+                                renderProducts(data.products, currentPage);
+                            })
+                        }
+                    });
+                }
+
+                function renderPagination(totalPages, currentPage) {
+                    const pagination = document.querySelector(".pagination");
+                    pagination.innerHTML = "";
+
+                    if (currentPage > 1) {
+                        const prevBtn = document.createElement("button");
+                        prevBtn.textContent = "<<";
+                        prevBtn.className = "btn";
+                        search = searchInput.value;
+                        prevBtn.onclick = () => fetchProducts(currentPage - 1, search);
+                        pagination.appendChild(prevBtn);
+                    }
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageBtn = document.createElement("button");
+                        pageBtn.textContent = i;
+                        pageBtn.className = (i === currentPage) ? "btn btn-edit" : "btn";
+                        search = searchInput.value;
+                        pageBtn.onclick = () => fetchProducts(i, search);
+                        pagination.appendChild(pageBtn);
+                    }
+                    if (currentPage < totalPages) {
+                        const nextBtn = document.createElement("button");
+                        nextBtn.textContent = ">>";
+                        nextBtn.className = "btn";
+                        search = searchInput.value;
+                        nextBtn.onclick = () => fetchProducts(currentPage + 1, search);
+                        pagination.appendChild(nextBtn);
+                    }
+                }
+
+                function openVariantsModal(productId, variants) {
+                    const modalBody = document.getElementById("variantsModalBody");
+                    modalBody.innerHTML = "";
+
+                    variants.forEach((variant, i) => {
+                        const variantTr = document.createElement("tr");
+
+                        // Variant count
+                        const countTd = document.createElement("td");
+                        countTd.textContent = i + 1;
+                        variantTr.appendChild(countTd);
+
+                        // Image
+                        const imgTd = document.createElement("td");
+                        const img = document.createElement("img");
+                        img.src = variant.images?.[0] || "/images/default.jpg";
+                        //imag.alt = product.name;
+                        img.width = 50;
+                        img.height = 50;
+                        img.style.objectFit = "cover";
+                        img.style.borderRadius = "6px";
+                        img.style.marginLeft = "8px";
+
+                        imgTd.appendChild(img);
+                        variantTr.appendChild(imgTd);
+
+                        //Dial color
+                        const dial_colorTd = document.createElement("td");
+                        dial_colorTd.textContent = variant.dial_color;
+                        variantTr.appendChild(dial_colorTd);
+
+                        //Strap color
+                        const strap_colorTd = document.createElement("td");
+                        strap_colorTd.textContent = variant.strap_color;
+                        variantTr.appendChild(strap_colorTd);
+
+                        // Price
+                        const priceTd = document.createElement("td");
+                        priceTd.textContent = variant.price.$numberDecimal;
+                        variantTr.appendChild(priceTd);
+
+                        // Stock
+                        const stockTd = document.createElement("td");
+                        stockTd.textContent = variant.stock;
+                        variantTr.appendChild(stockTd);
+
+                        // Status
+                        const statusTd = document.createElement("td");
+                        const statusViewBtn = document.createElement("button");
+                        statusViewBtn.textContent = variant.view ? "Listed" : "Unlisted";
+
+                        statusViewBtn.className = variant.view ? "btn btn-listed" : "btn btn-unlisted";
+                        // viewBtn.setAttribute("product-id", product._id);
+                        //viewBtn.setAttribute("variant-id", product.variants[i]._id);
+
+                        statusTd.appendChild(statusViewBtn);
+                        variantTr.appendChild(statusTd);
+
+                        statusViewBtn.addEventListener("click", async function (event) {
+                            try {
+                                const variant_id = variant._id
+                                const response = await fetch(`/admin/viewProduct/${productId}/variant/${variant_id}`,
+                                    { method: "PUT" });
+
+                                if (!response) {
+                                    throw new Error(`Network response was not ok, ${response.status}`);
+                                }
+
+                                const data = await response.json();
+                                console.log("data: ", data);
+
+                                if (data.view) {
+                                    statusViewBtn.textContent = "Listed";
+                                    statusViewBtn.className = "btn btn-listed";
+                                } else {
+                                    statusViewBtn.textContent = "Unlisted";
+                                    statusViewBtn.className = "btn btn-unlisted";
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Error",
+                                    text: "Unable to update variant status"
+                                });
+                            }
+                        })
+                        // const statusTd = document.createElement("td");
+                        // statusTd.textContent = variant.status;
+                        // variantTr.appendChild(statusTd);
+
+                        modalBody.appendChild(variantTr);
+                    })
+
+                    const modal = new bootstrap.Modal(
+                        document.getElementById("variantsModal")
+                    );
+                    modal.show();
+
+                }
+            })
+        </script>

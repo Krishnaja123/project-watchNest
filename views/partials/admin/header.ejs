@@ -1,0 +1,74 @@
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<header class="admin-header">
+  <div class="header-left">
+    <h1 class="logo">WATCH NEST</h1>
+  </div>
+    
+    <a href="/admin/logout" class="signup-button">Logout</a>
+  </div>
+</header>
+
+<style>
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    font-family: Arial, sans-serif;
+  }
+
+  .logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333333;
+    margin: 0;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .search-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .search-input {
+    padding: 0.5rem 1rem;
+    border: none;
+    outline: none;
+    min-width: 250px;
+    font-size: 0.9rem;
+  }
+
+  .search-button {
+    padding: 0.5rem 1rem;
+    background-color: #f0f0f0;
+    border: none;
+    border-left: 1px solid #cccccc;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .signup-button {
+    padding: 0.5rem 1.5rem;
+    background-color: #333333;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+  }
+
+  .signup-button:hover {
+    background-color: #555555;
+  }
+</style>

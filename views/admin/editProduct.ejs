@@ -1,0 +1,667 @@
+<!-- views/editProduct.ejs -->
+<%- include("../partials/admin/header") %>
+
+    <head>
+        <link rel="stylesheet" href="/css/products.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    </head>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+    </head>
+
+    <div class="container">
+
+        <body>
+            <!-- Main Content -->
+            <div class="main">
+                <h1>Edit Product</h1>
+
+                <div class="form-container">
+                    <h2>Product Information</h2>
+                    <form id="productForm" action="/admin/editProduct/<%= product._id %>?page=<%= page %>" method="POST"
+                        enctype="multipart/form-data">
+
+                        <!-- Product ID -->
+                        <div class="form-group">
+                            <label>Product ID</label>
+                            <input type="text" name="_id" value="<%= product._id %>" readonly>
+                        </div>
+
+                        <!-- Product Name -->
+                        <div class="form-group">
+                            <label for="productName">Product Name*</label>
+                            <input type="text" id="productName" name="name" value="<%= product.name %>"
+                                class="form-control">
+                            <div id="nameError" class="error-message"></div>
+                        </div>
+
+                        <!-- Category Dropdown -->
+                        <div class="form-group">
+                            <label for="category">Category*</label>
+                            <% selectedCatIds=product.cat_id ? product.cat_id.map(cat=> cat._id.toString()) : [];
+                                %>
+
+                                <select id="category" name="category[]" class="form-control" multiple>
+                                    <% if (categories && categories.length> 0) { %>
+                                        <% categories.forEach(category=> { %>
+                                            <option value="<%= category._id %>"
+                                                <%=selectedCatIds.includes(category._id.toString()) ? "selected" : "" %>
+                                                >
+                                                <%= category.name %>
+                                            </option>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <option disabled>No categories available</option>
+                                                    <% } %>
+                                </select>
+                                <div id="categoryError" class="error-message"></div>
+                        </div>
+
+                        <!-- Brand -->
+                        <div class="form-group">
+                            <label for="brand">Brand*</label>
+                            <select name="brand" id="brand" class="form-control">
+                                <% if (brands && brands.length> 0) { %>
+                                    <% brands.forEach(brand=> { %>
+                                        <option value="<%= brand._id %>" <%=product.brand_id &&
+                                            product.brand_id._id.toString()===brand._id.toString() ? "selected" : "" %>>
+                                            <%= brand.name %>
+                                        </option>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <option disabled>No brands available</option>
+                                                <% } %>
+                            </select>
+                            <div id="brandError" class="error-message"></div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" name="descrip"
+                                class="form-control"><%= product.descrip %></textarea>
+                        </div>
+
+                        <!-- Product Variants -->
+                        <div class="form-group">
+                            <label>Product Variants</label>
+                            <button type="button" class="add-variant-btn" id="addVariantBtn">+ Add Variant</button>
+                            <div id="variantsContainer">
+                                <% if (product.variants && product.variants.length> 0) { %>
+                                    <% product.variants.forEach((variant, index)=> { %>
+                                        <div class="variant" id="variant-<%= index + 1 %>">
+                                            <div class="variant-header">
+                                                <hr class="variant-divider">
+                                                <h4>Variant <%= index + 1 %>
+                                                </h4>
+                                                <button type="button" class="remove-variant"
+                                                    data-variant-id="variant-<%= index + 1 %>">
+                                                    Remove Variant
+                                                </button>
+                                            </div>
+
+                                            <div class="variant-content">
+                                                <!-- Strap Color -->
+                                                <div class="form-group">
+                                                    <label for="strap_color-<%= index + 1 %>">Strap Color*</label>
+                                                    <input type="text" id="strap_color-<%= index + 1 %>"
+                                                        name="variants[<%= index %>][strap_color]"
+                                                        value="<%= variant.strap_color %>"
+                                                        class="form-control variant-strap_color">
+                                                    <div class="strap_color-error error-message"></div>
+                                                </div>
+
+                                                <!-- Dial Color -->
+                                                <div class="form-group">
+                                                    <label for="dial_color-<%= index + 1 %>">Dial Color*</label>
+                                                    <input type="text" id="dial_color-<%= index + 1 %>"
+                                                        name="variants[<%= index %>][dial_color]"
+                                                        value="<%= variant.dial_color %>"
+                                                        class="form-control variant-dial_color">
+                                                    <div class="dial_color-error error-message"></div>
+                                                </div>
+
+                                                <!-- Price -->
+                                                <div class="form-group">
+                                                    <label for="price-<%= index + 1 %>">Price (₹)*</label>
+                                                    <input type="number" id="price-<%= index + 1 %>"
+                                                        name="variants[<%= index %>][price]"
+                                                        value="<%= variant.price %>" min="1"
+                                                        class="form-control variant-price">
+                                                    <div class="price-error error-message"></div>
+                                                </div>
+
+                                                <!-- Stock -->
+                                                <div class="form-group">
+                                                    <label for="stock-<%= index + 1 %>">Stock Quantity*</label>
+                                                    <input type="number" id="stock-<%= index + 1 %>"
+                                                        name="variants[<%= index %>][stock]"
+                                                        value="<%= variant.stock %>" min="0"
+                                                        class="form-control variant-stock">
+                                                    <div class="stock-error error-message"></div>
+                                                </div>
+
+                                                <!-- Images -->
+                                                <div class="form-group">
+                                                    <label for="images-<%= index + 1 %>">Product Images*</label>
+                                                    <input type="file" id="images-<%= index + 1 %>"
+                                                        data-variantId="<%= variant._id %>"
+                                                        name="variants[<%= index %>][images][]" class="variant-images"
+                                                        accept="image/*" multiple>
+
+                                                    <input type="hidden" name="variants[<%= index %>][existingImages]" id="existingImages-<%= index %>"
+                                                        value="<%= JSON.stringify(variant.images || []) %>">
+
+                                                    <div id="modal-<%= index + 1 %>">
+                                                        <div id="modalContent">
+                                                            <img id="preview-<%= index + 1 %>"
+                                                                style="width: 500px; height: 500px; display: none;">
+                                                            <button id="cropBtn-<%= index + 1 %>" type="button"
+                                                                style="display: none;">Crop</button>
+                                                            <button id="closeBtn-<%= index + 1 %>"
+                                                                style="display: none;">Close</button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <!-- Cropped images gallery -->
+                                                        <div id="croppedGallery-${variantCount}"
+                                                            style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                                        <div></div>
+                                                    </div>
+
+
+                                                    <!-- Show previously uploaded images -->
+                                                    <div id="existingGallery-<%= index + 1 %>" class="existing-gallery"
+                                                        style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                                                        <% if (variant.images && variant.images.length> 0) { %>
+                                                            <% variant.images.forEach((img, imgIndex)=> { %>
+                                                                <div id=`imageContainer+${imgIndex}`
+                                                                    style="position: relative; display: inline-block;">
+                                                                    <img src="<%= img %>" alt="Variant Image"
+                                                                        style="width: 100px; height: 100px; border-radius: 6px; border: 2px solid #ccc;">
+                                                                    <span class="remove-existing"
+                                                                        data-variant="<%= index %>"
+                                                                        data-image="<%= imgIndex %>"
+                                                                        style="position: absolute; top: 2px; right: 6px; cursor: pointer; color: red; background: white; border-radius: 50%; padding: 0 5px;">x</span>
+                                                                </div>
+                                                                <% }) %>
+                                                                    <% } %>
+                                                    </div>
+
+                                                    <div class="images-error error-message"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% }) %>
+                                            <% } %>
+
+                                                <!-- Variants will be added here dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Update Product</button>
+                            <button type="button" class="btn btn-outline"
+                                onclick="window.history.back()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
+        </body>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#category').select2({
+                placeholder: "Select categories",
+                allowClear: true,
+                closeOnSelect: false // keeps dropdown open after selecting
+            });
+        });
+    </script>
+
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const message = "<%= message %>";
+            const type = "<%= type %>";
+            if (message) {
+                Swal.fire({
+                    icon: type,
+                    text: message,
+                    confirmButtonColor: '#007bff',
+                    timer: 10000, // closes after 2 seconds (2000 ms)
+                });
+            }
+            const currentPage = "<%= page %>";
+
+            const form = document.getElementById("productForm");
+            const nameInput = document.getElementById("productName");
+            const nameError = document.getElementById("nameError");
+            const categoryInput = document.getElementById("category");
+            const categoryError = document.getElementById("categoryError");
+            const brandInput = document.getElementById("brand");
+            const brandError = document.getElementById("brandError");
+            const descriptionInput = document.getElementById("description");
+            const addVariantBtn = document.getElementById("addVariantBtn");
+            const variantsContainer = document.getElementById("variantsContainer");
+            const variantRemoveBtns = document.querySelectorAll(".remove-variant");
+            const imageInput = document.querySelectorAll(".variant-images");
+            const imageRemoveBtn = document.querySelectorAll(".remove-existing");
+
+            let variantCount = "<%= product.variants.length %>"; // Counter for variants
+            let allVariants = []; // Array to store variant data
+            let variantImages = {};
+
+            addVariantBtn.addEventListener("click", function () {
+                addNewVariant();
+            });
+
+            variantRemoveBtns.forEach(button => {
+                button.addEventListener("click", () => {
+                    const variantId = button.dataset.variantId;
+                    removeVariant(variantId);
+                })
+            })
+
+
+            imageInput.forEach((input) => {
+                console.log("get int here");
+                
+                const variantId = input.dataset.variantId || input.id.split("-")[1];
+                input.addEventListener("click", () => addImage(variantId))
+            });
+
+            removedImages = [];
+
+            imageRemoveBtn.forEach(button => {
+                button.addEventListener("click", (e) => {
+                    const variantIndex = e.target.dataset.variant;
+                    const imageIndex = e.target.dataset.image;
+                    const existingImagesInput  = document.getElementById(`existingImages-${variantIndex}`);
+                    imagesArr  = JSON.parse(existingImagesInput.value);
+                    console.log(imagesArr);
+
+                    // Remove the selected image
+                    imagesArr.splice(imageIndex, 1);
+                    console.log(imagesArr);
+
+                    existingImagesInput.value = JSON.stringify(imagesArr);
+                    
+                    // Remove UI element
+                    const container = e.target.closest("div");
+                    if (container) {
+                        container.remove();
+                    }
+                })
+            })
+
+            function addNewVariant() {
+                variantCount++;
+                const variantId = `variant-${variantCount}`;
+
+                const variantHtml = `<div class="variant" id="${variantId}">
+                    <div class="variant-header"> 
+                        <hr class="variant-divider">
+                        <h4>Variant ${variantCount}</h4>
+                        <button type="button" class="remove-variant" data-variant-id="${variantId}">Remove Variant</button>
+                    </div>
+                    
+                    <div class="variant-content">
+                        <!-- Strap Color -->
+                        <div class="form-group">
+                            <label for="strap_color-${variantCount}">Strap Color*</label>
+                            <input type="text" id="-${variantCount}" name="variants[${variantCount}][strap_color]" class="form-control variant-strap_color">
+                            <div class="strap_color-error error-message"></div>
+                        </div>
+
+                         <!-- Dial Color -->
+                        <div class="form-group">
+                            <label for="dial_color-${variantCount}">Dial Color*</label>
+                            <input type="text" id="dial_color-${variantCount}" name="variants[${variantCount}][dial_color]" class="form-control variant-dial_color">
+                            <div class="dial_color-error error-message"></div>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="form-group">
+                            <label for="price-${variantCount}">Price (₹)*</label>
+                            <input type="number" id="price-${variantCount}" name="variants[${variantCount}][price]" class="form-control variant-price" min="1">
+                            <div class="price-error error-message"></div>
+                        </div>
+
+                        <!-- Stock -->
+                        <div class="form-group">
+                            <label for="stock-${variantCount}">Stock Quantity*</label>
+                            <input type="number" id="stock-${variantCount}" name="variants[${variantCount}][stock]" class="form-control variant-stock" min="0">
+                            <div class="stock-error error-message"></div>
+                        </div>
+
+                        <!-- Images -->
+                        <div class="form-group">
+                            <label for="images-${variantCount}">Product Images*</label>
+                            <input type="file" id="images-${variantCount}" name="variants[${variantCount}][images]" class="variant-images" accept="image/*">
+                            <div class="images-error error-message"></div>
+                            
+                            <!-- Image preview area -->
+                                <div id="modal-${variantCount}">
+                                    <div id="modalContent">
+                                        <img id="preview-${variantCount}" style="width: 500px; height: 500px; display: none;">
+                                        <button id="cropBtn-${variantCount}" type="button" style="display: none;">Crop</button>
+                                        <button id="closeBtn-${variantCount}" style="display: none;">Close</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <!-- Cropped images gallery -->
+                                    <div id="croppedGallery-${variantCount}" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                    <div></div>
+                                </div>
+                        </div>
+                    </div>
+                </div>`;
+
+                variantsContainer.insertAdjacentHTML('beforeend', variantHtml);
+
+                const removeBtn = document.querySelector(`[data-variant-id="${variantId}"]`);
+                removeBtn.addEventListener("click", () => {
+                    removeVariant(variantId);
+                });
+
+                addImage(variantCount);
+
+            }
+
+            function removeVariant(id) {
+                const variable = document.getElementById(id);
+                if (variable) {
+                    variable.remove();
+                }
+
+                allVariants = allVariants.filter(variant => variant.id !== id);
+                // console.log(allVariants);
+
+            }
+
+            function addImage(identifier) {
+                const isNewVariant = !isNaN(identifier);
+
+                // Select elements based on type
+                const imgElement = isNewVariant
+                    ? document.getElementById(`images-${identifier}`)
+                    : document.querySelector(`[data-variantid="${identifier}"]`);
+console.log(imgElement);
+
+                // For existing variants, find modal by closest numeric index
+                const modal = isNewVariant
+                    ? document.getElementById(`modal-${identifier}`)
+                    : imgElement
+                        ? imgElement.closest(".form-group").querySelector("[id^='modal-']")
+                        : null;
+
+                if (!imgElement || !modal) {
+                    console.warn("Image or modal not found for:", identifier);
+                    return;
+                }
+
+                const previewImg = modal.querySelector("img");
+                const cropBtn = modal.querySelector("button[id^='cropBtn']");
+                const closeBtn = modal.querySelector("button[id^='closeBtn']");
+                const croppedGallery = modal.parentElement.querySelector("[id^='croppedGallery']");
+
+                let cropper;
+                let canvas;
+                let imageCount = 0;
+
+                imgElement.addEventListener("change", (event) => {
+                    const selectedImg = event.target.files[0];
+                    if (!selectedImg) return;
+
+                    previewImg.src = URL.createObjectURL(selectedImg);
+                    modal.style.display = "flex";
+                    previewImg.style.display = "block";
+                    cropBtn.style.display = "inline";
+                    closeBtn.style.display = "inline";
+
+                    if (cropper) cropper.destroy();
+
+                    cropper = new Cropper(previewImg, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        autoCropArea: 0.8
+                    });
+                });
+
+                cropBtn.addEventListener("click", () => {
+                    if (!cropper) return;
+
+                    canvas = cropper.getCroppedCanvas({
+                        width: 500,
+                        height: 500,
+                        imageSmoothingQuality: "high"
+                    });
+
+                    imageCount++;
+
+                    const croppedImg = document.createElement("img");
+                    croppedImg.src = canvas.toDataURL("image/png");
+                    croppedImg.style.width = "100px";
+                    croppedImg.style.height = "100px";
+                    croppedImg.style.border = "2px solid #ccc";
+                    croppedImg.style.borderRadius = "6px";
+
+                    canvas.toBlob((blob) => {
+                        const file = new File([blob], `cropped_${Date.now()}.png`, {
+                            type: "image/png"
+                        })
+                        if (!variantImages[variantCount]) {
+                            variantImages[variantCount] = [];
+                        }
+                        variantImages[variantCount].push(file)
+                    })
+
+                    const clearBtn = document.createElement("span");
+                    clearBtn.textContent = "x";
+                    clearBtn.style.position = "absolute";
+                    clearBtn.style.top = "2px";
+                    clearBtn.style.right = "6px";
+                    clearBtn.style.cursor = "pointer";
+                    clearBtn.style.color = "red";
+                    clearBtn.style.background = "white";
+                    clearBtn.style.borderRadius = "50%";
+                    clearBtn.style.padding = "0 6px";
+                    clearBtn.style.fontWeight = "bold";
+
+                    const imgWrapper = document.createElement("div");
+                    imgWrapper.style.position = "relative";
+                    imgWrapper.style.display = "inline-block";
+                    imgWrapper.style.margin = "5px";
+
+                    imgWrapper.appendChild(croppedImg);
+                    imgWrapper.appendChild(clearBtn);
+                    croppedGallery.appendChild(imgWrapper);
+
+                    clearBtn.addEventListener("click", () => {
+                        imgWrapper.remove();
+                        variantImages[identifier].pop(); // remove last added image
+                    });
+
+                    cropper.destroy();
+                    cropper = null;
+
+                    previewImg.style.display = "none";
+                    cropBtn.style.display = "none";
+                    closeBtn.style.display = "none";
+                    modal.style.display = "none";
+                });
+
+                closeBtn.addEventListener("click", () => {
+                    previewImg.style.display = "none";
+                    cropBtn.style.display = "none";
+                    closeBtn.style.display = "none";
+                    modal.style.display = "none";
+                    if (cropper) cropper.destroy();
+                });
+            }
+
+
+            function validateForm() {
+                let isValid = true;
+
+                nameError.textContent = "";
+                categoryError.textContent = "";
+                brandError.textContent = "";
+
+                if (nameInput.value.trim() === "") {
+                    nameError.textContent = "Please enter a product name";
+                    isValid = false;
+                } else if (nameInput.value.trim().length < 4) {
+                    nameError.textContent = "Name must be at least 4 characters long";
+                    isValid = false;
+                }
+
+                if (categoryInput.value.trim() === "") {
+                    categoryError.textContent = "Please select a category";
+                    isValid = false;
+                }
+
+                if (brandInput.value.trim() === "") {
+                    brandError.textContent = "Please select a brand";
+                    isValid = false;
+                }
+                const variants = document.querySelectorAll(".variant");
+                variants.forEach((variant, index) => {
+                    const strapColorInput = variant.querySelector(".variant-strap_color");
+                    const dialColorInput = variant.querySelector(".variant-dial_color");
+                    const priceInput = variant.querySelector(".variant-price");
+                    const stockInput = variant.querySelector(".variant-stock");
+                    const strapError = variant.querySelector(".strap_color-error");
+                    const dialError = variant.querySelector(".dial_color-error");
+                    const priceError = variant.querySelector(".price-error");
+                    const stockError = variant.querySelector(".stock-error");
+                    const imageError = variant.querySelector(".images-error");
+                    strapError.textContent = "";
+                    dialError.textContent = "";
+                    priceError.textContent = "";
+                    stockError.textContent = "";
+                    imageError.textContent = "";
+
+                    if (strapColorInput.value.trim() === "") {
+                        strapError.textContent = "Please enter strap color";
+                        isValid = false;
+                    }
+
+                    if (dialColorInput.value.trim() === "") {
+                        dialError.textContent = "Please enter dial color";
+                        isValid = false;
+                    }
+
+                    if (!priceInput.value || parseFloat(priceInput.value) <= 0) {
+                        priceError.textContent = "Please enter a valid price";
+                        isValid = false;
+                    }
+
+                    if (!stockInput.value || parseInt(stockInput.value) < 0) {
+                        stockError.textContent = "Please enter valid stock quantity";
+                        isValid = false;
+                    }
+
+                    // const images = variantImages[index + 1] || [];
+                    // if (images.length === 0) {
+                    //     imageError.textContent = "Please upload at least one image";
+                    //     isValid = false;
+                    // }
+                })
+                return isValid;
+            }
+            // Prevent form submission on Enter key
+            form.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    // Prevent default Enter key behavior
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+                try {
+
+                    if (!validateForm()) {
+                        return;
+                    }
+
+                    const id = "<%= product._id %>";
+
+                    const formData = new FormData(form);
+                    const variants = document.querySelectorAll(".variant");
+
+                    // console.log(variants);
+                    variants.forEach((variant, index) => {
+
+                        const newImages = variantImages[index + 1] || [];
+                        console.log("newImages: ", newImages);
+                        newImages.forEach((image) => {
+                            formData.append(`variants[${index}][images][]`, image);
+                        });
+                    });
+                    console.log(formData);
+
+                    const response = await fetch(`/admin/editProduct/${id}`, {
+                        method: "POST",
+                        body: formData
+                    });
+                    console.log(response);
+
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    const data = await response.json();
+                    // console.log("Upload success: ", data);
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: data.type || "success",
+                            text: data.message || "Product updated successfully!",
+                            confirmButtonColor: '#007bff',
+                            timer: 2000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // Redirect only after alert closes
+                            window.location.href = `/admin/products?page=${currentPage}`;
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: data.type || "error",
+                            text: data.message || "Something went wrong",
+                            confirmButtonColor: '#007bff'
+                        });
+                    }
+
+                } catch (error) {
+                    console.error("Form submit error:", error);
+                }
+            })
+
+        })
+
+
+    </script>

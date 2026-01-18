@@ -1,0 +1,166 @@
+<%- include("../partials/user/header") %>
+<head>
+    <link rel="stylesheet" href="/css/otp.css">
+</head>
+
+<body>
+    <!-- Main wrapper for centering -->
+    <div class="main-wrapper">
+        <div class="otp-container">
+            <h1>Verify Your OTP</h1>
+
+            <form action="/verify-otp" method="POST" id="otp-form">
+                <input type="hidden" name="email" value="<%= email %>">
+
+                <div class="otp-input-container">
+                    <% for(let i = 0; i < 6; i++) { %>
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                    <% } %>
+                    <input type="hidden" name="otp" id="fullOtp">
+
+                </div>
+
+                <div class="resend-otp">
+                    Didn't receive OTP?
+                    <span id="resend-text">
+                            <a href="#" id="resend-btn" style="color:#007bff; display:none;">Resend OTP</a>
+                    </span>
+                    <span id="countdown-timer"></span>
+                </div>
+
+                <button type="submit" class="verify-btn">Verify</button>
+            </form>
+        </div>
+    </div>
+
+    <%- include('../partials/user/footer') %>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const message = '<%= message %>';
+            const type = '<%= type %>';
+
+            if (message && message.trim() !== '') {
+                Swal.fire({
+                    icon: type,
+                    text: message,
+                    confirmButtonColor: '#007bff'
+                });
+            }
+
+            const form = document.getElementById("otp-form");
+            const otpInputs = document.querySelectorAll(".otp-input");
+            const fullOtp = document.getElementById("fullOtp");
+
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('input', function (e) {
+                    if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === "Backspace" && !input.value && index > 0) {
+                        otpInputs[index - 1].focus();
+                    }
+                });
+            });
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                let otp = "";
+                otpInputs.forEach((input) => {
+                    otp += input.value;
+                });
+
+                fullOtp.value = otp;
+                Swal.fire({
+                    title: 'Verifying OTP',
+                    html: 'Please wait...',
+                    timer: 3000,
+                });
+                form.submit(); 
+            });
+
+            // form.addEventListener("input", function (e) {
+            //     const otpRegex = /^[0-9]+$/;
+            //    if(!otpRegex.test(e.target.value))
+
+            // })
+
+            //Resend OTP Timer
+            const countdownTimer = document.getElementById("countdown-timer");
+            const resendBtn = document.getElementById("resend-btn");
+            let timeLeft = "<%= remainingTime %>";
+
+            function enambleResendBtn() {
+                resendBtn.style.display = "inline";
+                countdownTimer.textContent = "";
+            }
+
+            function updateTimer() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                countdownTimer.textContent = `(${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds})`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    enambleResendBtn();
+                }
+                timeLeft--;
+            }
+
+            let timerInterval = setInterval(updateTimer, 1000); 
+
+            // Handle resend OTP click
+            if (resendBtn) {
+                resendBtn.addEventListener("click", async function (e) {
+                    e.preventDefault();
+                    try {
+                        const response = await fetch("/resend-otp", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            credentials: 'include',
+                            body: JSON.stringify({
+                                email: "<%= email %>"
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'OTP Resent!',
+                                text: 'A new OTP has been sent to your email',
+                                timer: 3000
+                            });
+
+                            // Reset timer
+                            timeLeft = data.remainingTime;
+                            resendBtn.style.display = "none";
+                            clearInterval(timerInterval);
+                            timerInterval = setInterval(updateTimer, 1000);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Failed',
+                                text: data.message || 'Failed to resend OTP'
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error:", error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Could not resend OTP. Please try again.'
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

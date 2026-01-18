@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crop and Save to DB</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+</head>
+
+<body>
+  <h2>Crop and Save Image</h2>
+
+  <input type="file" id="fileInput" accept="image/*"><br><br>
+
+  <img id="preview" style="max-width: 100%; display: none;"><br>
+  <button id="cropBtn" style="display: none;">Crop & Upload</button>
+
+  <div id="croppedResult">
+    <h3>Cropped Image Preview:</h3>
+    <img id="croppedImage" src="">
+  </div>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const previewImg = document.getElementById("preview");
+    const cropBtn = document.getElementById("cropBtn");
+    const croppedImage = document.getElementById("croppedImage");
+
+    let cropper;
+
+    fileInput.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      previewImg.src = URL.createObjectURL(file);
+      previewImg.style.display = "block";
+      cropBtn.style.display = "inline-block";
+
+      if (cropper) cropper.destroy();
+
+      cropper = new Cropper(previewImg, {
+        aspectRatio: 1,
+        viewMode: 1,
+        autoCropArea: 0.8,
+      });
+    });
+
+    cropBtn.addEventListener("click", function () {
+      if (!cropper) return;
+
+      const canvas = cropper.getCroppedCanvas({
+        width: 300,
+        height: 300
+      });
+
+      croppedImage.src = canvas.toDataURL("image/png");
+
+      // Convert canvas to Blob
+      canvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append("croppedImage", blob, "cropped.png");
+
+        // Send to backend (POST request)
+        const res = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await res.json();
+        alert(result.message);
+      }, "image/png");
+    });
+  </script>
+</body>
+
+</html>

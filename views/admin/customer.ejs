@@ -1,0 +1,185 @@
+<!-- views/customers.ejs -->
+<%- include("../partials/admin/header") %>
+
+  <head>
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="stylesheet" href="/css/customer.css">
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- Sidebar -->
+      <%- include("../partials/admin/sidebar") %>
+
+        <!-- Main Content -->
+        <div class="main">
+          <h1>Customers</h1>
+
+          <!-- Search -->
+          <div class="search-box">
+            <input type="text" placeholder="Search" id="search">
+            <span id="clear-btn">x</span>
+          </div>
+
+          <!-- Table -->
+          <div class="table-container">
+            <table id="table">
+              <thead id="thead">
+                <tr>
+                  <th>Id</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Mobile</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="pagination"></div>
+        </div>
+    </div>
+
+  </body>
+
+  </html>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const searchInput = document.getElementById("search");
+      const clearBtn = document.getElementById("clear-btn");
+
+      searchInput.addEventListener("input", function () {
+        clearBtn.style.display = searchInput.value ? "inline" : "none";
+      });
+
+      clearBtn.addEventListener("click", function () {
+        searchInput.value = "";
+        clearBtn.style.display = "none";
+        searchInput.focus();
+        fetchUsers();
+      });
+      let page = "<%= page %>"
+      fetchUsers(page);
+
+      searchInput.addEventListener("input", function (e) {
+        let searchValue = e.target.value;
+        fetchUsers(1, searchValue);
+      });
+
+      async function fetchUsers(page = 1, search = "") {
+        try {
+          const response = await fetch(`/admin/fetchUser?page=${page}&search=${search}`);
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          const data = await response.json();
+          renderUserData(data.customers, data.currentPage);
+          renderPagination(data.totalPages, data.currentPage);
+        } catch (error) {
+          console.log("Error fetching users:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load customer data'
+          });
+        }
+      }
+
+      function renderUserData(customers, currentPage) {
+        const tbody = document.getElementById("tbody");
+        tbody.innerHTML = "";
+
+        customers.forEach((customer, index) => {
+          const row = document.createElement("tr");
+
+          const cells = [
+            customer._id,
+            customer.username,
+            customer.email,
+            customer.phone_number,
+            customer.role,
+            customer.userStatus,
+          ];
+
+          cells.forEach(data => {
+            const td = document.createElement("td");
+            if (typeof data === 'string' && (data === 'Active' || data === 'Blocked')) {
+              const span = document.createElement("span");
+              span.textContent = data;
+              span.className = data === 'Active' ? 'status-active' : 'status-blocked';
+              td.appendChild(span);
+            } else {
+              td.textContent = data;
+            }
+            row.appendChild(td);
+          });
+
+          // Action button
+          const actionTd = document.createElement("td");
+          const editLink = document.createElement("a");
+          editLink.href = `/admin/editUser/${customer._id}?page=${currentPage}`;
+          editLink.className = "btn btn-edit";
+          editLink.textContent = "Edit";
+
+          actionTd.appendChild(editLink);
+          row.appendChild(actionTd);
+
+          tbody.appendChild(row);
+        });
+      }
+
+      // async function filteredUsers(searchValue) {
+      //   try {
+      //     const response = await fetch(`/admin/fetchUser?search=${searchValue}`);
+      //     if (!response.ok) {
+      //       throw new Error("Network response was not ok");
+      //     }
+      //     const data = await response.json();
+      //     renderUserData(data);
+      //   } catch (error) {
+      //     console.log("Error:", error);
+      //   }
+      // }
+      function renderPagination(totalPages, currentPage) {
+        console.log("get in to renderPagination");
+
+        const pagination = document.querySelector(".pagination");
+        pagination.innerHTML = "";
+
+        if (currentPage > 1) {
+          //console.log("1");
+          const prevBtn = document.createElement("button");
+          prevBtn.textContent = "<<";
+          prevBtn.className = "btn";
+          search = searchInput.value;
+          prevBtn.onclick = () => fetchUsers(currentPage - 1, search);
+          pagination.appendChild(prevBtn);
+        }
+        for (let i = 1; i <= totalPages; i++) {
+          console.log("total page:", totalPages);
+
+          const pageBtn = document.createElement("button");
+          pageBtn.textContent = i;
+          pageBtn.className = (i === currentPage) ? "btn btn-edit" : "btn";
+          search = searchInput.value;
+          pageBtn.onclick = () => fetchUsers(i, search);
+          pagination.appendChild(pageBtn);
+        }
+        console.log("total page:", totalPages);
+        if (currentPage < totalPages) {
+          const nextBtn = document.createElement("button");
+          nextBtn.textContent = ">>";
+          nextBtn.className = "btn";
+          search = searchInput.value;
+          nextBtn.onclick = () => fetchUsers(currentPage + 1, search);
+          pagination.appendChild(nextBtn);
+        }
+      }
+    });
+  </script>
+
+  <%- include("../partials/admin/footer") %>

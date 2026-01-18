@@ -1,0 +1,57 @@
+<!-- views/addCategory.ejs -->
+<%- include("../partials/admin/header") %>
+
+    <head>
+        <link rel="stylesheet" href="/css/sidebar.css">
+        <link rel="stylesheet" href="/css/addCategory.css">
+    </head>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <%- include("../partials/admin/sidebar") %>
+
+            <!-- Main Content -->
+            <div class="content">
+                <div class="header">Add Category</div>
+
+                <div class="form-container">
+                    <form action="/admin/category" method="POST" id="categoryForm">
+                        <label for="categoryName">Category Name</label>
+                        <input type="text" id="categoryName" name="name">
+                        <label for="discription">Category Discription</label>
+                        <input type="text" id="descrip" name="descrip">
+                        <button type="submit">Save</button>
+                    </form>
+                </div>
+            </div>
+    </div>
+
+    <%- include("../partials/admin/footer") %>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const message = "<%= message %>";
+                const type = "<%= type %>";
+                if (message) {
+                    Swal.fire({
+                        icon: type,
+                        text: message,
+                        confirmButtonColor: '#007bff'
+                    });
+                }
+                const form = document.getElementById("categoryForm");
+                const nameInput = document.getElementById("categoryName");
+                form.addEventListener("submit", (e) => {
+                    e.preventDefault();
+                    if (nameInput.value.trim() === "") {
+                        Swal.fire({
+                            icon: "error",
+                            text: "Please enter category name",
+                            confirmButtonColor: '#007bff'
+                        });
+                        return;
+                    }
+                    form.submit();
+                })
+            })  
+        </script>

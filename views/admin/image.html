@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
+</head>
+
+
+<body>
+    <div>
+        <input type="file" id="fileInput" accept="image/*"><br><br>
+        <img id="preview" style="max-width: 100%; display: none;"><br>
+        <button id="cropBtn" style="display: none;">crop</button>
+
+    </div id="croppedResults">
+    <h3>Cropped Images</h3>
+
+    <img id="croppedImgs">
+
+    <div>
+
+    </div>
+
+</body>
+
+</html>
+<script>
+    const imageInput = document.getElementById("fileInput");
+    const previewImg = document.getElementById("preview");
+    const cropBtn = document.getElementById("cropBtn");
+    const croppedImg = document.getElementById("croppedImgs")
+    const originalImages = [];
+    let cropper;
+
+    imageInput.addEventListener("change", function (e) {
+        const selectedImg = e.target.files[0];
+        if (!selectedImg) return;
+
+        previewImg.src = URL.createObjectURL(selectedImg);
+
+        // if(!originalImages){
+        //     originalImages = [];
+        // }else {
+        //     originalImages.push(previewImg.src);
+        // }
+
+        previewImg.style.display = "block";
+        cropBtn.style.display = "inline-block";
+
+        if (cropper) {
+            cropper.destroy();
+        }
+
+        cropper = new Cropper(previewImg, {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 0.8
+        })
+    })
+
+    cropBtn.addEventListener("click", function () {
+        if (!cropper) return;
+
+        const canvas = cropper.getCroppedCanvas({
+            width: 300,
+            height: 300
+        })
+
+        croppedImg.src = canvas.toDataURL("image/png");
+        cropBtn.style.display = "none";
+        cropper.destroy();
+        cropper = null;
+
+        canvas.toBlob(async (blob) => {
+            const formData = new FormData();
+            formData.append("croppedImg", blob, `cropped_${Date.now()}.png`);
+
+            const response = await fetch("/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            const result = await response.json();
+
+        }, )
+
+    }, "image/png");
+
+
+</script>
