@@ -1,0 +1,31 @@
+<% products.forEach(product=> { %>
+                                    <div class="product-card">
+
+                                        <div class="position-relative">
+                                            <img src="<%= product.variants[0]?.images[0] %>" class="product-img"
+                                                alt="<%= product.name %>">
+
+                                            <button class="wishlist-btn">♥</button>
+                                        </div>
+
+                                        <div class="product-info text-center">
+                                            <p class="small text-muted mb-1">
+                                                <%= product.brand %>
+                                            </p>
+                                            <h6 class="fw-semibold">
+                                                <%= product.name %>
+                                            </h6>
+
+                                            <% if (product.offerPrice) { %>
+                                                <p>
+                                                    <span class="fw-bold">₹<%= product.offerPrice %></span>
+                                                    <del class="text-muted small">₹<%= product.price %></del>
+                                                </p>
+                                                <% } else { %>
+                                                    <p class="fw-bold">₹<%= product.variants[0]?.price %>
+                                                    </p>
+                                                    <% } %>
+                                        </div>
+
+                                    </div>
+                                    <% }) %>

@@ -163,96 +163,96 @@
 
                     products.forEach(product => {
                         const variantCount = product.variants.length;
-                        for (let i = 0; i < variantCount; i++) {
+                        // for (let i = 0; i < variantCount; i++) {
 
-                            const tr = document.createElement("tr");
-                            let cells = [
-                                product._id,
-                                product.name,
-                            ]
-                            cells.forEach(data => {
-                                const td = document.createElement("td");
-                                td.textContent = data;
-                                tr.appendChild(td);
-                            });
+                        const tr = document.createElement("tr");
+                        let cells = [
+                            product._id,
+                            product.name,
+                        ]
+                        cells.forEach(data => {
+                            const td = document.createElement("td");
+                            td.textContent = data;
+                            tr.appendChild(td);
+                        });
 
-                            const imgTd = document.createElement("td");
-                            const img = document.createElement("img");
-                            img.src = product.variants[i].images?.[0] || "/images/default.jpg";
-                            //imag.alt = product.name;
-                            img.width = 50;
-                            img.height = 50;
-                            img.style.objectFit = "cover";
-                            img.style.borderRadius = "6px";
-                            img.style.marginLeft = "8px";
+                        const imgTd = document.createElement("td");
+                        const img = document.createElement("img");
+                        img.src = product.variants[0].images?.[0] || "/images/default.jpg";
+                        //imag.alt = product.name;
+                        img.width = 50;
+                        img.height = 50;
+                        img.style.objectFit = "cover";
+                        img.style.borderRadius = "6px";
+                        img.style.marginLeft = "8px";
 
-                            imgTd.appendChild(img);
-                            tr.appendChild(imgTd);
+                        imgTd.appendChild(img);
+                        tr.appendChild(imgTd);
 
-                            // Category
-                            const categories = product.cat_id?.map(cat => cat.name).join(",") || "";
-                            const categoryTd = document.createElement("td");
-                            categoryTd.textContent = categories;
-                            tr.appendChild(categoryTd);
+                        // Category
+                        const categories = product.cat_id?.map(cat => cat.name).join(",") || "";
+                        const categoryTd = document.createElement("td");
+                        categoryTd.textContent = categories;
+                        tr.appendChild(categoryTd);
 
-                            // Brand
-                            const brandTd = document.createElement("td");
-                            brandTd.textContent = product.brand_id?.name || "";
-                            tr.appendChild(brandTd);
+                        // Brand
+                        const brandTd = document.createElement("td");
+                        brandTd.textContent = product.brand_id?.name || "";
+                        tr.appendChild(brandTd);
 
-                            const variantTd = document.createElement("td");
+                        const variantTd = document.createElement("td");
 
-                            const variantCountSpan = document.createElement("span");
-                            variantCountSpan.textContent = product.variants.length;
-                            variantCountSpan.style.marginRight = "10px";
-                            variantTd.appendChild(variantCountSpan);
+                        const variantCountSpan = document.createElement("span");
+                        variantCountSpan.textContent = product.variants.length;
+                        variantCountSpan.style.marginRight = "10px";
+                        variantTd.appendChild(variantCountSpan);
 
-                            const viewVariantBtn = document.createElement("button");
-                            viewVariantBtn.textContent = "View";
-                            viewVariantBtn.className = "btn btn-view";
-                            variantTd.appendChild(viewVariantBtn);
+                        const viewVariantBtn = document.createElement("button");
+                        viewVariantBtn.textContent = "View";
+                        viewVariantBtn.className = "btn btn-view";
+                        variantTd.appendChild(viewVariantBtn);
 
-                            tr.appendChild(variantTd);
+                        tr.appendChild(variantTd);
 
-                            viewVariantBtn.addEventListener("click", () => {
-                                openVariantsModal(product._id, product.variants);
-                            })
+                        viewVariantBtn.addEventListener("click", () => {
+                            openVariantsModal(product._id, product.variants);
+                        })
 
 
-                            const actionTd = document.createElement("td");
-                            const editLink = document.createElement("a");
-                            editLink.href = `/admin/editProduct/${product._id}?page=${currentPage}`;
-                            editLink.className = "btn btn-edit";
-                            editLink.textContent = "Edit";
+                        const actionTd = document.createElement("td");
+                        const editLink = document.createElement("a");
+                        editLink.href = `/admin/editProduct/${product._id}?page=${currentPage}`;
+                        editLink.className = "btn btn-edit";
+                        editLink.textContent = "Edit";
 
-                            const deletBtn = document.createElement("button");
-                            deletBtn.className = "btn btn-delete";
-                            deletBtn.textContent = "Delete";
-                            //deletBtn.setAttribute("data-id", product._id);
-                            //deletBtn.setAttribute("data-page", currentPage);
+                        const deletBtn = document.createElement("button");
+                        deletBtn.className = "btn btn-delete";
+                        deletBtn.textContent = "Delete";
+                        //deletBtn.setAttribute("data-id", product._id);
+                        //deletBtn.setAttribute("data-page", currentPage);
 
-                            actionTd.appendChild(editLink);
-                            actionTd.appendChild(deletBtn);
+                        actionTd.appendChild(editLink);
+                        actionTd.appendChild(deletBtn);
 
-                            tr.appendChild(actionTd);
-                            tbody.appendChild(tr);
+                        tr.appendChild(actionTd);
+                        tbody.appendChild(tr);
 
-                            deletBtn.addEventListener("click", async () => {
+                        deletBtn.addEventListener("click", async () => {
 
-                                const confirmed = confirm("Deleting this product will also delete all its associated variants. Are you sure you want to continue?");
-                                if (!confirmed) return;
+                            const confirmed = confirm("Deleting this product will also delete all its associated variants. Are you sure you want to continue?");
+                            if (!confirmed) return;
 
-                                const response = await fetch(`/admin/product/${product._id}`, { method: "PUT" });
+                            const response = await fetch(`/admin/product/${product._id}`, { method: "PUT" });
 
-                                if (!response.ok) {
-                                    throw new Error(`Network response was not ok: ${response.status}`);
-                                }
+                            if (!response.ok) {
+                                throw new Error(`Network response was not ok: ${response.status}`);
+                            }
 
-                                const data = await response.json();
+                            const data = await response.json();
 
-                                fetchProducts(currentPage, searchInput.value);
-                            })
-                        }
+                            fetchProducts(currentPage, searchInput.value);
+                        })
+                        // }
                     });
                 }
 
@@ -329,7 +329,13 @@
 
                         // Stock
                         const stockTd = document.createElement("td");
-                        stockTd.textContent = variant.stock;
+                        if (variant.stock > 0) {
+                            stockTd.textContent = variant.stock;
+                        } else {
+                            stockTd.textContent = "Out of stock";
+                            stockTd.style.color = "red";
+                            stockTd.style.fontWeight = "bold";
+                        }
                         variantTr.appendChild(stockTd);
 
                         // Status
@@ -375,7 +381,7 @@
                                 });
                             }
                         })
-                     
+
                         modalBody.appendChild(variantTr);
                     })
 

@@ -31,7 +31,12 @@ app.use(session({
         httpOnly: true,
         maxAge: 24*60*60*1000  // 1 day (in milliseconds)
     }
-}))
+}));
+
+app.use((req,res,next) => {
+    res.locals.user = req.session.user || null;
+    next();
+})
 
 app.use(passport.initialize());
 app.use(passport.session());

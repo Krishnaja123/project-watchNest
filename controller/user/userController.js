@@ -1,25 +1,9 @@
-const User = require("../models/userModel");
+const User = require("../../models/userModel");
 const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 //const {userAuth, adminAuth} = require("../middleware/auth")
 
-
-const loadHome = (req, res) => {
-    try {
-
-        let message = req.session.message || "";
-        req.session.message = "";
-        let type = req.session.type || "";
-        req.session.type = "";
-
-        return res.render("user/home", { message, type, title: "Home" });
-        // console.log(req.session.message);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error");
-    }
-}
 
 const loadRegister = (req, res) => {
     try {
@@ -494,6 +478,14 @@ const loginUser = async (req, res) => {
             req.session.message = "Invalid password";
             return res.redirect("/login");
         }
+        req.session.user = {
+            id: existingUser._id,
+            name: existingUser.username,
+            email: existingUser.email
+        };
+        console.log(req.session.user);
+        
+
         return res.redirect("/home");
 
     } catch (error) {
@@ -502,8 +494,19 @@ const loginUser = async (req, res) => {
     }
 }
 
+const logout = async (req, res) => {
+    req.session.destroy(err => {
+        if(err){
+            console.log("Logout error:", err);
+            return res.redirect("/home");
+            
+        }
+
+        res.clearCookie("connect.sid");
+        res.redirect("/login");
+    });
+}
 module.exports = {
-    loadHome,
     loadRegister,
     registerUser,
     loadVerifyOtp,
@@ -514,6 +517,7 @@ module.exports = {
     loadForgotPassword,
     forgotPassword,
     resetPassword,
-    saveNewPassword
+    saveNewPassword, 
+    logout
 }
 

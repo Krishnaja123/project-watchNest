@@ -16,9 +16,6 @@
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-
-    </head>
-
     <div class="container">
         <!-- Sidebar -->
         <%- include("../partials/admin/sidebar") %>
@@ -121,15 +118,6 @@
                                                 <div class="price-error error-message"></div>
                                             </div>
 
-                                            <!-- Offer -->
-                                            <div class="form-group">
-                                                <label for="offer-${variantCount}">Offer*</label>
-                                                <input type="number" id="offer-${variantCount}"
-                                                    name="variants[${variantCount}][offer]"
-                                                    class="form-control variant-offer" min="0">
-                                                <div class="stock-error error-message"></div>
-                                            </div>
-
                                             <!-- Stock -->
                                             <div class="form-group">
                                                 <label for="stock-${variantCount}">Stock Quantity*</label>
@@ -165,7 +153,6 @@
                                                 </div>
 
                                                 <div class="img1 error-message"></div>
-
 
                                             </div>
 
@@ -267,7 +254,8 @@
 
                                 <!-- Actions -->
                                 <div class="form-group">
-                                    <button type="submit" class="btn btn-primary">Save Product</button>
+                                    <button type="submit" class="btn btn-primary" id="saveProductBtn">
+                                        Save Product</button>
                                     <button type="button" class="btn btn-outline"
                                         onclick="window.history.back()">Cancel</button>
                                 </div>
@@ -360,13 +348,6 @@
                             <div class="price-error error-message"></div>
                         </div>
 
-                        <!-- Offer -->
-                        <div class="form-group">
-                            <label for="offer-${variantCount}">Offer*</label>
-                            <input type="number" id="offer-${variantCount}" name="variants[${variantCount}][offer]" class="form-control variant-offer" min="0">
-                            <div class="stock-error error-message"></div>
-                        </div>
-
                         <!-- Stock -->
                         <div class="form-group">
                             <label for="stock-${variantCount}">Stock Quantity*</label>
@@ -392,58 +373,6 @@
                 });
 
             }
-
-            //     function generateImageFields(variantCount, imageCount = 4) {
-            //         let imageHtml = "";
-
-            //         for (let i = 1; i <= imageCount; i++) {
-            //             imageHtml += `
-            // <div class="form-group">
-            //     <label for="images-${variantCount}-${i}">Product Image ${i}</label>
-            //     <input 
-            //         type="file" 
-            //         id="images-${variantCount}-${i}" 
-            //         name="variants[${variantCount}][images][]" 
-            //         class="variant-images" 
-            //         accept="image/*"
-            //     >
-
-            //     <!-- Preview -->
-            //     <div class="image-preview-wrapper">
-            //         <img 
-            //             id="preview-${variantCount}-${i}" 
-            //             style="max-width:300px; display:none;"
-            //         >
-            //     </div>
-
-            //     <!-- Buttons -->
-            //     <div class="image-actions">
-            //         <button 
-            //             type="button"
-            //             id="cropBtn-${variantCount}-${i}"
-            //             style="display:none;"
-            //         >Crop</button>
-
-            //         <button 
-            //             type="button"
-            //             id="closeBtn-${variantCount}-${i}"
-            //             style="display:none;"
-            //         >Cancel</button>
-            //     </div>
-
-            //     <!-- Cropped images -->
-            //     <div 
-            //         id="croppedGallery-${variantCount}-${i}" 
-            //         style="display:flex; gap:10px; flex-wrap:wrap;"
-            //     >
-            //     </div>
-            // </div>
-            // `;
-            //         }
-
-            //         return imageHtml;
-            //     }
-
 
             function generateImageFields(variantCount, imageCount = 4) {
                 let imageHtml = "";
@@ -499,6 +428,7 @@
             }
 
             const croppers = {}; // store cropper instances
+            const originalImages = {};
 
 
             document.addEventListener("change", function (e) {
@@ -507,6 +437,14 @@
                 const input = e.target;
                 const variant = input.dataset.variant;
                 const imageIndex = input.dataset.image;
+
+                const file = input.files[0];
+                if (!file) return;
+
+                // Store original file
+                if (!originalImages[variant])
+                    originalImages[variant] = {};
+                originalImages[variant][imageIndex] = file;
 
                 const preview = document.getElementById(`preview-${variant}-${imageIndex}`);
 
@@ -518,14 +456,12 @@
                     `closeBtn-${variant}-${imageIndex}`
                 );
 
-                const file = input.files[0];
-                if (!file) return;
 
                 preview.src = URL.createObjectURL(file);
                 preview.style.display = "block";
 
                 cropBtn.style.display = "inline-block";
-                cancelBtn.style.display = "inline-block"; // ✅ FIX
+                cancelBtn.style.display = "inline-block";
 
                 const key = `${variant}-${imageIndex}`;
 
@@ -818,19 +754,11 @@
                     const dialError = variant.querySelector(".dial_color-error");
                     const priceError = variant.querySelector(".price-error");
                     const stockError = variant.querySelector(".stock-error");
-                    const img1_Error = variant.querySelector(".img1 images-error");
-                    const img2_Error = variant.querySelector(".img2 images-error");
-                    const img3_Error = variant.querySelector(".img3 images-error");
-                    const img4_Error = variant.querySelector(".img4 images-error");
 
                     strapError.textContent = "";
                     dialError.textContent = "";
                     priceError.textContent = "";
                     stockError.textContent = "";
-                    img1_Error.textContent = "";
-                    img2_Error.textContent = "";
-                    img3_Error.textContent = "";
-                    img4_Error.textContent = "";
 
 
                     if (strapColorInput.value.trim() === "") {
@@ -853,11 +781,23 @@
                         isValid = false;
                     }
 
-                    const images = variantImages[index + 1] || [];
-                    if (images.length === 0) {
-                        imageError.textContent = "Please upload at least one image";
+                    const galleries = variant.querySelectorAll('[id^="croppedGallery-"]');
+                    const imageError = variant.querySelector(".images-error");
+
+                    imageError.textContent = "";
+
+                    let totalImages = 0;
+
+                    galleries.forEach(gallery => {
+                        totalImages += gallery.children.length;
+                    });
+
+                    if (totalImages < 1) {
+                        imageError.textContent = "Please upload atleast 1 product images";
                         isValid = false;
                     }
+
+
                 })
 
                 return isValid;
@@ -866,11 +806,16 @@
 
             form.addEventListener("submit", async function (e) {
                 e.preventDefault();
+
+                const saveBtn = document.getElementById("saveProductBtn");
                 try {
 
                     if (!validateForm()) {
                         return;
                     }
+
+                    saveBtn.disabled = true;
+                    saveBtn.innerText = "Saving...";
 
                     const formData = new FormData();
 
@@ -900,7 +845,15 @@
 
                         const imageInputs = variant.querySelectorAll(".variant-images");
 
+
                         imageInputs.forEach((input, imgIndex) => {
+
+                            const originalImage = originalImages[index + 1] ? originalImages[index + 1][imgIndex + 1] : null;
+
+                            if (originalImage) {
+                                formData.append(`variants[${index}][original_images][]`, originalImage);
+                            }
+
                             if (input.files.length > 0) {
                                 formData.append(
                                     `variants[${index}][images][]`,
@@ -938,6 +891,10 @@
                             window.location.href = "/admin/products";
                         });
                     } else {
+
+                        saveBtn.disabled = false;
+                        saveBtn.innerText = "Save Product";
+
                         Swal.fire({
                             icon: data.type || "error",
                             text: data.message || "Something went wrong",
@@ -946,7 +903,14 @@
                     }
 
                 } catch (error) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = "Save Product";
+
                     console.error("Form submit error:", error);
+                    Swal.fire({
+                        icon: "error",
+                        text: "Network error. Please try again."
+                    });
                 }
             })
 

@@ -4,6 +4,7 @@ const Category = require("../../models/categoryModel");
 const Brand = require("../../models/brandModel")
 const multer = require("multer");
 const cloudinary = require("../../config/cloudinary");
+const { urlencoded } = require("express");
 
 function uploadToCloudinary(buffer, folder = "products") {
     return new Promise((resolve, reject) => {
@@ -12,7 +13,7 @@ function uploadToCloudinary(buffer, folder = "products") {
                 if (err) reject(err);
                 else resolve(result.secure_url);
             });
-            stream.end(buffer);
+        stream.end(buffer);
     });
 }
 
@@ -43,23 +44,23 @@ const createProduct = async (req, res) => {
 
 const saveProduct = async (req, res) => {
     console.log("get in to saveProduct");
-    console.log(req.body);
-    console.log(req.files);
-    
+    console.log("req.body: ", req.body);
+    console.log("req.files: ", req.files);
+
     try {
         const { name, category, brand, descrip } = req.body;
 
-        req.files.forEach((file, i)=> {
-           console.log(i, file.fieldname, file.originalname);
-            
+        req.files.forEach((file, i) => {
+            console.log(i, file.fieldname, file.originalname);
+
         });
         if (!name || !brand || !category) {
             return res.json({ type: "error", message: "Please fill all the mandatory fields" });
         }
 
         const trimedName = name.trim();
-        const existingProduct = await Product.findOne({ 
-            name: { $regex: `^${trimedName}$`, $options: "i" } 
+        const existingProduct = await Product.findOne({
+            name: { $regex: `^${trimedName}$`, $options: "i" }
         });
 
         if (existingProduct) {
@@ -71,25 +72,25 @@ const saveProduct = async (req, res) => {
         variants = Array.isArray(variants) ? variants : [variants];
 
         variants = variants.map(v => ({
-        ...v,
-        images: [],
-        original_images: []
-    }));
+            ...v,
+            images: [],
+            original_images: []
+        }));
 
         for (const file of req.files) {
-           const index = parseInt(file.fieldname.match(/\d+/)[0], 10);
+            const index = parseInt(file.fieldname.match(/\d+/)[0], 10);
 
             if (file.fieldname.includes("[images]")) {
-            // Cropped image
-            const url = await uploadToCloudinary(file.buffer, "product_images/cropped");
-            variants[index].images.push(url); 
-        }
+                // Cropped image
+                const url = await uploadToCloudinary(file.buffer, "product_images/cropped");
+                variants[index].images.push(url);
+            }
 
-        if (file.fieldname.includes("[original_images]")) {
-            // Original image
-            const url = await uploadToCloudinary(file.buffer, "product_images/original");
-            variants[index].original_images.push(url);
-        }
+            if (file.fieldname.includes("[original_images]")) {
+                // Original image
+                const url = await uploadToCloudinary(file.buffer, "product_images/original");
+                variants[index].original_images.push(url);
+            }
         };
 
         const newProduct = await new Product({
@@ -221,11 +222,11 @@ const viewProduct = async (req, res) => {
         console.log(product.variants.id(variantId));
 
         await product.save();
-        res.json({ 
+        res.json({
             success: true,
             variantId: variant._id,
             view: variant.view
-         });
+        });
 
     } catch (error) {
         console.log("server error", error);
@@ -273,7 +274,7 @@ const productDetails = async (req, res) => {
             return res.status(404).send("Brand not found");
         }
         console.log("product : ", product);
-        
+
         return res.render("admin/editProduct", {
             product,
             page,
@@ -289,216 +290,95 @@ const productDetails = async (req, res) => {
     }
 }
 
-// const updateProduct = async (req, res) => {
-//     try {
-//         console.log("get in to update function");
-
-//         const { _id, name, category, brand, descrip, removedImages } = req.body;
-
-//         const product = await Product.findById(_id);
-//         if (!product) {
-//             return res.json({
-//                 success: false,
-//                 type: "failure",
-//                 message: "No product found with this ID"
-//             });
-//         }
-
-//         let variants = req.body.variants;
-//         variants = Array.isArray(variants) ? variants : [variants];
-//         //console.log("req.files: ", req.files);
-//         req.files.forEach(file => {
-//             const index = parseInt(file.fieldname.match(/\d+/)[0], 10);
-//             console.log(index)
-//             if (file.originalname.startsWith("cropped")) {
-//                 if(!variants[index]){
-//                     variants[index] = {};
-//                 }
-//                 if (!variants[index].images) {
-//                     variants[index].images = [];
-//                 }
-//                 variants[index].images.push(file.path);
-//             }
-//         })
-
-//         //const removedList = removedImages ? JSON.parse(removedImages) : [];
-
-//         variants = variants.map((variant, index) => {
-//             const existingvariant = product.variants[index];
-//             const existingImages = existingvariant?.images || [];
-//             const newImages = variant[index].images || [];
-
-//             const filteredExisting = existingImages.filter(
-//                 img => !removedList.includes(img)
-//             );
-//         })
-
-
-//         if (product.variants.length === 0) {
-//             return res.json({
-//                 success: false,
-//                 type: "failure",
-//                 message: "Please add atleast one variant",
-//             });
-//         }
-
-//         product.name = name;
-//         product.cat_id = Array.isArray(category) ? category : [category];
-//         product.brand_id = brand;
-//         product.descrip = descrip;
-//         product.variants = variants;
-
-//         await product.save();
-//         console.log("Product before save: ", product);
-
-//         return res.json({
-//             success: true,
-//             type: "success",
-//             message: "Product updated successfully",
-//         });
-//     } catch (error) {
-//         console.log("server error", error);
-//         res.status(500).send("server error");
-
-//     }
-// }
-
-// const updateProduct = async (req, res) => {
-//     try {
-//         console.log("get in to update function");
-//         console.log("req.body: ", req.body);
-
-//         const { _id, name, category, brand, descrip } = req.body;
-
-
-//         const product = await Product.findById(_id);
-//         if (!product) {
-//             return res.json({
-//                 success: false,
-//                 type: "failure",
-//                 message: "No product found with this ID"
-//             });
-//         }
-
-//         let variants = req.body.variants || [];
-
-//         // Normalize if only one variant was sent (not array)
-//         if (!Array.isArray(variants)) variants = [variants];
-
-//         console.log("files:", req.files);
-//         variants = variants.map((variant, index) => {
-//             let existing = variant.existingImages;
-//             if (typeof existing === 'string') {
-//                 existing = JSON.parse(existing);
-//             }
-//             existing = Array.isArray(existing) ? existing : [existing];
-//             variant.images = variant.existingImages;
-//             console.log("variant.images: ", variant.images);
-
-//             const newFiles = req.files.filter(file => file.fieldname === `variants[${index}][images][]`);
-//             console.log("newFiles");
-
-//             const newImageUrls = newFiles.map(file => file.path);
-
-//             return {
-//                 strap_color: variant.strap_color,
-//                 dial_color: variant.dial_color,
-//                 price: variant.price,
-//                 stock: variant.stock,
-//                 images: [...existing, ...newImageUrls]
-//             }
-//         })
-
-//         if (product.variants.length === 0) {
-//             return res.json({
-//                 success: false,
-//                 type: "failure",
-//                 message: "Please add atleast one variant",
-//             });
-//         }
-
-//         product.name = name;
-//         product.cat_id = Array.isArray(category) ? category : [category];
-//         product.brand_id = brand;
-//         product.descrip = descrip;
-//         product.variants = variants;
-
-//         await product.save();
-//         console.log("Product before save: ", product);
-
-//         return res.json({
-//             success: true,
-//             type: "success",
-//             message: "Product updated successfully",
-//         });
-//     } catch (error) {
-//         console.log("server error", error);
-//         res.status(500).send("server error");
-
-//     }
-// }
 
 const updateProduct = async (req, res) => {
     try {
-        console.log("get into update controller");
+        console.log("get in to update product");
+        const productId = req.params.id;
 
-        console.log("req.body:", req.body);
-        console.log("req.files:", req.files);
+        // console.log(req.files.map(f => f.fieldname));
+        
+        const { name, category, brand, descrip, variants } = req.body;
 
-        const { _id, name, category, brand, descrip } = req.body;
+        const product = await Product.findById(productId);
 
-        const product = await Product.findById(_id);
         if (!product) {
-            return res.json({ success: false, message: "Product not found" });
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
         }
-
-        let variants = req.body.variants || [];
-
-        if (!Array.isArray(variants)) variants = [variants];
-
-        const updatedVariants = variants.map((variant, index) => {
-
-            let existing = variant.existingImages;
-            if (typeof existing === "string") {
-                existing = JSON.parse(existing);
-            }
-            existing = Array.isArray(existing) ? existing : [];
-
-            const uploadedFiles = req.files.filter(
-                (file) => file.fieldname.startsWith(`variants[${index}][images]`)
-            );
-
-            const newImageUrls = uploadedFiles.map(file => file.path);
-
-            const finalImages = [...existing, ...newImageUrls];
-
-            return {
-                strap_color: variant.strap_color,
-                dial_color: variant.dial_color,
-                price: variant.price,
-                stock: variant.stock,
-                images: finalImages
-            };
-        });
+        
 
         product.name = name;
         product.cat_id = Array.isArray(category) ? category : [category];
         product.brand_id = brand;
         product.descrip = descrip;
+
+        console.log("images:",req.files);
+
+        const updatedVariants = [];
+
+        for (let i = 0; i < variants.length; i++) {
+            const variant = variants[i];
+
+            const existing_cropped = variant.existing_cropped_images || [];
+            const existing_original = variant.existing_original_images || [];
+
+            const croppedFiles = (req.files || []).filter(file =>
+                file.fieldname.includes(`variants[${i}][images]`));
+
+            const originalFiles = (req.files || []).filter(file =>
+                file.fieldname.includes(`variants[${i}][original_images]`));
+
+            const croppedUrls = [];
+            const originalUrls = [];
+
+            for (const file of croppedFiles) {
+                const url = await uploadToCloudinary(
+                    file.buffer,
+                    "product_images/cropped"
+                );
+                croppedUrls.push(url);
+            }
+
+            for (const file of originalFiles) {
+                const url = await uploadToCloudinary(
+                    file.buffer,
+                    "product_images/original"
+                );
+                originalUrls.push(url);
+            }
+
+            updatedVariants.push({
+                strap_color: variant.strap_color,
+                dial_color: variant.dial_color,
+                price: variant.price,
+                stock: variant.stock,
+                images: [...existing_cropped, ...croppedUrls],
+                original_images: [...existing_original, ...originalUrls]
+            })
+        }
+
         product.variants = updatedVariants;
 
-        await product.save();
+            await product.save();
 
-        console.log("PRODUCT UPDATED ✅", product);
-
-        return res.json({
-            success: true,
-            message: "Product updated successfully"
-        });
-
+            return res.json({
+                success: true,
+                message: "Product updated successfully",
+                type: "success"
+            });
     } catch (err) {
         console.error("Update Error:", err);
         res.status(500).json({ success: false, message: "Server Error" });
+
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            type: "error"
+        });
+
     }
 };
 

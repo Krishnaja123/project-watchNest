@@ -6,16 +6,12 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    </head>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+        <!-- Select2 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     </head>
 
@@ -95,7 +91,6 @@
                         <!-- Product Variants -->
                         <div class="form-group">
                             <label>Product Variants</label>
-                            <button type="button" class="add-variant-btn" id="addVariantBtn">+ Add Variant</button>
                             <div id="variantsContainer">
                                 <% if (product.variants && product.variants.length> 0) { %>
                                     <% product.variants.forEach((variant, index)=> { %>
@@ -152,55 +147,82 @@
                                                 </div>
 
                                                 <!-- Images -->
-                                                <div class="form-group">
-                                                    <label for="images-<%= index + 1 %>">Product Images*</label>
-                                                    <input type="file" id="images-<%= index + 1 %>"
-                                                        data-variantId="<%= variant._id %>"
-                                                        name="variants[<%= index %>][images][]" class="variant-images"
-                                                        accept="image/*" multiple>
+                                                <% for (let imgIndex=1; imgIndex <=4; imgIndex++) { %>
+                                                    <div class="form-group">
+                                                        <label>Product Image <%= imgIndex %></label>
 
-                                                    <input type="hidden" name="variants[<%= index %>][existingImages]" id="existingImages-<%= index %>"
-                                                        value="<%= JSON.stringify(variant.images || []) %>">
+                                                        <input type="file" name="variants[<%= index %>][images][]"
+                                                            class="variant-images" data-variant="<%= index + 1 %>"
+                                                            data-image="<%= imgIndex %>"
+                                                            data-original="<%= variant.original_images[imgIndex - 1] %>"
+                                                            accept="image/*" />
 
-                                                    <div id="modal-<%= index + 1 %>">
-                                                        <div id="modalContent">
-                                                            <img id="preview-<%= index + 1 %>"
-                                                                style="width: 500px; height: 500px; display: none;">
-                                                            <button id="cropBtn-<%= index + 1 %>" type="button"
-                                                                style="display: none;">Crop</button>
-                                                            <button id="closeBtn-<%= index + 1 %>"
-                                                                style="display: none;">Close</button>
+                                                        <div class="image-preview-wrapper">
+                                                            <img id="preview-<%= index + 1 %>-<%= imgIndex %>"
+                                                                data-variant="<%= index + 1 %>"
+                                                                data-image="<%= imgIndex %>"
+                                                                style="max-width:300px; display:none;" />
                                                         </div>
-                                                    </div>
 
-                                                    <div>
-                                                        <!-- Cropped images gallery -->
-                                                        <div id="croppedGallery-${variantCount}"
-                                                            style="display:flex; gap:10px; flex-wrap:wrap;"></div>
-                                                        <div></div>
-                                                    </div>
+                                                        <div class="image-actions">
+                                                            <button type="button" class="crop-btn"
+                                                                data-variant="<%= index + 1 %>"
+                                                                data-image="<%= imgIndex %>"
+                                                                style="display:none;">Crop</button>
+
+                                                            <button type="button"
+                                                                id="closeBtn-<%= index + 1 %>-<%= imgIndex %>"
+                                                                style="display:none;">Cancel</button>
+                                                        </div>
+
+                                                        <div id="croppedGallery-<%= index + 1 %>-<%= imgIndex %>"
+                                                            class="cropped-gallery" <% if (variant.images &&
+                                                            variant.images[imgIndex - 1]) { %>
+                                                            style="display:flex;"
+                                                            <% } %>
+                                                                >
+                                                                <% if (variant.images && variant.images[imgIndex - 1]) {
+                                                                    %>
+                                                                    <div class="gallery-image-wrapper"
+                                                                        data-variant="<%= index + 1 %>"
+                                                                        data-image="<%= imgIndex %>">
+
+                                                                        <img src="<%= variant.images[imgIndex - 1] %>"
+                                                                            class="existing-image"
+                                                                            data-variant="<%= index + 1 %>"
+                                                                            data-image="<%= imgIndex %>"
+                                                                            data-filename="<%= variant.images[imgIndex - 1] %>" />
+
+                                                                        <input type="file" class="original-image-input"
+                                                                            name="variants[<%= index %>][original_images][]"
+                                                                            style="display:none;">
 
 
-                                                    <!-- Show previously uploaded images -->
-                                                    <div id="existingGallery-<%= index + 1 %>" class="existing-gallery"
-                                                        style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                                                        <% if (variant.images && variant.images.length> 0) { %>
-                                                            <% variant.images.forEach((img, imgIndex)=> { %>
-                                                                <div id=`imageContainer+${imgIndex}`
-                                                                    style="position: relative; display: inline-block;">
-                                                                    <img src="<%= img %>" alt="Variant Image"
-                                                                        style="width: 100px; height: 100px; border-radius: 6px; border: 2px solid #ccc;">
-                                                                    <span class="remove-existing"
-                                                                        data-variant="<%= index %>"
-                                                                        data-image="<%= imgIndex %>"
-                                                                        style="position: absolute; top: 2px; right: 6px; cursor: pointer; color: red; background: white; border-radius: 50%; padding: 0 5px;">x</span>
-                                                                </div>
-                                                                <% }) %>
+
+                                                                        <div class="gallery-actions">
+                                                                            <button type="button"
+                                                                                class="gallery-edit">✏️</button>
+                                                                            <button type="button"
+                                                                                class="gallery-remove">✖</button>
+                                                                        </div>
+
+                                                                        <input type="hidden"
+                                                                            name="variants[<%= index %>][existing_cropped_images][]"
+                                                                            value="<%= variant.images[imgIndex - 1] %>">
+
+                                                                        <input type="hidden"
+                                                                            name="variants[<%= index %>][existing_original_images][]"
+                                                                            value="<%= variant.images[imgIndex - 1] %>">
+
+
+                                                                    </div>
                                                                     <% } %>
-                                                    </div>
+                                                        </div>
 
-                                                    <div class="images-error error-message"></div>
-                                                </div>
+                                                        <div class="images-error error-message"></div>
+
+                                                    </div>
+                                                    <% } %>
                                             </div>
                                         </div>
                                         <% }) %>
@@ -208,6 +230,9 @@
 
                                                 <!-- Variants will be added here dynamically -->
                             </div>
+
+                            <button type="button" class="add-variant-btn" id="addVariantBtn">+ Add Variant</button>
+
                         </div>
 
                         <!-- Actions -->
@@ -253,6 +278,16 @@
             }
             const currentPage = "<%= page %>";
 
+            document.querySelectorAll(".cropped-gallery").forEach(gallery => {
+                if (gallery.children.length > 0) {
+                    const idParts = gallery.id.split("-");
+                    const variant = idParts[1];
+                    const imageIndex = idParts[2];
+
+                    updateImageUI(variant, imageIndex);
+                }
+            });
+
             const form = document.getElementById("productForm");
             const nameInput = document.getElementById("productName");
             const nameError = document.getElementById("nameError");
@@ -265,11 +300,25 @@
             const variantsContainer = document.getElementById("variantsContainer");
             const variantRemoveBtns = document.querySelectorAll(".remove-variant");
             const imageInput = document.querySelectorAll(".variant-images");
-            const imageRemoveBtn = document.querySelectorAll(".remove-existing");
 
             let variantCount = "<%= product.variants.length %>"; // Counter for variants
             let allVariants = []; // Array to store variant data
             let variantImages = {};
+
+            let croppers = {};
+            let originalImages = {};
+            let existingImages = {};
+
+            document.querySelectorAll(".existing-image").forEach(img => {
+                const variant = img.dataset.variant;
+                const filename = img.dataset.filename;
+
+                if (!existingImages[variant]) {
+                    existingImages[variant] = [];
+                }
+
+                existingImages[variant].push(filename);
+            });
 
             addVariantBtn.addEventListener("click", function () {
                 addNewVariant();
@@ -279,38 +328,6 @@
                 button.addEventListener("click", () => {
                     const variantId = button.dataset.variantId;
                     removeVariant(variantId);
-                })
-            })
-
-
-            imageInput.forEach((input) => {
-                console.log("get int here");
-                
-                const variantId = input.dataset.variantId || input.id.split("-")[1];
-                input.addEventListener("click", () => addImage(variantId))
-            });
-
-            removedImages = [];
-
-            imageRemoveBtn.forEach(button => {
-                button.addEventListener("click", (e) => {
-                    const variantIndex = e.target.dataset.variant;
-                    const imageIndex = e.target.dataset.image;
-                    const existingImagesInput  = document.getElementById(`existingImages-${variantIndex}`);
-                    imagesArr  = JSON.parse(existingImagesInput.value);
-                    console.log(imagesArr);
-
-                    // Remove the selected image
-                    imagesArr.splice(imageIndex, 1);
-                    console.log(imagesArr);
-
-                    existingImagesInput.value = JSON.stringify(imagesArr);
-                    
-                    // Remove UI element
-                    const container = e.target.closest("div");
-                    if (container) {
-                        container.remove();
-                    }
                 })
             })
 
@@ -329,7 +346,7 @@
                         <!-- Strap Color -->
                         <div class="form-group">
                             <label for="strap_color-${variantCount}">Strap Color*</label>
-                            <input type="text" id="-${variantCount}" name="variants[${variantCount}][strap_color]" class="form-control variant-strap_color">
+                            <input type="text" id="strap_color-${variantCount}" name="variants[${variantCount}][strap_color]" class="form-control variant-strap_color">
                             <div class="strap_color-error error-message"></div>
                         </div>
 
@@ -355,38 +372,368 @@
                         </div>
 
                         <!-- Images -->
-                        <div class="form-group">
-                            <label for="images-${variantCount}">Product Images*</label>
-                            <input type="file" id="images-${variantCount}" name="variants[${variantCount}][images]" class="variant-images" accept="image/*">
-                            <div class="images-error error-message"></div>
+                    
+                            ${generateImageFields(variantCount, 4)}
                             
-                            <!-- Image preview area -->
-                                <div id="modal-${variantCount}">
-                                    <div id="modalContent">
-                                        <img id="preview-${variantCount}" style="width: 500px; height: 500px; display: none;">
-                                        <button id="cropBtn-${variantCount}" type="button" style="display: none;">Crop</button>
-                                        <button id="closeBtn-${variantCount}" style="display: none;">Close</button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <!-- Cropped images gallery -->
-                                    <div id="croppedGallery-${variantCount}" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
-                                    <div></div>
-                                </div>
-                        </div>
-                    </div>
+                            <div class="images-error error-message"></div>
+
+
                 </div>`;
 
-                variantsContainer.insertAdjacentHTML('beforeend', variantHtml);
+                const addVariantBtn = document.getElementById("addVariantBtn");
+                addVariantBtn.insertAdjacentHTML("beforebegin", variantHtml);
 
                 const removeBtn = document.querySelector(`[data-variant-id="${variantId}"]`);
                 removeBtn.addEventListener("click", () => {
                     removeVariant(variantId);
                 });
 
-                addImage(variantCount);
-
             }
+
+            function generateImageFields(variantCount, imageCount = 4) {
+                let imageHtml = "";
+
+                for (let i = 1; i <= imageCount; i++) {
+                    imageHtml += `
+        <div class="form-group">
+            <label for="images-${variantCount}-${i}">Product Image ${i}</label>
+
+            <input 
+                type="file"
+                id="images-${variantCount}-${i}"
+                name="variants[${variantCount}][images][]"
+                class="variant-images"
+                data-variant="${variantCount}"
+                data-image="${i}"
+                accept="image/*"
+            >
+
+            <div class="image-preview-wrapper">
+                <img 
+                    id="preview-${variantCount}-${i}"
+                    data-variant="${variantCount}"
+                    data-image="${i}"
+                    style="max-width:300px; display:none;"
+                >
+            </div>
+
+            <div class="image-actions">
+                <button 
+                    type="button"
+                    class="crop-btn"
+                    data-variant="${variantCount}"
+                    data-image="${i}"
+                    style="display:none;"
+                >Crop</button>
+
+                <button 
+                    type="button"
+                    id="closeBtn-${variantCount}-${i}"
+                    style="display:none;"
+                >Cancel</button>
+            </div>
+
+            <div 
+                id="croppedGallery-${variantCount}-${i}"
+                style="display:flex; gap:10px; flex-wrap:wrap;"
+            ></div>
+        </div>`;
+                }
+
+                return imageHtml;
+            }
+
+            document.addEventListener("change", function (e) {
+                if (!e.target.classList.contains("variant-images")) return;
+
+                const input = e.target;
+                const variant = input.dataset.variant;
+                const imageIndex = input.dataset.image;
+
+                const file = input.files[0];
+                if (!file) return;
+
+                // Store original file
+                if (!originalImages[variant]) {
+                    originalImages[variant] = [];
+                }
+                originalImages[variant].push(file);
+
+                const preview = document.getElementById(`preview-${variant}-${imageIndex}`);
+
+                const cropBtn = document.querySelector(
+                    `.crop-btn[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+
+                const cancelBtn = document.getElementById(
+                    `closeBtn-${variant}-${imageIndex}`
+                );
+
+
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = "block";
+
+                cropBtn.style.display = "inline-block";
+                cancelBtn.style.display = "inline-block";
+
+                const key = `${variant}-${imageIndex}`;
+
+                if (croppers[key]) {
+                    croppers[key].destroy();
+                }
+
+                croppers[key] = new Cropper(preview, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 0.8
+                });
+            });
+
+
+            document.addEventListener("click", function (e) {
+                if (!e.target.classList.contains("crop-btn")) return;
+
+                const btn = e.target;
+                const variant = btn.dataset.variant;
+                const imageIndex = btn.dataset.image;
+                const key = `${variant}-${imageIndex}`;
+
+                const cropper = croppers[key];
+                if (!cropper) return;
+
+                const canvas = cropper.getCroppedCanvas({
+                    width: 300,
+                    height: 300
+                });
+
+                const gallery = document.getElementById(`croppedGallery-${variant}-${imageIndex}`);
+                gallery.style.display = "flex";
+
+                const imageWrapper = document.createElement("div");
+                imageWrapper.className = "gallery-image-wrapper";
+                imageWrapper.dataset.variant = variant;
+                imageWrapper.dataset.image = imageIndex;
+
+
+
+                imageWrapper.innerHTML = `
+    <img src="${canvas.toDataURL("image/png")}" />
+    
+
+    <div class="gallery-actions">
+        <button type="button" class="gallery-edit">✏️</button>
+        <button type="button" class="gallery-remove">✖</button>
+    </div>
+`;
+
+                gallery.appendChild(imageWrapper);
+
+                updateImageUI(variant, imageIndex);
+
+                // Convert canvas to file & attach to form
+                canvas.toBlob(blob => {
+                    const fileInput = document.querySelector(
+                        `.variant-images[data-variant="${variant}"][data-image="${imageIndex}"]`
+                    );
+
+                    const file = new File([blob], `cropped_${Date.now()}.png`, { type: "image/png" });
+
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    fileInput.files = dt.files;
+                });
+
+                cropper.destroy();
+                delete croppers[key];
+                btn.style.display = "none";
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!e.target.classList.contains("gallery-remove")) return;
+
+                const wrapper = e.target.closest(".gallery-image-wrapper");
+                const img = wrapper.querySelector("img");
+
+                const variant = img.dataset.variant;
+                const imageIndex = img.dataset.image;
+                const filename = img.dataset.filename;
+
+                if (existingImages[variant]) {
+                    existingImages[variant] = existingImages[variant].filter(img => img !== filename);
+                }
+
+                const gallery = document.getElementById(
+                    `croppedGallery-${variant}-${imageIndex}`
+                );
+
+                // 1️⃣ Remove gallery image
+                wrapper.remove();
+
+                if (gallery && gallery.children.length === 0) {
+                    gallery.style.display = "none";
+                }
+
+                // 2️⃣ Get elements
+                const fileInput = document.querySelector(
+                    `.variant-images[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+
+                const preview = document.getElementById(`preview-${variant}-${imageIndex}`);
+                const cropBtn = document.querySelector(
+                    `.crop-btn[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+                const cancelBtn = document.getElementById(`closeBtn-${variant}-${imageIndex}`);
+
+                // 3️⃣ Destroy cropper if exists
+                const cropperKey = `${variant}-${imageIndex}`;
+                if (croppers[cropperKey]) {
+                    croppers[cropperKey].destroy();
+                    delete croppers[cropperKey];
+                }
+
+                // 4️⃣ Reset & SHOW file input again ✅
+                if (fileInput) {
+                    fileInput.value = "";
+                    fileInput.style.display = "block"; // ⭐ SHOW INPUT
+                }
+
+                // 5️⃣ Hide preview & buttons
+                if (preview) {
+                    preview.src = "";
+                    preview.style.display = "none";
+                }
+                if (cropBtn) cropBtn.style.display = "none";
+                if (cancelBtn) cancelBtn.style.display = "none";
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!e.target.classList.contains("gallery-edit")) return;
+
+                const wrapper = e.target.closest(".gallery-image-wrapper");
+                const variant = wrapper.dataset.variant;
+                const imageIndex = wrapper.dataset.image;
+
+                wrapper.remove();
+
+                const gallery = document.getElementById(`croppedGallery-${variant}-${imageIndex}`);
+                const preview = document.getElementById(`preview-${variant}-${imageIndex}`);
+                const cropBtn = document.querySelector(
+                    `.crop-btn[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+                const cancelBtn = document.getElementById(`closeBtn-${variant}-${imageIndex}`);
+                const fileInput = document.querySelector(`.variant-images[data-variant="${variant}"][data-image="${imageIndex}"]`);
+
+
+
+                preview.src = fileInput.dataset.original || preview.src;
+                preview.style.display = "block";
+                cropBtn.style.display = "inline-block";
+                cancelBtn.style.display = "inline-block";
+
+                const key = `${variant}-${imageIndex}`;
+
+                if (croppers[key]) {
+                    croppers[key].destroy();
+                    delete croppers[key];
+                }
+
+                croppers[key] = new Cropper(preview, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 0.8
+                });
+            });
+
+
+            document.addEventListener("click", function (e) {
+                if (!e.target.id.startsWith("closeBtn")) return;
+
+                const btn = e.target;
+
+                // Extract variant & image index from ID
+                const parts = btn.id.split("-");
+                const variantIndex = parts[1];
+                const imageIndex = parts[2];
+
+                const wrapper = btn.closest(".form-group");
+
+                const fileInput = wrapper.querySelector(
+                    `input[data-variant="${variantIndex}"][data-image="${imageIndex}"]`
+                );
+
+                const previewImg = wrapper.querySelector(
+                    `img[data-variant="${variantIndex}"][data-image="${imageIndex}"]`
+                );
+
+                const cropBtn = wrapper.querySelector(
+                    `.crop-btn[data-variant="${variantIndex}"][data-image="${imageIndex}"]`
+                );
+
+                // 1️⃣ Destroy cropper if exists
+                const cropperKey = `${variantIndex}-${imageIndex}`;
+                if (croppers[cropperKey]) {
+                    croppers[cropperKey].destroy();
+                    delete croppers[cropperKey];
+                }
+
+                // 2️⃣ Reset file input
+                if (fileInput) {
+                    fileInput.value = "";
+                }
+
+                // 3️⃣ Hide preview image
+                if (previewImg) {
+                    previewImg.src = "";
+                    previewImg.style.display = "none";
+                }
+
+                // 4️⃣ Hide crop & cancel buttons
+                if (cropBtn) cropBtn.style.display = "none";
+                btn.style.display = "none";
+
+                updateImageUI(variantIndex, imageIndex);
+
+            });
+
+            function updateImageUI(variant, imageIndex) {
+                const wrapper = document
+                    .querySelector(`#croppedGallery-${variant}-${imageIndex}`)
+                    ?.closest(".form-group");
+
+                if (!wrapper) return;
+
+                const fileInput = wrapper.querySelector(
+                    `input[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+
+                const previewImg = wrapper.querySelector(
+                    `img[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+
+                const cropBtn = wrapper.querySelector(
+                    `.crop-btn[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+
+                const cancelBtn = wrapper.querySelector(
+                    `#closeBtn-${variant}-${imageIndex}`
+                );
+
+                const gallery = document.getElementById(
+                    `croppedGallery-${variant}-${imageIndex}`
+                );
+
+                const hasImage = gallery && gallery.children.length > 0;
+
+                if (hasImage) {
+                    if (fileInput) fileInput.style.display = "none";
+                    if (previewImg) previewImg.style.display = "none";
+                    if (cropBtn) cropBtn.style.display = "none";
+                    if (cancelBtn) cancelBtn.style.display = "none";
+                } else {
+                    if (fileInput) fileInput.style.display = "block";
+                }
+            }
+
 
             function removeVariant(id) {
                 const variable = document.getElementById(id);
@@ -398,128 +745,6 @@
                 // console.log(allVariants);
 
             }
-
-            function addImage(identifier) {
-                const isNewVariant = !isNaN(identifier);
-
-                // Select elements based on type
-                const imgElement = isNewVariant
-                    ? document.getElementById(`images-${identifier}`)
-                    : document.querySelector(`[data-variantid="${identifier}"]`);
-console.log(imgElement);
-
-                // For existing variants, find modal by closest numeric index
-                const modal = isNewVariant
-                    ? document.getElementById(`modal-${identifier}`)
-                    : imgElement
-                        ? imgElement.closest(".form-group").querySelector("[id^='modal-']")
-                        : null;
-
-                if (!imgElement || !modal) {
-                    console.warn("Image or modal not found for:", identifier);
-                    return;
-                }
-
-                const previewImg = modal.querySelector("img");
-                const cropBtn = modal.querySelector("button[id^='cropBtn']");
-                const closeBtn = modal.querySelector("button[id^='closeBtn']");
-                const croppedGallery = modal.parentElement.querySelector("[id^='croppedGallery']");
-
-                let cropper;
-                let canvas;
-                let imageCount = 0;
-
-                imgElement.addEventListener("change", (event) => {
-                    const selectedImg = event.target.files[0];
-                    if (!selectedImg) return;
-
-                    previewImg.src = URL.createObjectURL(selectedImg);
-                    modal.style.display = "flex";
-                    previewImg.style.display = "block";
-                    cropBtn.style.display = "inline";
-                    closeBtn.style.display = "inline";
-
-                    if (cropper) cropper.destroy();
-
-                    cropper = new Cropper(previewImg, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                        autoCropArea: 0.8
-                    });
-                });
-
-                cropBtn.addEventListener("click", () => {
-                    if (!cropper) return;
-
-                    canvas = cropper.getCroppedCanvas({
-                        width: 500,
-                        height: 500,
-                        imageSmoothingQuality: "high"
-                    });
-
-                    imageCount++;
-
-                    const croppedImg = document.createElement("img");
-                    croppedImg.src = canvas.toDataURL("image/png");
-                    croppedImg.style.width = "100px";
-                    croppedImg.style.height = "100px";
-                    croppedImg.style.border = "2px solid #ccc";
-                    croppedImg.style.borderRadius = "6px";
-
-                    canvas.toBlob((blob) => {
-                        const file = new File([blob], `cropped_${Date.now()}.png`, {
-                            type: "image/png"
-                        })
-                        if (!variantImages[variantCount]) {
-                            variantImages[variantCount] = [];
-                        }
-                        variantImages[variantCount].push(file)
-                    })
-
-                    const clearBtn = document.createElement("span");
-                    clearBtn.textContent = "x";
-                    clearBtn.style.position = "absolute";
-                    clearBtn.style.top = "2px";
-                    clearBtn.style.right = "6px";
-                    clearBtn.style.cursor = "pointer";
-                    clearBtn.style.color = "red";
-                    clearBtn.style.background = "white";
-                    clearBtn.style.borderRadius = "50%";
-                    clearBtn.style.padding = "0 6px";
-                    clearBtn.style.fontWeight = "bold";
-
-                    const imgWrapper = document.createElement("div");
-                    imgWrapper.style.position = "relative";
-                    imgWrapper.style.display = "inline-block";
-                    imgWrapper.style.margin = "5px";
-
-                    imgWrapper.appendChild(croppedImg);
-                    imgWrapper.appendChild(clearBtn);
-                    croppedGallery.appendChild(imgWrapper);
-
-                    clearBtn.addEventListener("click", () => {
-                        imgWrapper.remove();
-                        variantImages[identifier].pop(); // remove last added image
-                    });
-
-                    cropper.destroy();
-                    cropper = null;
-
-                    previewImg.style.display = "none";
-                    cropBtn.style.display = "none";
-                    closeBtn.style.display = "none";
-                    modal.style.display = "none";
-                });
-
-                closeBtn.addEventListener("click", () => {
-                    previewImg.style.display = "none";
-                    cropBtn.style.display = "none";
-                    closeBtn.style.display = "none";
-                    modal.style.display = "none";
-                    if (cropper) cropper.destroy();
-                });
-            }
-
 
             function validateForm() {
                 let isValid = true;
@@ -590,6 +815,8 @@ console.log(imgElement);
                 })
                 return isValid;
             }
+
+
             // Prevent form submission on Enter key
             form.addEventListener("keydown", function (e) {
                 if (e.key === "Enter") {
@@ -611,18 +838,15 @@ console.log(imgElement);
                     const id = "<%= product._id %>";
 
                     const formData = new FormData(form);
-                    const variants = document.querySelectorAll(".variant");
 
-                    // console.log(variants);
-                    variants.forEach((variant, index) => {
-
-                        const newImages = variantImages[index + 1] || [];
-                        console.log("newImages: ", newImages);
-                        newImages.forEach((image) => {
-                            formData.append(`variants[${index}][images][]`, image);
+                    Object.keys(originalImages).forEach(variantIndex => {
+                        originalImages[variantIndex].forEach(file => {
+                            formData.append(
+                                `variants[${variantIndex - 1}][original_images][]`,
+                                file
+                            );
                         });
                     });
-                    console.log(formData);
 
                     const response = await fetch(`/admin/editProduct/${id}`, {
                         method: "POST",

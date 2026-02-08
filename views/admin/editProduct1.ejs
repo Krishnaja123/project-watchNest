@@ -1,4 +1,4 @@
-<!-- views/addProduct.ejs -->
+<!-- views/editProduct.ejs -->
 <%- include("../partials/admin/header") %>
 
     <head>
@@ -9,8 +9,6 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     </head>
-
-
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -26,7 +24,7 @@
         <body>
             <!-- Main Content -->
             <div class="main">
-                <h1>Add New Product</h1>
+                <h1>Edit Product</h1>
 
                 <div class="form-container">
                     <h2>Product Information</h2>
@@ -158,26 +156,13 @@
                                                     <label for="images-<%= index + 1 %>">Product Images*</label>
                                                     <input type="file" id="images-<%= index + 1 %>"
                                                         data-variantId="<%= variant._id %>"
-                                                        name="variants[<%= index %>][images]" class="variant-images"
-                                                        accept="image/*">
+                                                        name="variants[<%= index %>][images][]" class="variant-images"
+                                                        accept="image/*" multiple>
 
-                                                    <div id="modal-<%= index + 1 %>">
-                                                        <div id="modalContent">
-                                                            <img id="preview-<%= index + 1 %>"
-                                                                style="width: 500px; height: 500px; display: none;">
-                                                            <button id="cropBtn-<%= index + 1 %>" type="button"
-                                                                style="display: none;">Crop</button>
-                                                            <button id="closeBtn-<%= index + 1 %>"
-                                                                style="display: none;">Close</button>
-                                                        </div>
-                                                    </div>
+                                                    <input type="hidden" name="variants[<%= index %>][existingImages]"
+                                                        id="existingImages-<%= index %>"
+                                                        value="<%= JSON.stringify(variant.images || []) %>">
 
-                                                    <div>
-                                                        <!-- Cropped images gallery -->
-                                                        <div id="croppedGallery-${variantCount}"
-                                                            style="display:flex; gap:10px; flex-wrap:wrap;"></div>
-                                                        <div></div>
-                                                    </div>
 
 
                                                     <!-- Show previously uploaded images -->
@@ -189,10 +174,13 @@
                                                                     style="position: relative; display: inline-block;">
                                                                     <img src="<%= img %>" alt="Variant Image"
                                                                         style="width: 100px; height: 100px; border-radius: 6px; border: 2px solid #ccc;">
-                                                                    <span class="remove-existing"
-                                                                        data-variant="<%= index %>"
-                                                                        data-image="<%= imgIndex %>"
-                                                                        style="position: absolute; top: 2px; right: 6px; cursor: pointer; color: red; background: white; border-radius: 50%; padding: 0 5px;">x</span>
+
+                                                                    <div class="gallery-actions">
+                                                                        <button type="button"
+                                                                            class="gallery-edit">✏️</button>
+                                                                        <button type="button"
+                                                                            class="gallery-remove">✖</button>
+                                                                    </div>
                                                                 </div>
                                                                 <% }) %>
                                                                     <% } %>
@@ -241,8 +229,6 @@
         document.addEventListener("DOMContentLoaded", function () {
 
             const message = "<%= message %>";
-            console.log(message);
-
             const type = "<%= type %>";
             if (message) {
                 Swal.fire({
@@ -253,7 +239,6 @@
                 });
             }
             const currentPage = "<%= page %>";
-            console.log("currentPage : ", currentPage);
 
             const form = document.getElementById("productForm");
             const nameInput = document.getElementById("productName");
@@ -267,7 +252,7 @@
             const variantsContainer = document.getElementById("variantsContainer");
             const variantRemoveBtns = document.querySelectorAll(".remove-variant");
             const imageInput = document.querySelectorAll(".variant-images");
-            const imageRemoveBtn = document.querySelectorAll(".remove-existing");
+            const imageRemoveBtn = document.querySelectorAll(".gallery-remove");
 
             let variantCount = "<%= product.variants.length %>"; // Counter for variants
             let allVariants = []; // Array to store variant data
@@ -286,6 +271,8 @@
 
 
             imageInput.forEach((input) => {
+                console.log("get int here");
+
                 const variantId = input.dataset.variantId || input.id.split("-")[1];
                 input.addEventListener("click", () => addImage(variantId))
             });
@@ -294,10 +281,19 @@
 
             imageRemoveBtn.forEach(button => {
                 button.addEventListener("click", (e) => {
-                    const variantId = e.target.dataset.variant;
-                    const imageId = e.target.dataset.image;
-                    removedImages.push({ variantId, imageId });
+                    const variantIndex = e.target.dataset.variant;
+                    const imageIndex = e.target.dataset.image;
+                    const existingImagesInput = document.getElementById(`existingImages-${variantIndex}`);
+                    imagesArr = JSON.parse(existingImagesInput.value);
+                    console.log(imagesArr);
 
+                    // Remove the selected image
+                    imagesArr.splice(imageIndex, 1);
+                    console.log(imagesArr);
+
+                    existingImagesInput.value = JSON.stringify(imagesArr);
+
+                    // Remove UI element
                     const container = e.target.closest("div");
                     if (container) {
                         container.remove();
@@ -378,9 +374,6 @@
                 addImage(variantCount);
 
             }
-            
-            console.log(`variant ${variantCount}, `, allVariants);
-
 
             function removeVariant(id) {
                 const variable = document.getElementById(id);
@@ -389,137 +382,9 @@
                 }
 
                 allVariants = allVariants.filter(variant => variant.id !== id);
-                console.log(allVariants);
+                // console.log(allVariants);
 
             }
-
-            //             function addImage(variantCount) {
-
-            //                 const isNewVariant = !isNaN(variantCount);
-            // console.log(isNewVariant);
-            //                 const imgElement = isNewVariant ? document.getElementById(`images-${variantCount}`) : document.querySelector(`[data-variantid="${variantCount}"]`);
-            //                 const modal = isNewVariant ? document.getElementById(`modal-${variantCount}`) : document.querySelector(`#modal-[data-variantid="${variantCount}"]`);
-            //                 const previewImg = isNewVariant ? document.getElementById(`preview-${variantCount}`) : modal.querySelector("img");
-            //                 const cropBtn = isNewVariant ? document.getElementById(`cropBtn-${variantCount}`) : modal.querySelector("button[id^='cropBtn']");
-            //                 const closeBtn = isNewVariant ? document.getElementById(`closeBtn-${variantCount}`) : modal.querySelector("button[id^='closeBtn']`");
-            //                 const croppedGallery = isNewVariant ? document.getElementById(`croppedGallery-${variantCount}`) : document.querySelector(`#croppedGallery-[data-variantid="${variantCount}"]`);
-            //                 // const imgElement = document.getElementById(`images-${variantCount}`) || document.querySelector(`[data-variantId="${variantId}"]`);
-            //                 // const modal = document.getElementById(`modal-${variantCount}`) || document.querySelector(`[data-variantid="${variantId}"]`);
-            //                 // const previewImg = document.getElementById(`preview-${variantCount}`);
-            //                 // const cropBtn = document.getElementById(`cropBtn-${variantCount}`);
-            //                 // const closeBtn = document.getElementById(`closeBtn-${variantCount}`);
-            //                 // const croppedGallery = document.getElementById(`croppedGallery-${variantCount}`);
-
-            //                 let cropper;
-            //                 let canvas;
-
-
-            //                 //let croppedFiles = [];
-            //                 let imageCount = 0;
-
-            //                 imgElement.addEventListener("change", (event) => {
-            //                     selectedImg = event.target.files[0];
-            //                     if (selectedImg) {
-            //                         previewImg.src = URL.createObjectURL(selectedImg);
-            //                         modal.style.display = "flex";
-            //                         previewImg.style.display = "block";
-            //                         cropBtn.style.display = "inline";
-            //                         closeBtn.style.display = "inline";
-
-            //                         if (cropper) {
-            //                             cropper.destroy();
-            //                         }
-
-            //                         cropper = new Cropper(previewImg, {
-            //                             aspectRatio: 1,
-            //                             viewMode: 1,
-            //                             autoCropArea: 0.8
-            //                         });
-            //                     }
-            //                 })
-
-            //                 cropBtn.addEventListener("click", () => {
-            //                     if (cropper) {
-            //                         canvas = cropper.getCroppedCanvas({
-            //                             width: 500,
-            //                             height: 500,
-            //                             imageSmoothingQuality: 'high'
-            //                         });
-            //                     }
-
-            //                     imageCount++;
-
-            //                     const croppedImg = document.createElement("img");
-            //                     croppedImg.src = canvas.toDataURL("image/png");
-            //                     croppedImg.style.width = "100px";
-            //                     croppedImg.style.height = "100px";
-            //                     croppedImg.style.border = "2px solid #ccc";
-            //                     croppedImg.style.borderRadius = "6px";
-
-            //                     canvas.toBlob((blob) => {
-            //                         const file = new File([blob], `cropped_${Date.now()}.png`, {
-            //                             type: "image/png"
-            //                         })
-            //                         if (!variantImages[variantCount]) {
-            //                             variantImages[variantCount] = [];
-            //                         }
-            //                         variantImages[variantCount].push(file)
-            //                     })
-
-
-
-            //                     // console.log("croppedFiles: ", croppedFiles);
-
-
-            //                     const clearBtn = document.createElement("span");
-            //                     clearBtn.id = `clearBtn-${imageCount}`;
-            //                     clearBtn.textContent = "x";
-            //                     clearBtn.style.position = "absolute";
-            //                     clearBtn.style.top = "2px";
-            //                     clearBtn.style.right = "6px";
-            //                     clearBtn.style.cursor = "pointer";
-            //                     clearBtn.style.color = "red";
-            //                     clearBtn.style.fontWeight = "bold";
-            //                     clearBtn.style.fontSize = "18px";
-            //                     clearBtn.style.background = "white";
-            //                     clearBtn.style.borderRadius = "50%";
-            //                     clearBtn.style.padding = "0 6px";
-
-            //                     const imgWrapper = document.createElement("div");
-            //                     imgWrapper.style.position = "relative";
-            //                     imgWrapper.style.display = "inline-block";
-            //                     imgWrapper.style.margin = "5px";
-
-            //                     imgWrapper.appendChild(croppedImg);
-            //                     imgWrapper.appendChild(clearBtn);
-            //                     croppedGallery.appendChild(imgWrapper);
-
-            //                     clearBtn.addEventListener("click", () => {
-            //                         imgWrapper.remove();
-            //                         const index = parseInt(clearBtn.id);
-            //                         variantImages[variantCount].splice(index, 1);
-            //                     })
-
-            //                     cropper.destroy();
-            //                     cropper = null;
-
-            //                     previewImg.style.display = "none";
-            //                     cropBtn.style.display = "none";
-            //                     closeBtn.style.display = "none";
-            //                     modal.style.display = "none";
-
-            //                 })
-
-            //                 closeBtn.addEventListener("click", () => {
-            //                     previewImg.style.display = "none";
-            //                     cropBtn.style.display = "none";
-            //                     closeBtn.style.display = "none";
-            //                     modal.style.display = "none";
-            //                     if (cropper) {
-            //                         cropper.destroy();
-            //                     }
-            //                 })
-            //             }
 
             function addImage(identifier) {
                 const isNewVariant = !isNaN(identifier);
@@ -528,6 +393,7 @@
                 const imgElement = isNewVariant
                     ? document.getElementById(`images-${identifier}`)
                     : document.querySelector(`[data-variantid="${identifier}"]`);
+                console.log(imgElement);
 
                 // For existing variants, find modal by closest numeric index
                 const modal = isNewVariant
@@ -588,10 +454,14 @@
                     croppedImg.style.borderRadius = "6px";
 
                     canvas.toBlob((blob) => {
-                        const file = new File([blob], `cropped_${Date.now()}.png`, { type: "image/png" });
-                        if (!variantImages[identifier]) variantImages[identifier] = [];
-                        variantImages[identifier].push(file);
-                    });
+                        const file = new File([blob], `cropped_${Date.now()}.png`, {
+                            type: "image/png"
+                        })
+                        if (!variantImages[variantCount]) {
+                            variantImages[variantCount] = [];
+                        }
+                        variantImages[variantCount].push(file)
+                    })
 
                     const clearBtn = document.createElement("span");
                     clearBtn.textContent = "x";
@@ -609,6 +479,7 @@
                     imgWrapper.style.position = "relative";
                     imgWrapper.style.display = "inline-block";
                     imgWrapper.style.margin = "5px";
+
                     imgWrapper.appendChild(croppedImg);
                     imgWrapper.appendChild(clearBtn);
                     croppedGallery.appendChild(imgWrapper);
@@ -672,7 +543,6 @@
                     const priceError = variant.querySelector(".price-error");
                     const stockError = variant.querySelector(".stock-error");
                     const imageError = variant.querySelector(".images-error");
-
                     strapError.textContent = "";
                     dialError.textContent = "";
                     priceError.textContent = "";
@@ -725,55 +595,21 @@
                         return;
                     }
 
-                    const id = e.target._id.value;
+                    const id = "<%= product._id %>";
 
-                    const formData = new FormData();
-                    formData.append("_id", e.target._id.value);
-                    formData.append("name", e.target.name.value);
-                    //console.log("e.target.category.selectedOptions: ", e.target.category.selectedOptions);
-
-                    const selectedCategories = Array.from(e.target.category.selectedOptions).map(opt => opt.value);
-                    selectedCategories.forEach(catId => {
-                        formData.append("category[]", catId);
-                    });
-                    formData.append("brand", e.target.brand.value);
-                    formData.append("descrip", e.target.descrip.value);
-
+                    const formData = new FormData(form);
                     const variants = document.querySelectorAll(".variant");
 
-                    console.log(variants);
+                    // console.log(variants);
                     variants.forEach((variant, index) => {
-                        const strapColor = variant.querySelector(".variant-strap_color").value;
-                        const dialColor = variant.querySelector(".variant-dial_color").value;
-                        const price = variant.querySelector(".variant-price").value;
-                        const stock = variant.querySelector(".variant-stock").value;
-
-                        formData.append(`variants[${index}][strap_color]`, strapColor);
-                        formData.append(`variants[${index}][dial_color]`, dialColor);
-                        formData.append(`variants[${index}][price]`, price);
-                        formData.append(`variants[${index}][stock]`, stock);
-
-                        // const images = variantImages[index + 1] || [];
-                        // images.forEach((image) => {
-                        //     formData.append(`variants[${index}][images]`, image);
-                        // });
-
-                        const existingImages = Array.from(
-                            variant.querySelectorAll(`#existingGallery-${index + 1} img`)
-                        ).map(img => img.src);
-
-                        existingImages.forEach(src => {
-                            formData.append(`variants[${index}][existingImages][]`, src);
-                        });
-                            console.log("existingImages: ", existingImages);
 
                         const newImages = variantImages[index + 1] || [];
-                        console.log(newImages);
+                        console.log("newImages: ", newImages);
                         newImages.forEach((image) => {
                             formData.append(`variants[${index}][images][]`, image);
                         });
                     });
-                    formData.append("removedImages", JSON.stringify(removedImages));
+                    console.log(formData);
 
                     const response = await fetch(`/admin/editProduct/${id}`, {
                         method: "POST",
@@ -785,7 +621,7 @@
                         throw new Error("Network response was not ok");
                     }
                     const data = await response.json();
-                    console.log("Upload success: ", data);
+                    // console.log("Upload success: ", data);
 
                     if (data.success) {
                         Swal.fire({
@@ -816,90 +652,3 @@
 
 
     </script>
-
-
-const updateProduct = async (req, res) => {
-    try {
-
-        console.log("get in to product update controller");
-
-        const { _id, name, category, brand, descrip } = req.body;
-        const removedImages = JSON.parse(req.body.removedImages || "[]");
-
-         //let variants = req.body.variants;
-        // variants = Array.isArray(variants) ? variants : [variants];
-        // req.files.forEach(file => {
-        //     const index = parseInt(file.fieldname.match(/\d+/)[0], 10);
-        //     if (!variants[index].images) {
-        //         variants[index].images = [];
-        //     }
-        //     variants[index].images.push(file.path);
-        // })
-
-        //const page = parseInt(req.query.page);
-
-        const product = await Product.findById(_id);
-        if (!product) {
-            req.session.message = "No product found with this ID";
-            req.session.type = "error";
-            return res.redirect("/admin/products")
-        }
-        product.variants.forEach((variant, index) => {
-            const existingImages = req.body.variants[index]?.existingImages || [];
-            if(!Array.isArray(existingImages)){
-                existingImages = [existingImages];
-            }
-           const removedImagesForThisVar = removedImages.filter(img => img.variantIndex == index);
-            removedImagesForThisVar.forEach(img => {
-                existingImages.splice(img.imageIndex, 1);
-            });
-
-            const newvariantFiles = req.files.filter(file => {
-               return file.fieldname.includes(`variants[${index}][images]`)
-            });
-
-            const newImages = newvariantFiles.map(img => img.path);
-
-
-            variant.images = [...existingImages, ...newImages];
-        })
-
-        if (product.variants.length === 0) {
-           return res.json({
-            success: false,
-            type: "failure",
-            message: "Please add atleast one variant",
-        }); 
-        }
-        // const updatedProduct = await Product.findByIdAndUpdate(_id, {
-        //     name,
-        //     cat_id: Array.isArray(category) ? category : [category],
-        //     brand_id: brand,
-        //     descrip,
-        //     variants
-        // });
-
-        product.name = name;
-        product.cat_id = Array.isArray(category) ? category : [category];
-        product.brand_id = brand;
-        product.descrip = descrip;
-        product.variants = variants;
-
-        await product.save();
-        
-        // if (!updatedProduct) {
-        //     req.session.message = "Product not updated, Please try again.";
-        //     req.session.type = "error";
-        //     return res.redirect(`/admin/editProduct/${_id}?`);
-        // }
-
-        return res.json({
-            success: true,
-            type: "success",
-            message: "Product updated successfully",
-        });
-    } catch (error) {
-        console.log("server error", error);
-        res.status(500).send("server error")
-    }
-}

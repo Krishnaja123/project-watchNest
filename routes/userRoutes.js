@@ -1,17 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const userController = require("../controller/userController")
+const userController = require("../controller/user/userController");
+const homepageController = require("../controller/user/hompageController");
+const productController = require("../controller/user/productController");
 const passport = require("passport");
 
 // router.get('/pageNotFound', userController.pageNotFound)
-router.get('/home', userController.loadHome);
 router.get('/signup', userController.loadRegister);
 router.post('/register', userController.registerUser);
 router.get('/verify-otp', userController.loadVerifyOtp);
 router.post('/verify-otp', userController.verifyOtp);
-router.post('/resend-otp',userController.resendOtp);
-router.get('/login',userController.loadLogin);
-router.post('/login',userController.loginUser);
+router.post('/resend-otp', userController.resendOtp);
+router.get('/login', userController.loadLogin);
+router.post('/login', userController.loginUser);
 router.get('/forgotPassword', userController.loadForgotPassword);
 router.post('/forgotPassword', userController.forgotPassword);
 router.get('/reset-password', userController.resetPassword);
@@ -23,5 +24,13 @@ router.get('/auth/google/callback',passport.authenticate('google',{failureRedire
 (req,res)=>{
     res.redirect('/home');
 })
+
+router.get('/logout', userController.logout);
+
+//homepage
+router.get('/home', productController.loadHomePage);
+router.get('/products', productController.loadShowPage);
+router.get('/products/filter', productController.filteredShowPage);
+router.get('/productDetails', productController.productDetails);
 
 module.exports = router;
