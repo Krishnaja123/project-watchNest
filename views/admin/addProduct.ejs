@@ -145,84 +145,112 @@
                                             <div class="form-group">
                                                 <label for="images-1-1">Product Image 1</label>
                                                 <input type="file" id="images-1-1" name="variants[1][images][]"
-                                                    class="variant-images" accept="image/*">
+                                                    class="variant-images" data-variant="1" data-image="1"
+                                                    accept="image/*">
 
                                                 <div class="image-preview-wrapper">
-                                                    <img id="preview-1-1" style="max-width:300px; display:none;">
+                                                    <img id="preview-1-1" data-variant="1" data-image="1"
+                                                        style="max-width:300px; display:none;">
                                                 </div>
 
                                                 <div class="image-actions">
-                                                    <button type="button" id="cropBtn-1-1"
-                                                        style="display:none;">Crop</button>
-                                                    <button type="button" id="closeBtn-1-1"
+                                                    <button type="button" class="crop-btn" data-variant="1"
+                                                        data-image="1" style="display:none;">Crop</button>
+                                                    <button type="button" id="closeBtn-1-1" class="btn btn-secondary"
                                                         style="display:none;">Cancel</button>
                                                 </div>
 
                                                 <div id="croppedGallery-1-1"
-                                                    style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                                    style="display:flex; gap:10px; flex-wrap:wrap;">
+                                                </div>
+
+                                                <div class="img1 error-message"></div>
+
+
                                             </div>
 
                                             <!-- Image 2 -->
                                             <div class="form-group">
                                                 <label for="images-1-2">Product Image 2</label>
                                                 <input type="file" id="images-1-2" name="variants[1][images][]"
-                                                    class="variant-images" accept="image/*">
+                                                    class="variant-images" data-variant="1" data-image="2"
+                                                    accept="image/*">
 
                                                 <div class="image-preview-wrapper">
-                                                    <img id="preview-1-2" style="max-width:300px; display:none;">
+                                                    <img id="preview-1-2" data-variant="1" data-image="2"
+                                                        style="max-width:300px; display:none;">
                                                 </div>
 
                                                 <div class="image-actions">
-                                                    <button type="button" id="cropBtn-1-2"
-                                                        style="display:none;">Crop</button>
-                                                    <button type="button" id="closeBtn-1-2"
+                                                    <button type="button" class="crop-btn" data-variant="1"
+                                                        data-image="2" style="display:none;">Crop</button>
+                                                    <button type="button" id="closeBtn-1-2" class="btn btn-secondary"
                                                         style="display:none;">Cancel</button>
                                                 </div>
 
                                                 <div id="croppedGallery-1-2"
-                                                    style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                                    style="display:flex; gap:10px; flex-wrap:wrap;">
+
+                                                </div>
+
+                                                <div class="img2 error-message"></div>
+
                                             </div>
 
                                             <!-- Image 3 -->
                                             <div class="form-group">
                                                 <label for="images-1-3">Product Image 3</label>
                                                 <input type="file" id="images-1-3" name="variants[1][images][]"
-                                                    class="variant-images" accept="image/*">
+                                                    class="variant-images" data-variant="1" data-image="3"
+                                                    accept="image/*">
 
                                                 <div class="image-preview-wrapper">
-                                                    <img id="preview-1-3" style="max-width:300px; display:none;">
+                                                    <img id="preview-1-3" data-variant="1" data-image="3"
+                                                        style="max-width:300px; display:none;">
                                                 </div>
 
                                                 <div class="image-actions">
-                                                    <button type="button" id="cropBtn-1-3"
-                                                        style="display:none;">Crop</button>
-                                                    <button type="button" id="closeBtn-1-3"
+                                                    <button type="button" class="crop-btn" data-variant="1"
+                                                        data-image="3" style="display:none;">Crop</button>
+                                                    <button type="button" id="closeBtn-1-3" class="btn btn-secondary"
                                                         style="display:none;">Cancel</button>
                                                 </div>
 
                                                 <div id="croppedGallery-1-3"
-                                                    style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                                    style="display:flex; gap:10px; flex-wrap:wrap;">
+
+                                                </div>
+
+                                                <div class="img3 error-message"></div>
+
                                             </div>
 
                                             <!-- Image 4 -->
                                             <div class="form-group">
                                                 <label for="images-1-4">Product Image 4</label>
                                                 <input type="file" id="images-1-4" name="variants[1][images][]"
-                                                    class="variant-images" accept="image/*">
+                                                    class="variant-images" data-variant="1" data-image="4"
+                                                    accept="image/*">
 
                                                 <div class="image-preview-wrapper">
-                                                    <img id="preview-1-4" style="max-width:300px; display:none;">
+                                                    <img id="preview-1-4" data-variant="1" data-image="4"
+                                                        style="max-width:300px; display:none;">
                                                 </div>
 
                                                 <div class="image-actions">
-                                                    <button type="button" id="cropBtn-1-4"
-                                                        style="display:none;">Crop</button>
-                                                    <button type="button" id="closeBtn-1-4"
+                                                    <button type="button" class="crop-btn" data-variant="1"
+                                                        data-image="4" style="display:none;">Crop</button>
+                                                    <button type="button" id="closeBtn-1-4" class="btn btn-secondary"
                                                         style="display:none;">Cancel</button>
                                                 </div>
 
                                                 <div id="croppedGallery-1-4"
-                                                    style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                                    style="display:flex; gap:10px; flex-wrap:wrap;">
+
+                                                </div>
+
+                                                <div class="img4 error-message"></div>
+
                                             </div>
 
                                             <div class="images-error error-message"></div>
@@ -293,8 +321,7 @@
 
             let variantCount = 1; // Counter for variants
             let allVariants = []; // Array to store variant data
-            let variantImages = {};
-            let originalImages = {};
+
 
             addVariantBtn.addEventListener("click", function () {
                 addNewVariant();
@@ -366,6 +393,58 @@
 
             }
 
+            //     function generateImageFields(variantCount, imageCount = 4) {
+            //         let imageHtml = "";
+
+            //         for (let i = 1; i <= imageCount; i++) {
+            //             imageHtml += `
+            // <div class="form-group">
+            //     <label for="images-${variantCount}-${i}">Product Image ${i}</label>
+            //     <input 
+            //         type="file" 
+            //         id="images-${variantCount}-${i}" 
+            //         name="variants[${variantCount}][images][]" 
+            //         class="variant-images" 
+            //         accept="image/*"
+            //     >
+
+            //     <!-- Preview -->
+            //     <div class="image-preview-wrapper">
+            //         <img 
+            //             id="preview-${variantCount}-${i}" 
+            //             style="max-width:300px; display:none;"
+            //         >
+            //     </div>
+
+            //     <!-- Buttons -->
+            //     <div class="image-actions">
+            //         <button 
+            //             type="button"
+            //             id="cropBtn-${variantCount}-${i}"
+            //             style="display:none;"
+            //         >Crop</button>
+
+            //         <button 
+            //             type="button"
+            //             id="closeBtn-${variantCount}-${i}"
+            //             style="display:none;"
+            //         >Cancel</button>
+            //     </div>
+
+            //     <!-- Cropped images -->
+            //     <div 
+            //         id="croppedGallery-${variantCount}-${i}" 
+            //         style="display:flex; gap:10px; flex-wrap:wrap;"
+            //     >
+            //     </div>
+            // </div>
+            // `;
+            //         }
+
+            //         return imageHtml;
+            //     }
+
+
             function generateImageFields(variantCount, imageCount = 4) {
                 let imageHtml = "";
 
@@ -373,27 +452,32 @@
                     imageHtml += `
         <div class="form-group">
             <label for="images-${variantCount}-${i}">Product Image ${i}</label>
+
             <input 
-                type="file" 
-                id="images-${variantCount}-${i}" 
-                name="variants[${variantCount}][images][]" 
-                class="variant-images" 
+                type="file"
+                id="images-${variantCount}-${i}"
+                name="variants[${variantCount}][images][]"
+                class="variant-images"
+                data-variant="${variantCount}"
+                data-image="${i}"
                 accept="image/*"
             >
-            
-            <!-- Preview -->
+
             <div class="image-preview-wrapper">
                 <img 
-                    id="preview-${variantCount}-${i}" 
+                    id="preview-${variantCount}-${i}"
+                    data-variant="${variantCount}"
+                    data-image="${i}"
                     style="max-width:300px; display:none;"
                 >
             </div>
 
-            <!-- Buttons -->
             <div class="image-actions">
                 <button 
                     type="button"
-                    id="cropBtn-${variantCount}-${i}"
+                    class="crop-btn"
+                    data-variant="${variantCount}"
+                    data-image="${i}"
                     style="display:none;"
                 >Crop</button>
 
@@ -404,20 +488,289 @@
                 >Cancel</button>
             </div>
 
-            <!-- Cropped images -->
             <div 
-                id="croppedGallery-${variantCount}-${i}" 
+                id="croppedGallery-${variantCount}-${i}"
                 style="display:flex; gap:10px; flex-wrap:wrap;"
-            >
-            </div>
-        </div>
-        `;
+            ></div>
+        </div>`;
                 }
 
                 return imageHtml;
             }
 
-            const cropper = {};
+            const croppers = {}; // store cropper instances
+
+
+            document.addEventListener("change", function (e) {
+                if (!e.target.classList.contains("variant-images")) return;
+
+                const input = e.target;
+                const variant = input.dataset.variant;
+                const imageIndex = input.dataset.image;
+
+                const preview = document.getElementById(`preview-${variant}-${imageIndex}`);
+
+                const cropBtn = document.querySelector(
+                    `.crop-btn[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+
+                const cancelBtn = document.getElementById(
+                    `closeBtn-${variant}-${imageIndex}`
+                );
+
+                const file = input.files[0];
+                if (!file) return;
+
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = "block";
+
+                cropBtn.style.display = "inline-block";
+                cancelBtn.style.display = "inline-block"; // ✅ FIX
+
+                const key = `${variant}-${imageIndex}`;
+
+                if (croppers[key]) {
+                    croppers[key].destroy();
+                }
+
+                croppers[key] = new Cropper(preview, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 0.8
+                });
+            });
+
+
+            document.addEventListener("click", function (e) {
+                if (!e.target.classList.contains("crop-btn")) return;
+
+                const btn = e.target;
+                const variant = btn.dataset.variant;
+                const imageIndex = btn.dataset.image;
+                const key = `${variant}-${imageIndex}`;
+
+                const cropper = croppers[key];
+                if (!cropper) return;
+
+                const canvas = cropper.getCroppedCanvas({
+                    width: 300,
+                    height: 300
+                });
+
+                const gallery = document.getElementById(`croppedGallery-${variant}-${imageIndex}`);
+
+                const imageWrapper = document.createElement("div");
+                imageWrapper.className = "gallery-image-wrapper";
+                imageWrapper.dataset.variant = variant;
+                imageWrapper.dataset.image = imageIndex;
+
+                imageWrapper.innerHTML = `
+    <img src="${canvas.toDataURL("image/png")}" />
+    
+
+    <div class="gallery-actions">
+        <button type="button" class="gallery-edit">✏️</button>
+        <button type="button" class="gallery-remove">✖</button>
+    </div>
+`;
+
+                gallery.appendChild(imageWrapper);
+
+
+                updateImageUI(variant, imageIndex);
+
+
+                // Convert canvas to file & attach to form
+                canvas.toBlob(blob => {
+                    const fileInput = document.querySelector(
+                        `.variant-images[data-variant="${variant}"][data-image="${imageIndex}"]`
+                    );
+
+                    const file = new File([blob], `cropped_${Date.now()}.png`, { type: "image/png" });
+
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    fileInput.files = dt.files;
+                });
+
+                cropper.destroy();
+                delete croppers[key];
+                btn.style.display = "none";
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!e.target.classList.contains("gallery-remove")) return;
+
+                const wrapper = e.target.closest(".gallery-image-wrapper");
+                const variant = wrapper.dataset.variant;
+                const imageIndex = wrapper.dataset.image;
+
+                // 1️⃣ Remove gallery image
+                wrapper.remove();
+
+                // 2️⃣ Get elements
+                const fileInput = document.querySelector(
+                    `.variant-images[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+
+                const preview = document.getElementById(`preview-${variant}-${imageIndex}`);
+                const cropBtn = document.querySelector(
+                    `.crop-btn[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+                const cancelBtn = document.getElementById(`closeBtn-${variant}-${imageIndex}`);
+
+                // 3️⃣ Destroy cropper if exists
+                const cropperKey = `${variant}-${imageIndex}`;
+                if (croppers[cropperKey]) {
+                    croppers[cropperKey].destroy();
+                    delete croppers[cropperKey];
+                }
+
+                // 4️⃣ Reset & SHOW file input again ✅
+                if (fileInput) {
+                    fileInput.value = "";
+                    fileInput.style.display = "block"; // ⭐ SHOW INPUT
+                }
+
+                // 5️⃣ Hide preview & buttons
+                if (preview) {
+                    preview.src = "";
+                    preview.style.display = "none";
+                }
+                if (cropBtn) cropBtn.style.display = "none";
+                if (cancelBtn) cancelBtn.style.display = "none";
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!e.target.classList.contains("gallery-edit")) return;
+
+                const wrapper = e.target.closest(".gallery-image-wrapper");
+                const variant = wrapper.dataset.variant;
+                const imageIndex = wrapper.dataset.image;
+
+                // 1️⃣ REMOVE current gallery image
+                wrapper.remove();
+
+                const preview = document.getElementById(`preview-${variant}-${imageIndex}`);
+                const cropBtn = document.querySelector(
+                    `.crop-btn[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+                const cancelBtn = document.getElementById(`closeBtn-${variant}-${imageIndex}`);
+
+                if (!preview.src) return;
+
+                // 2️⃣ Show crop UI
+                preview.style.display = "block";
+                cropBtn.style.display = "inline-block";
+                cancelBtn.style.display = "inline-block";
+
+                const key = `${variant}-${imageIndex}`;
+
+                // 3️⃣ Reset old cropper
+                if (croppers[key]) {
+                    croppers[key].destroy();
+                    delete croppers[key];
+                }
+
+                // 4️⃣ Create new cropper
+                croppers[key] = new Cropper(preview, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 0.8
+                });
+            });
+
+
+            document.addEventListener("click", function (e) {
+                if (!e.target.id.startsWith("closeBtn")) return;
+
+                const btn = e.target;
+
+                // Extract variant & image index from ID
+                const parts = btn.id.split("-");
+                const variantIndex = parts[1];
+                const imageIndex = parts[2];
+
+                const wrapper = btn.closest(".form-group");
+
+                const fileInput = wrapper.querySelector(
+                    `input[data-variant="${variantIndex}"][data-image="${imageIndex}"]`
+                );
+
+                const previewImg = wrapper.querySelector(
+                    `img[data-variant="${variantIndex}"][data-image="${imageIndex}"]`
+                );
+
+                const cropBtn = wrapper.querySelector(
+                    `.crop-btn[data-variant="${variantIndex}"][data-image="${imageIndex}"]`
+                );
+
+                // 1️⃣ Destroy cropper if exists
+                const cropperKey = `${variantIndex}-${imageIndex}`;
+                if (croppers[cropperKey]) {
+                    croppers[cropperKey].destroy();
+                    delete croppers[cropperKey];
+                }
+
+                // 2️⃣ Reset file input
+                if (fileInput) {
+                    fileInput.value = "";
+                }
+
+                // 3️⃣ Hide preview image
+                if (previewImg) {
+                    previewImg.src = "";
+                    previewImg.style.display = "none";
+                }
+
+                // 4️⃣ Hide crop & cancel buttons
+                if (cropBtn) cropBtn.style.display = "none";
+                btn.style.display = "none";
+
+                updateImageUI(variantIndex, imageIndex);
+
+            });
+
+            function updateImageUI(variant, imageIndex) {
+                const wrapper = document
+                    .querySelector(`#croppedGallery-${variant}-${imageIndex}`)
+                    ?.closest(".form-group");
+
+                if (!wrapper) return;
+
+                const fileInput = wrapper.querySelector(
+                    `input[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+
+                const previewImg = wrapper.querySelector(
+                    `img[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+
+                const cropBtn = wrapper.querySelector(
+                    `.crop-btn[data-variant="${variant}"][data-image="${imageIndex}"]`
+                );
+
+                const cancelBtn = wrapper.querySelector(
+                    `#closeBtn-${variant}-${imageIndex}`
+                );
+
+                const gallery = document.getElementById(
+                    `croppedGallery-${variant}-${imageIndex}`
+                );
+
+                const hasImage = gallery && gallery.children.length > 0;
+
+                if (hasImage) {
+                    // 🔒 Lock UI
+                    if (fileInput) fileInput.style.display = "none";
+                    if (previewImg) previewImg.style.display = "none";
+                    if (cropBtn) cropBtn.style.display = "none";
+                    if (cancelBtn) cancelBtn.style.display = "none";
+                } else {
+                    // 🔓 Unlock UI
+                    if (fileInput) fileInput.style.display = "block";
+                }
+            }
 
 
             function removeVariant(id) {
@@ -465,13 +818,20 @@
                     const dialError = variant.querySelector(".dial_color-error");
                     const priceError = variant.querySelector(".price-error");
                     const stockError = variant.querySelector(".stock-error");
-                    // const imageError = variant.querySelector(".images-error");
+                    const img1_Error = variant.querySelector(".img1 images-error");
+                    const img2_Error = variant.querySelector(".img2 images-error");
+                    const img3_Error = variant.querySelector(".img3 images-error");
+                    const img4_Error = variant.querySelector(".img4 images-error");
 
                     strapError.textContent = "";
                     dialError.textContent = "";
                     priceError.textContent = "";
                     stockError.textContent = "";
-                    // imageError.textContent = "";
+                    img1_Error.textContent = "";
+                    img2_Error.textContent = "";
+                    img3_Error.textContent = "";
+                    img4_Error.textContent = "";
+
 
                     if (strapColorInput.value.trim() === "") {
                         strapError.textContent = "Please enter strap color";
@@ -493,11 +853,11 @@
                         isValid = false;
                     }
 
-                    // const images = variantImages[index + 1] || [];
-                    // if (images.length === 0) {
-                    //     imageError.textContent = "Please upload at least one image";
-                    //     isValid = false;
-                    // }
+                    const images = variantImages[index + 1] || [];
+                    if (images.length === 0) {
+                        imageError.textContent = "Please upload at least one image";
+                        isValid = false;
+                    }
                 })
 
                 return isValid;
@@ -538,7 +898,19 @@
                         formData.append(`variants[${index}][price]`, price);
                         formData.append(`variants[${index}][stock]`, stock);
 
+                        const imageInputs = variant.querySelectorAll(".variant-images");
+
+                        imageInputs.forEach((input, imgIndex) => {
+                            if (input.files.length > 0) {
+                                formData.append(
+                                    `variants[${index}][images][]`,
+                                    input.files[0]
+                                );
+                            }
+                        });
+
                     });
+
 
                     const response = await fetch("/admin/product", {
                         method: "POST",

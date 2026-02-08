@@ -157,6 +157,7 @@
                 }
 
                 function renderProducts(products, currentPage) {
+                    console.log("current page:", currentPage);
                     const tbody = document.getElementById("tbody");
                     tbody.innerHTML = "";
 
@@ -188,21 +189,8 @@
                             imgTd.appendChild(img);
                             tr.appendChild(imgTd);
 
-                            const categories = product.cat_id?.map(cat => cat.name).join(",") || "";
-
-                            // cells = [
-                            //     categories,
-                            //     product.brand_id?.name || "",
-                            //     product.variants.length,
-                            // ]
-                            // //console.log(cells);
-                            // cells.forEach(data => {
-                            //     const td = document.createElement("td");
-                            //     td.textContent = data;
-                            //     tr.appendChild(td);
-                            // });
-
                             // Category
+                            const categories = product.cat_id?.map(cat => cat.name).join(",") || "";
                             const categoryTd = document.createElement("td");
                             categoryTd.textContent = categories;
                             tr.appendChild(categoryTd);
@@ -230,38 +218,6 @@
                                 openVariantsModal(product._id, product.variants);
                             })
 
-                            // const td = document.createElement("td");
-                            // const viewBtn = document.createElement("button");
-                            // viewBtn.textContent = product.variants[i].view ? "Listed" : "Unlisted";
-
-                            // viewBtn.className = product.variants[i].view ? "btn btn-listed" : "btn btn-unlisted";
-                            // // viewBtn.setAttribute("product-id", product._id);
-                            // //viewBtn.setAttribute("variant-id", product.variants[i]._id);
-
-                            // td.appendChild(viewBtn);
-                            // tr.appendChild(td);
-
-                            // viewBtn.addEventListener("click", async function (event) {
-                            //     //const variant_id = event.target.getAttribute("variant-id");
-                            //     const variant_id = product.variants[i]._id
-                            //     const response = await fetch(`/admin/viewProduct/${product._id}/variant/${variant_id}`,
-                            //         { method: "PUT" });
-
-                            //     if (!response) {
-                            //         throw new Error(`Network response was not ok, ${response.status}`);
-                            //     }
-
-                            //     const data = await response.json();
-                            //     console.log("data: ", data);
-
-                            //     if (data.product.variants[i].view) {
-                            //         viewBtn.textContent = "Listed";
-                            //         viewBtn.className = "btn btn-listed";
-                            //     } else {
-                            //         viewBtn.textContent = "Unlisted";
-                            //         viewBtn.className = "btn btn-unlisted";
-                            //     }
-                            // })
 
                             const actionTd = document.createElement("td");
                             const editLink = document.createElement("a");
@@ -294,7 +250,7 @@
 
                                 const data = await response.json();
 
-                                renderProducts(data.products, currentPage);
+                                fetchProducts(currentPage, searchInput.value);
                             })
                         }
                     });
@@ -408,6 +364,8 @@
                                     statusViewBtn.textContent = "Unlisted";
                                     statusViewBtn.className = "btn btn-unlisted";
                                 }
+
+                                variant.view = data.view;
                             } catch (err) {
                                 console.error(err);
                                 Swal.fire({
@@ -417,10 +375,7 @@
                                 });
                             }
                         })
-                        // const statusTd = document.createElement("td");
-                        // statusTd.textContent = variant.status;
-                        // variantTr.appendChild(statusTd);
-
+                     
                         modalBody.appendChild(variantTr);
                     })
 

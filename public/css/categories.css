@@ -121,9 +121,16 @@ tr:hover {
     color: white;
 }
 
+.btn-listed:hover {
+    background-color: #077a20;
+}
 .btn-unlisted {
     background-color: #d37414;
     color: white;
+}
+
+.btn-unlisted:hover {
+    background-color: #fd890d;
 }
 
 .btn-view {
