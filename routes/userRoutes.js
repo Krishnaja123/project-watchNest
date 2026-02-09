@@ -31,6 +31,6 @@ router.get('/logout', userController.logout);
 router.get('/home', productController.loadHomePage);
 router.get('/products', productController.loadShowPage);
 router.get('/products/filter', productController.filteredShowPage);
-router.get('/productDetails', productController.productDetails);
+router.get('/products/:id', productController.loadProductDetails);
 
 module.exports = router;

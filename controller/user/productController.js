@@ -194,13 +194,22 @@ const filteredShowPage = async (req, res) => {
 
 }
 
-const productDetails = async (req,res) => {
-    res.render('user/productDetails');
+const loadProductDetails = async (req,res) => {
+    try {
+        const id = req.params.id;
+        const product = await Product.findById(id);
+        res.render('user/productDetails', {
+            product
+        })
+    } catch (error) {
+        console.log(error);
+    }
+
 }
 
 module.exports = {
     loadHomePage,
     loadShowPage,
     filteredShowPage,
-    productDetails
+    loadProductDetails
 }

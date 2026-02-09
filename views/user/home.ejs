@@ -47,7 +47,8 @@
 
         <div class="products-grid">
             <% showData.slice(0,4).forEach(data=> { %>
-                <div class="product-card">
+               <a href="/products/<%= data._id %>" class="product-link">
+                 <div class="product-card">
                     <div class="product-image" style="background-image: url('https://via.placeholder.com/300x400');">
                         <img src="<%= data.image %>">
                     </div>
@@ -59,6 +60,7 @@
                         </p>
                     </div>
                 </div>
+               </a>
                 <% }) %>
         </div>
     </main>
