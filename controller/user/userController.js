@@ -167,7 +167,7 @@ const verifyOtp = async (req, res) => {
         const userData = req.session.userData;
 
         console.log(otp, savedOtp, userData);
-        
+
 
         //Validate empty OTP
         if (!otp || otp.trim() === "") {
@@ -180,7 +180,7 @@ const verifyOtp = async (req, res) => {
             );
             return res.redirect("/verify-otp");
         }
-        
+
 
         // Validate incomplete OTP
         if (otp.trim().length < 6) {
@@ -287,6 +287,11 @@ const forgotPassword = async (req, res) => {
             return res.redirect("/signup");
         }
 
+        if (!existingUser.password_hash && existingUser.googleId !== null) {
+            req.session.message = "This account uses Google login. Please login with Google.";
+            return res.redirect("/login");
+        }
+
         const otp = generateOtp();
 
         const emailSent = await sentVerificationMail(email, otp);
@@ -314,7 +319,7 @@ const forgotPassword = async (req, res) => {
     }
 }
 
-const resetPassword = async (req,res) => {
+const resetPassword = async (req, res) => {
     try {
         let message = req.session.message || "";
         req.session.message = "";
@@ -333,40 +338,40 @@ const resetPassword = async (req,res) => {
     }
 }
 
-const saveNewPassword = async (req,res) => {
+const saveNewPassword = async (req, res) => {
     try {
         console.log("get in to saveNewPassword");
-        
+
         const { password, confirmPassword } = req.body;
         if (!req.session.email) {
             req.session.message = "Please try again. Password change not successfull";
             req.session.type = "error";
-            return res.redirect('/login');   
+            return res.redirect('/login');
         }
         const email = req.session.email;
 
         console.log(password, confirmPassword, email);
-        
+
         if (!password || !confirmPassword) {
             req.session.message = "Please fill all mandatory fields";
             req.session.type = "error";
-            return res.redirect("/signup");
+            return res.redirect("/reset-password");
         }
 
         if (password !== confirmPassword) {
             req.session.message = 'Passwords do not match';
             req.session.type = "error";
-            return res.redirect("/signup");
+            return res.redirect("/reset-password");
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log(hashedPassword);
-        const user = await User.updateOne( {email: email}, 
-            { $set: {password_hash: hashedPassword}}
+        const user = await User.updateOne({ email: email },
+            { $set: { password_hash: hashedPassword } }
         )
 
         console.log("user: ", user);
-        
+
 
         req.session.message = "Password updated successfully! Please login.";
         req.session.type = "success";
@@ -380,7 +385,7 @@ const saveNewPassword = async (req,res) => {
 
 const loadLogin = (req, res) => {
     try {
-        let message = req.session.message || "";
+        let message = req.session.message || req.query.message || "";
         req.session.message = "";
         let type = req.session.type || "";
         req.session.type = "";
@@ -434,7 +439,7 @@ const resendOtp = async (req, res) => {
 const loginUser = async (req, res) => {
     try {
         console.log("get into loadlogin")
-        req.session.massage = "";
+        req.session.message = "";
         const { email, password } = req.body;
         if (!email || !password) {
             req.session.message = "Please fill required fields";
@@ -469,6 +474,15 @@ const loginUser = async (req, res) => {
         console.log(password);
         console.log(existingUser.password_hash);
 
+        if(existingUser.userStatus === "Blocked"){
+            req.session.message = "You are blocked by admin";
+        }
+
+        if (!existingUser.password_hash && existingUser.googleId !== null) {
+            req.session.message = "Please login using Google";
+            return res.redirect("/login");
+        }
+
         const isMatch = await bcrypt.compare(password, existingUser.password_hash);
 
 
@@ -484,7 +498,7 @@ const loginUser = async (req, res) => {
             email: existingUser.email
         };
         console.log(req.session.user);
-        
+
 
         return res.redirect("/home");
 
@@ -496,10 +510,10 @@ const loginUser = async (req, res) => {
 
 const logout = async (req, res) => {
     req.session.destroy(err => {
-        if(err){
+        if (err) {
             console.log("Logout error:", err);
             return res.redirect("/home");
-            
+
         }
 
         res.clearCookie("connect.sid");
@@ -517,7 +531,7 @@ module.exports = {
     loadForgotPassword,
     forgotPassword,
     resetPassword,
-    saveNewPassword, 
+    saveNewPassword,
     logout
 }
 

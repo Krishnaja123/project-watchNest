@@ -1,99 +1,120 @@
 <%- include("../partials/user/header") %>
 
-    <head>
-        <link rel="stylesheet" href="/css/login.css">
-    </head>
+  <head>
+    <link rel="stylesheet" href="/css/user/login.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
 
-    <body>
-        <div class="main-content">
-            <div class="login-container">
-                <h1>Login</h1>
+  <body style="background-color: #f6f2ea;">
+    <div class="auth-wrapper">
+      <!-- Left Panel -->
+      <div class="auth-left">
+        <img src="/images/logo/watchnest_logo.png" alt="Watch Nest Logo" class="logo">
+        <h1>WATCHNEST</h1>
+        <p>Your Style Starts Here</p>
+      </div>
 
-                <form action="/login" method="POST" id="login-form">
+      <!-- Right Panel -->
+      <div class="auth-right">
+        <h2>Login</h2>
+        <form action="/login" method="POST" id="login-form">
+          <div class="form-group mb-3">
+            <input type="email" id="email" name="email" placeholder="Email" class="form-control">
+            <div id="error-email" class="error-message"></div>
+          </div>
 
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" >
-                        <div id="error-email" class="error-message"></div>
+          <div class="form-group mb-3">
+            <input type="password" id="password" name="password" placeholder="Password" class="form-control">
+            <div id="error-password" class="error-message"></div>
+          </div>
 
-                    </div>
+          <button type="submit" class="btn btn-primary w-100">Login</button>
 
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" >
-                        <div id="error-passwod" class="error-message"></div>
+          <div class="d-flex justify-content-between mt-3">
+            <a href="/signup">Signup</a>
+            <a href="/forgotPassword">Forgot Password?</a>
+          </div>
 
-                    </div>
-
-                    <div>
-                        <a href="/signup">Signup</a>
-                        <a href="/forgotPassword">Forgot Password</a>
-                    </div>
-
-                    <div class="buttons">
-                        <button type="submit" class="btn btn-signup">Login</button>
-                        <div id="error3" class="error-message"></div>
-
-                    </div>
-                </form>
-
-
-                <div class="social-login">
-                    <div class="social-text">Or continue with</div>
-                    <div class="social-icon">G</div>
-                    <!-- Add more social icons as needed -->
-                </div>
+          <div class="social-login mt-3">
+            <p class="text-center">Or continue with</p>
+            <div class="d-flex justify-content-center gap-3">
+              <div class="social-icon">
+                <a href="/auth/google">
+                <img src="/images/logo/google.png" alt="google img">
+                </a>
+              </div>
             </div>
-        </div>
+          </div>
+        </form>
+      </div>
+    </div>
 
-        <%- include('../partials/user/footer') %>
-    </body>
+    <%- include('../partials/user/footer') %>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </body>
 
-    </html>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('login-form');
-            const emailInput = document.getElementById("email");
-            const passwordInput = document.getElementById('password');
-            //const error = document.getElementById('error');
-            const emailError = document.getElementById('error-email');
-            const passwordError = document.getElementById('error-password');
+  </html>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('login-form');
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById('password');
+      //const error = document.getElementById('error');
+      const emailError = document.getElementById('error-email');
+      const passwordError = document.getElementById('error-password');
 
-            emailInput.addEventListener('input', validateEmail);
-            // Form submission handler
-            form.addEventListener('submit', function (event) {
-                event.preventDefault(); // Prevent default form submission
+      emailInput.addEventListener('input', validateEmail);
+      
+      form.addEventListener('submit', function (event) {
+        event.preventDefault(); 
 
-                const isEmailValid = validateEmail();
+        const isEmailValid = validateEmail();
+        const isPasswordValid = validatePassword();
 
-                if (isEmailValid) {
-                    form.submit(); // Submit if validation passes
-                }
 
-            });
-
-            function validateEmail() {
-                const email = emailInput.value.trim();
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    emailError.textContent = 'Please enter a valid email address';
-                    return false;
-                } else {
-                    emailError.textContent = "";
-                    return true;
-                }
-
-            }
-        })
-        const message = "<%= message %>";
-        const type = "<%= type %>";
-
-        if (message || message.trim() !== '') {
-            Swal.fire({
-                icon: type,
-                text: message,
-                confirmButtonColor: '#007bff'
-            })
+        if (isEmailValid && isPasswordValid) {
+          form.submit(); 
         }
 
-    </script>
+      });
+
+      function validateEmail() {
+        const email = emailInput.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          emailError.textContent = 'Please enter a valid email address';
+          return false;
+        } else {
+          emailError.textContent = "";
+          return true;
+        }
+
+      }
+
+      function validatePassword() {
+        const password = passwordInput.value.trim();
+        if (password.length === 0) {
+          passwordError.textContent = 'Please enter password';
+          return false;
+        } else if (password.length < 4 ) {
+          passwordError.textContent = 'Password length must be minimum 4 characters';
+          return false;
+        } else {
+          passwordError.textContent = "";
+          return true;
+        }
+      }
+
+    })
+    const message = "<%= message %>";
+    const type = "<%= type %>";
+
+    if (message || message.trim() !== '') {
+      Swal.fire({
+        icon: type,
+        text: message,
+        confirmButtonColor: '#007bff'
+      })
+    }
+
+  </script>

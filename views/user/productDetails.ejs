@@ -8,154 +8,253 @@
                 width: 70px;
                 height: 70px;
                 object-fit: cover;
-                cursor: pointer;
                 border: 1px solid #ddd;
                 margin-bottom: 10px;
+                cursor: pointer;
+                border-radius: 6px;
             }
 
             .thumb-img.active {
                 border: 2px solid #000;
             }
 
-            .main-img {
+            .main-image-wrapper {
                 width: 100%;
-                max-height: 420px;
+                height: 420px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #eee;
+                border-radius: 10px;
+                background: #fafafa;
+            }
+
+            .main-img {
+                max-width: 100%;
+                max-height: 100%;
                 object-fit: contain;
             }
 
             .variant-btn {
                 border: 1px solid #ccc;
-                padding: 6px 14px;
-                margin-right: 8px;
-                border-radius: 6px;
-                cursor: pointer;
+                padding: 8px 14px;
+                margin-right: 10px;
+                margin-top: 10px;
+                border-radius: 8px;
                 background: #fff;
+                cursor: pointer;
+                text-align: left;
+                font-size: 14px;
             }
 
             .variant-btn.active {
                 border-color: #000;
                 font-weight: 600;
+                background: #f8f8f8;
             }
 
-            .price {
-                font-size: 24px;
-                font-weight: bold;
+            .main-image-wrapper {
+                position: relative;
+                overflow: hidden;
+                /* VERY IMPORTANT */
+                cursor: zoom-in;
             }
 
-            .old-price {
-                text-decoration: line-through;
-                color: gray;
-                margin-left: 10px;
+            .main-img {
+                transition: transform 0.4s ease;
+            }
+
+            .main-image-wrapper:hover .main-img {
+                transform: scale(1.6);
+            }
+
+            .similar-card {
+                border-radius: 10px;
+                height: 100%;
+            }
+
+            .similar-img {
+                width: 100%;
+                height: 120px;
+                object-fit: contain;
+                padding: 12px;
+            }
+
+            @media (min-width: 768px) {
+                .similar-img {
+                    height: 140px;
+                }
+            }
+
+            @media (min-width: 1200px) {
+                .similar-img {
+                    height: 160px;
+                }
+            }
+
+            .similar-card .card-body {
+                padding: 10px 8px 12px;
             }
         </style>
+
     </head>
 
     <body>
         <div class="container my-5">
 
-            <div class="row">
-                <!-- LEFT IMAGE SECTION -->
-                <div class="col-md-6 d-flex">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/home">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/products">Shop</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <%= product.name %>
+                    </li>
+                </ol>
+            </nav>
 
-                    <!-- THUMBNAILS -->
-                    <div class="me-3">
-                        <% product.images.forEach((img, index)=> { %>
-                            <img src="<%= img %>" class="thumb-img <%= index === 0 ? 'active' : '' %>"
-                                onclick="changeImage('<%= img %>', this)" />
+            <div class="row">
+
+                <!-- LEFT IMAGE + VARIANTS -->
+                <div class="col-md-6">
+
+                    <div class="d-flex gap-3">
+
+                        <!-- THUMBNAILS -->
+                        <div class="d-flex flex-column align-items-center">
+                            <% defaultVariant.images.forEach((img, index)=> { %>
+                                <img src="<%= img %>" class="thumb-img <%= index === 0 ? 'active' : '' %>"
+                                    onclick="changeImage('<%= img %>', this)" />
+                                <% }) %>
+                        </div>
+
+                        <!-- MAIN IMAGE -->
+                        <div class="main-image-wrapper">
+                            <img id="mainImage" src="<%= defaultVariant.images[0] %>" class="main-img" />
+                        </div>
+
+                    </div>
+
+                    <!-- VARIANTS -->
+                    <div class="mt-4">
+                        <h6 class="fw-bold">Available Variants</h6>
+
+                        <% product.variants.forEach((variant, index)=> { %>
+                            <button class="variant-btn <%= index === 0 ? 'active' : '' %>"
+                                onclick='changeVariant(<%- JSON.stringify(variant) %>, this)'>
+                                Strap: <%= variant.strap_color %><br>
+                                    Dial: <%= variant.dial_color %>
+                            </button>
                             <% }) %>
                     </div>
 
-                    <!-- MAIN IMAGE -->
-                    <div class="flex-grow-1">
-                        <img id="mainImage" src="<%= product.images[0] %>" class="main-img" />
-
-                        <!-- VARIANTS BELOW IMAGE -->
-                        <div class="mt-4">
-                            <h6>Available Variants</h6>
-                            <% product.variants.forEach((variant, index)=> { %>
-                                <span class="variant-btn <%= index === 0 ? 'active' : '' %>">
-                                    <%= variant %>
-                                </span>
-                                <% }) %>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- RIGHT PRODUCT DETAILS -->
-                <div class="col-md-6">
-                    <h2>
+                <div class="col-md-6 ps-md-5">
+
+                    <h2 class="fw-bold">
                         <%= product.name %>
                     </h2>
 
                     <p class="text-muted">
-                        ⭐ <%= product.rating %> | <%= product.reviews %> reviews
+                        ⭐ <%= product.reviews_count %> reviews
                     </p>
 
-                    <p class="price">
-                        ₹<%= product.price %>
-                            <span class="old-price">₹<%= product.oldPrice %></span>
-                            <span class="text-success fs-6">
-                                <%= product.discount %>% off
-                            </span>
+                    <p class="text-muted">
+                        <strong>Category:</strong>
+                        <% if (product.cat_id && product.cat_id.length> 0) { %>
+                            <%= product.cat_id.map(cat=> cat.name).join(", ") %>
+                                <% } else { %>
+                                    ""
+                                    <% } %>
                     </p>
 
-                    <hr />
-
-                    <p><strong>Category:</strong>
-                        <%= product.category %>
+                    <p class="text-muted">
+                        <strong>Brand:</strong>
+                        <%= product.brand_id?.name %>
                     </p>
-                    <p><strong>Brand:</strong>
-                        <%= product.brand %>
+
+                    <p class="text-muted">
+                        <strong>Strap color:</strong>
+                        <%= defaultVariant.strap_color %>
+                    </p>
+
+                    <p class="text-muted">
+                        <strong>Dial color:</strong>
+                        <%= defaultVariant.dial_color %>
+                    </p>
+
+                    <h3 class="text-danger fw-bold">
+                        ₹ <span id="price">
+                            <%= defaultVariant.price %>
+                        </span>
+                    </h3>
+
+                    <p>
+                        <strong>Stock:</strong>
+                        <span id="stock">
+                            <%= defaultVariant.stock %>
+                        </span>
                     </p>
 
                     <p class="mt-3">
-                        <%= product.description %>
+                        <%= product.descrip || "No description available" %>
                     </p>
 
                     <div class="mt-4">
                         <button class="btn btn-danger px-4">Buy Now</button>
                         <button class="btn btn-success px-4 ms-2">Add To Cart</button>
                     </div>
+                    
                 </div>
+
+
             </div>
-
-            <!-- SIMILAR COLLECTION -->
-            <div class="mt-5">
-                <h4>Similar Collection</h4>
-
-                <div class="row mt-3">
-                    <% similarProducts.forEach(item=> { %>
-                        <div class="col-md-3">
-                            <div class="card">
-                                <img src="<%= item.image %>" class="card-img-top" />
-                                <div class="card-body text-center">
-                                    <h6>
-                                        <%= item.name %>
-                                    </h6>
-                                    <p>₹<%= item.price %>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <% }) %>
-                </div>
-            </div>
-
-            <%- include("../partials/user/footer") %>
 
         </div>
+        </div>
 
-        <script>
-            function changeImage(src, element) {
-                document.getElementById("mainImage").src = src;
+        <!-- SIMILAR COLLECTION -->
+        <div class="mt-5">
+            <h5 class="fw-bold mb-3">Similar Collection</h5>
 
-                document.querySelectorAll(".thumb-img").forEach(img => {
-                    img.classList.remove("active");
-                });
+            <div class="row g-3">
+                <% similarProducts.forEach(item=> { %>
+                    <div class="col-6 col-md-2">
+                        <div class="card h-100 shadow-sm">
 
-                element.classList.add("active");
-            }
-        </script>
+                            <img src="<%= item.variants[0].images[0] %>" class="card-img-top similar-img"
+                                alt="<%= item.name %>">
+
+                            <div class="card-body text-center p-2">
+                                <h6 class="small mb-1 text-truncate">
+                                    <%= item.name %>
+                                </h6>
+                                <p class="mb-0 fw-semibold">
+                                    ₹<%= item.variants[0].price %>
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+
+        <%- include("../partials/user/footer") %>
+
+            <script>
+                function changeImage(src, element) {
+                    document.getElementById("mainImage").src = src;
+
+                    document.querySelectorAll(".thumb-img").forEach(img => {
+                        img.classList.remove("active");
+                    });
+
+                    element.classList.add("active");
+                }
+            </script>
     </body>
 
     </html>

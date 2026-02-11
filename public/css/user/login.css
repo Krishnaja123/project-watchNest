@@ -1,0 +1,133 @@
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #f5f3ef; /* beige background */
+}
+
+.auth-wrapper {
+  display: flex;
+  width: 800px;
+  max-width: 90%;
+  margin: 50px auto;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  min-height: 500px;
+}
+
+/* Left Panel */
+.auth-left {
+  flex: 1;
+  background: #082a16; /* dark green */
+  color: white;
+  text-align: center;
+  padding: 50px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-left .logo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+}
+
+.auth-left h1 {
+  margin: 10px 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.auth-left p {
+  margin-bottom: 30px;
+  font-size: 14px;
+  color: #cce5cc; /* lighter green for text */
+}
+
+.auth-left h3 {
+  font-weight: 500;
+}
+
+/* Right Panel */
+.auth-right {
+  flex: 1;
+  background: white;
+  padding: 50px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-right h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 700;
+}
+
+/* Input Fields */
+.form-control {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 12px;
+}
+
+/* Login Button */
+.btn-primary {
+  background-color: #4CAF50; /* fresh green */
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background-color: #45a049; /* darker green on hover */
+}
+
+/* Social Login Icons */
+.social-login .social-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.social-login .social-icon:hover {
+  background: #ddd;
+}
+
+.social-icon img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+/* Error messages */
+.error-message {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+/* Links */
+a {
+  text-decoration: none; /* remove underline */
+  color: #2c6e49; /* match green theme */
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: none; /* no underline on hover */
+  color: #1e4b2b; /* darker green */
+}
+

@@ -194,15 +194,44 @@ const filteredShowPage = async (req, res) => {
 
 }
 
-const loadProductDetails = async (req,res) => {
+const loadProductDetails = async (req, res) => {
     try {
         const id = req.params.id;
-        const product = await Product.findById(id);
+        const product = await Product.findById(id)
+        .populate("cat_id", "name") 
+        .populate("brand_id", "name") ;
+
+        if (!product) {
+            return res.status(404).send("Product not found");
+        }
+
+        console.log("product: ", product);
+
+        const defaultVariant = product.variants.length > 0 ? product.variants[0] : [];
+        const price = defaultVariant.price;
+
+        const minPrice = price - 300;
+        const maxPrice = price + 300;
+
+        const similarProducts = await Product.find({
+            category: product.category,
+            _id: { $ne: product._id },
+            "variants.price": { $elemMatch: { $gte: minPrice, $lte: maxPrice }
+        }
+        }).limit(6);
+
+        console.log("similar products: ", similarProducts);
+
         res.render('user/productDetails', {
-            product
+            product,
+            defaultVariant,
+            images: defaultVariant.images,
+            title: "Shop",
+            similarProducts,
         })
     } catch (error) {
         console.log(error);
+        res.status(500).send("Server error");
     }
 
 }

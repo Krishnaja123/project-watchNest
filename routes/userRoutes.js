@@ -1,36 +1,39 @@
 const express = require("express");
 const router = express.Router();
+const {userAuth, requireLogin} = require("../middleware/userAuth");
 const userController = require("../controller/user/userController");
 const homepageController = require("../controller/user/hompageController");
 const productController = require("../controller/user/productController");
 const passport = require("passport");
 
 // router.get('/pageNotFound', userController.pageNotFound)
-router.get('/signup', userController.loadRegister);
-router.post('/register', userController.registerUser);
-router.get('/verify-otp', userController.loadVerifyOtp);
-router.post('/verify-otp', userController.verifyOtp);
-router.post('/resend-otp', userController.resendOtp);
-router.get('/login', userController.loadLogin);
+router.get('/signup', userAuth, userController.loadRegister);
+router.post('/register', userAuth, userController.registerUser);
+router.get('/verify-otp', userAuth, userController.loadVerifyOtp);
+router.post('/verify-otp', userAuth,userController.verifyOtp);
+router.post('/resend-otp', userAuth, userController.resendOtp);
+router.get('/login', userAuth, userController.loadLogin);
 router.post('/login', userController.loginUser);
-router.get('/forgotPassword', userController.loadForgotPassword);
-router.post('/forgotPassword', userController.forgotPassword);
-router.get('/reset-password', userController.resetPassword);
-router.post('/reset-password', userController.saveNewPassword);
+router.get('/forgotPassword', userAuth, userController.loadForgotPassword);
+router.post('/forgotPassword', userAuth, userController.forgotPassword);
+router.get('/reset-password', userAuth, userController.resetPassword);
+router.post('/reset-password', userAuth, userController.saveNewPassword);
 
 
 router.get('/auth/google', passport.authenticate('google',{scope:['profile','email']}));
 router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),
 (req,res)=>{
     res.redirect('/home');
-})
+});
 
-router.get('/logout', userController.logout);
+
+
+router.get('/logout', requireLogin, userController.logout);
 
 //homepage
-router.get('/home', productController.loadHomePage);
-router.get('/products', productController.loadShowPage);
-router.get('/products/filter', productController.filteredShowPage);
-router.get('/products/:id', productController.loadProductDetails);
+router.get('/home', requireLogin, productController.loadHomePage);
+router.get('/products', requireLogin, productController.loadShowPage);
+router.get('/products/filter', requireLogin, productController.filteredShowPage);
+router.get('/products/:id', requireLogin, productController.loadProductDetails);
 
 module.exports = router;
