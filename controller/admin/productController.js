@@ -160,7 +160,7 @@ const fetchProducts = async (req, res) => {
             page = parseInt(req.query.page);
         }
 
-        const limit = 2;
+        const limit = 6;
         const categories = await Category.find({ name: { $regex: search, $options: "i" } });
         const brands = await Brand.find({ name: { $regex: search, $options: "i" } });
 
@@ -290,15 +290,27 @@ const productDetails = async (req, res) => {
     }
 }
 
-
 const updateProduct = async (req, res) => {
     try {
         console.log("get in to update product");
         const productId = req.params.id;
 
-        // console.log(req.files.map(f => f.fieldname));
-        
-        const { name, category, brand, descrip, variants } = req.body;
+         console.log("req.body: ", req.body);
+
+        let { name, category, brand, descrip, variants } = req.body;
+
+        if (typeof variants === "string") {
+            variants = JSON.parse(variants);
+        }
+
+        if (variants && !Array.isArray(variants)) {
+            variants = Object.values(variants);
+        }
+
+        // If still undefined
+        if (!variants) {
+            variants = [];
+        }
 
         const product = await Product.findById(productId);
 
@@ -308,22 +320,24 @@ const updateProduct = async (req, res) => {
                 message: "Product not found"
             });
         }
-        
+
 
         product.name = name;
         product.cat_id = Array.isArray(category) ? category : [category];
         product.brand_id = brand;
         product.descrip = descrip;
 
-        console.log("images:",req.files);
+        console.log("images:", req.files);
 
         const updatedVariants = [];
 
         for (let i = 0; i < variants.length; i++) {
             const variant = variants[i];
 
-            const existing_cropped = variant.existing_cropped_images || [];
-            const existing_original = variant.existing_original_images || [];
+            if(!variant) continue;
+
+            const existing_cropped = variant?.existing_cropped_images || [];
+            const existing_original = variant?.existing_original_images || [];
 
             const croppedFiles = (req.files || []).filter(file =>
                 file.fieldname.includes(`variants[${i}][images]`));
@@ -349,7 +363,7 @@ const updateProduct = async (req, res) => {
                 );
                 originalUrls.push(url);
             }
-
+console.log("variants: ", variant);
             updatedVariants.push({
                 strap_color: variant.strap_color,
                 dial_color: variant.dial_color,
@@ -362,23 +376,21 @@ const updateProduct = async (req, res) => {
 
         product.variants = updatedVariants;
 
-            await product.save();
+        await product.save();
 
-            return res.json({
-                success: true,
-                message: "Product updated successfully",
-                type: "success"
-            });
+        return res.json({
+            success: true,
+            message: "Product updated successfully",
+            type: "success"
+        });
     } catch (err) {
         console.error("Update Error:", err);
-        res.status(500).json({ success: false, message: "Server Error" });
 
         return res.status(500).json({
             success: false,
             message: "Server error",
             type: "error"
         });
-
     }
 };
 

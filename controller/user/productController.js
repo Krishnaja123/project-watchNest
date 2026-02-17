@@ -12,8 +12,14 @@ const loadHomePage = async (req, res) => {
         let type = req.session.type || "";
         req.session.type = "";
 
-        const product = await Product.find({ is_delete: false })
-            .sort({ created_at: -1 }).limit(4).select("name variants");
+        const product = await Product.find({
+            is_delete: false,
+            variants: { $elemMatch: { view: true } }
+        })
+            .sort({ created_at: -1 })
+            .populate("brand_id", "name")
+            .limit(4)
+            .select("name variants brand_id");
         console.log(product);
 
         const showData = product.map(data => {
@@ -21,9 +27,9 @@ const loadHomePage = async (req, res) => {
             return {
                 _id: data._id,
                 name: data.name,
+                brand: data.brand_id?.name,
                 price: firstVariant?.price || 0,
-                image: firstVariant?.images?.[0]
-
+                image: firstVariant?.images?.[0],
             }
         });
 
@@ -31,7 +37,8 @@ const loadHomePage = async (req, res) => {
             message,
             type,
             title: "Home",
-            showData
+            showData,
+            hideNavBar: false,
         });
         // console.log(req.session.message);
     } catch (error) {
@@ -48,10 +55,10 @@ const loadShowPage = async (req, res) => {
         req.session.type = "";
 
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 50;
+        const limit = parseInt(req.query.limit) || 12;
         const skip = (page - 1) * limit;
 
-        let filter = { is_delete: false };
+        let filter = { is_delete: false, variants: { $elemMatch: { view: true } } };
         console.log(req.query.category);
 
         if (req.query.category) {
@@ -108,10 +115,15 @@ const loadShowPage = async (req, res) => {
         const totalProducts = await Product.countDocuments(filter);
 
         const products = await Product.find(filter)
+            .populate("brand_id", "name")
             .sort(sortOption)
             .skip(skip)
             .limit(limit)
             .lean();
+
+        products.forEach(product => {
+            product.variants = product.variants.filter(variant => variant.view === true);
+        })
 
         console.log(products);
 
@@ -129,7 +141,8 @@ const loadShowPage = async (req, res) => {
             brands,
             banner: null,
             currentPage: page,
-            totalPages
+            totalPages,
+            hideNavBar: false,
         })
     } catch (error) {
         console.log("server error", error);
@@ -140,6 +153,10 @@ const loadShowPage = async (req, res) => {
 const filteredShowPage = async (req, res) => {
     try {
         let filter = { is_delete: false };
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+        const skip = (page - 1) * limit;
 
         if (req.query.category) {
             const categoryIds = req.query.category.split(",")
@@ -153,7 +170,7 @@ const filteredShowPage = async (req, res) => {
             filter.brand_id = { $in: brandIds };
         }
 
-        filter.variants = { $elemMatch: {} };
+        filter.variants = { $elemMatch: { view: true } };
 
         if (req.query.minPrice) {
             filter.variants.$elemMatch.price = {
@@ -179,9 +196,18 @@ const filteredShowPage = async (req, res) => {
         else if (req.query.sort === "newest") {
             sortOption = { created_at: -1 };
         }
+
+        const totalProducts = await Product.countDocuments(filter);
+
         const products = await Product.find(filter)
             .sort(sortOption)
+            .skip(skip)
+            .limit(limit)
             .lean();
+
+        products.forEach(product => {
+            product.variants = product.variants.filter(variant => variant.view === true);
+        })
         console.log("products: ", products);
 
         res.render("partials/user/productGrid", {
@@ -198,27 +224,31 @@ const loadProductDetails = async (req, res) => {
     try {
         const id = req.params.id;
         const product = await Product.findById(id)
-        .populate("cat_id", "name") 
-        .populate("brand_id", "name") ;
+            .populate("cat_id", "name")
+            .populate("brand_id", "name");
 
         if (!product) {
             return res.status(404).send("Product not found");
         }
-
+        product.variants.filter(variant => variant.view === true);
         console.log("product: ", product);
 
         const defaultVariant = product.variants.length > 0 ? product.variants[0] : [];
-        const price = defaultVariant.price;
+        const price = parseFloat(defaultVariant.price.toString());
 
-        const minPrice = price - 300;
-        const maxPrice = price + 300;
+        const minPrice = price - 500;
+        const maxPrice = price + 500;
+
+        const minDecimal = mongoose.Types.Decimal128.fromString(minPrice.toString());
+        const maxDecimal = mongoose.Types.Decimal128.fromString(maxPrice.toString());
 
         const similarProducts = await Product.find({
-            category: product.category,
+            cat_id: { $in: product.cat_id.map(cat => cat._id) },
             _id: { $ne: product._id },
-            "variants.price": { $elemMatch: { $gte: minPrice, $lte: maxPrice }
-        }
-        }).limit(6);
+            variants: {
+                $elemMatch:{price: { $gte: minDecimal, $lte: maxDecimal } }
+            }
+        }).limit(4);
 
         console.log("similar products: ", similarProducts);
 
@@ -228,6 +258,7 @@ const loadProductDetails = async (req, res) => {
             images: defaultVariant.images,
             title: "Shop",
             similarProducts,
+            hideNavBar: false,
         })
     } catch (error) {
         console.log(error);
@@ -236,9 +267,10 @@ const loadProductDetails = async (req, res) => {
 
 }
 
+
 module.exports = {
     loadHomePage,
     loadShowPage,
     filteredShowPage,
-    loadProductDetails
+    loadProductDetails,
 }

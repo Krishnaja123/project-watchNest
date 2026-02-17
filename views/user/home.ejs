@@ -2,20 +2,6 @@
 
     <link rel="stylesheet" href="/css/user/home.css">
 
-    <div class="black-nav">
-        <div class="black-nav-container">
-            <div class="black-nav-item">
-                <a href="/products?category=mens">Men</a>
-            </div>
-            <div class="black-nav-item">
-                <a href="/products?category=women">Women</a>
-            </div>
-            <div class="black-nav-item">
-                <a href="/products?category=kids">Kids</a>
-            </div>
-        </div>
-    </div>
-
     <main>
         <section class="banner">
             <div class="banner-slider">
@@ -28,9 +14,8 @@
                 <h1>SUMMER COLLECTION 2023</h1>
                 <p>Discover our new arrivals</p>
                 <a href="/products">
-                    <button
-                        style=" margin-top: 20px; padding: 10px 30px; background: #ff0000; 
-                        color: white; border: none; border-radius: 25px; cursor: pointer;">SHOP
+                    <button style=" margin-top: 20px; padding: 10px 30px; background: #f1eded; 
+                        color: rgb(0, 0, 0); border: none; border-radius: 25px; cursor: pointer;">SHOP
                         NOW</button>
                 </a>
             </div>
@@ -46,21 +31,33 @@
         </div>
 
         <div class="products-grid">
-            <% showData.slice(0,4).forEach(data=> { %>
-               <a href="/products/<%= data._id %>" class="product-link">
-                 <div class="product-card">
-                    <div class="product-image" style="background-image: url('https://via.placeholder.com/300x400');">
-                        <img src="<%= data.image %>">
+            <% showData.forEach(data=> { %>
+                <a href="/product/<%= data._id %>" class="product-link">
+                    <div class="product-card">
+
+                        <div class="wishlist">
+                            <i class="fa fa-heart"></i>
+                        </div>
+
+                        <div class="product-image">
+                            <img src="<%= data.image %>" alt="">
+                        </div>
+
+                        <div class="product-info">
+                            <h3 class="product-title">
+                                <%= data.name %>
+                            </h3>
+                            <p class="brand">Brand: <%= data.brand %>
+                            </p>
+                            <p class="price">₹<%= data.price %>
+                            </p>
+
+                            <button class="add-cart-btn" data-id="<%= data._id %>">
+                                Add to Cart
+                            </button>
+                        </div>
                     </div>
-                    <div class="product-info">
-                        <h3 class="product-title">
-                            <%= data.name %>
-                        </h3>
-                        <p class="product-price"> ₹ <%= data.price %>
-                        </p>
-                    </div>
-                </div>
-               </a>
+                </a>
                 <% }) %>
         </div>
     </main>

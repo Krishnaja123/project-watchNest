@@ -34,6 +34,6 @@ router.get('/logout', requireLogin, userController.logout);
 router.get('/home', requireLogin, productController.loadHomePage);
 router.get('/products', requireLogin, productController.loadShowPage);
 router.get('/products/filter', requireLogin, productController.filteredShowPage);
-router.get('/products/:id', requireLogin, productController.loadProductDetails);
+router.get('/product/:id', requireLogin, productController.loadProductDetails);
 
 module.exports = router;

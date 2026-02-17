@@ -1,0 +1,229 @@
+
+header {
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* GLOBAL RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* TOP BAR */
+.top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 40px;
+    border-bottom: 1px solid #eee;
+}
+
+/* LOGO */
+.logo a {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #333;
+}
+
+.logo a span {
+    color: #d4af37;
+}
+
+ 
+/* SEARCH BAR */
+.logo-search-container {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    background: #f7f7f7;
+    border-radius: 30px;
+    overflow: hidden;
+    padding: 3px;
+}
+
+.search-form button:hover {
+    background: #c49b2f;
+}
+
+.search-form input {
+    border: none;
+    background: transparent;
+    padding: 8px 15px;
+    outline: none;
+    width: 220px;
+}
+
+.search-form button {
+    border: none;
+    background: #d4af37;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 25px;
+    transition: 0.3s;
+}
+
+ 
+/* NAV BUTTONS */
+.nav-buttons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-button {
+    color: #333;
+    transition: 0.3s ease;
+}
+
+.nav-button:hover {
+    color: #d4af37;
+}
+
+.badge-cart {
+    background: #d4af37;
+    color: #fff;
+    border-radius: 50%;
+    padding: 4px 7px;
+    font-size: 11px;
+}
+ 
+/* CART BADGE */
+.badge-cart {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background: red;
+    color: white;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 50%;
+}
+
+ 
+/* USER DROPDOWN */
+.user-menu {
+    position: relative;
+    cursor: pointer;
+}
+
+.user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background: #fff;
+    width: 180px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    display: none;
+    flex-direction: column;
+}
+
+.user-dropdown a {
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    transition: 0.2s;
+}
+
+.user-dropdown a:hover {
+    background: #f5f5f5;
+}
+
+.user-dropdown.show {
+    display: flex;
+}
+ 
+/* MAIN NAV BAR */
+.main-nav-bar {
+    background: #111;
+    padding: 10px 0;
+}
+
+.main-nav-list {
+    display: flex;
+    justify-content: center;   /* THIS centers the nav items */
+    align-items: center;
+    gap: 40px;
+}
+
+.main-nav-item {
+    color: #ccc;
+    margin: 0 15px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.main-nav-item:hover {
+    color: #d4af37;
+}
+
+ 
+/* HAMBURGER (MOBILE) */
+.hamburger-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+ 
+/* RESPONSIVE */
+@media (max-width: 992px) {
+
+    .search-form input {
+        width: 150px;
+    }
+
+    .main-nav-list {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .main-nav-bar {
+        display: none;
+        flex-direction: column;
+    }
+
+    .main-nav-bar.show {
+        display: flex;
+    }
+
+    .hamburger-toggle {
+        display: block;
+    }
+
+    .nav-buttons span {
+        display: none; /* hide text on mobile */
+    }
+}

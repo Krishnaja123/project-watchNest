@@ -17,7 +17,8 @@ const loadRegister = (req, res) => {
         res.render("user/signup", {
             message,
             type,
-            title: "SignUp"
+            title: "SignUp",
+            hideNavBar: true
         });
 
     } catch (error) {
@@ -151,7 +152,8 @@ const loadVerifyOtp = async (req, res) => {
             remainingTime,
             message,
             type,
-            title: "OTP Verification"
+            title: "OTP Verification",
+            hideNavBar: true
         });
 
     } catch (error) {
@@ -254,7 +256,8 @@ const loadForgotPassword = async (req, res) => {
         res.render("user/forgotPassword", {
             message,
             type,
-            title: "Forgot Password"
+            title: "Forgot Password",
+            hideNavBar: true
         })
 
     } catch (error) {
@@ -393,7 +396,8 @@ const loadLogin = (req, res) => {
         res.render("user/login", {
             message,
             type,
-            title: "Login Page"
+            title: "Login Page",
+            hideNavBar: true
         })
 
     } catch (error) {

@@ -8,16 +8,20 @@
 
     <body>
 
-        <div class="container-fluid mt-4">
+        <div class="container mt-4">
             <div class="row">
 
                 <!-- SIDEBAR -->
                 <aside class="col-md-3 col-lg-2 border-end">
                     <h6 class="fw-bold mb-3">Categories</h6>
 
+                    <button class="btn btn-outline-warning w-100 mb-3 rounded-pill" 
+                    id="clear-filter">Clear Filters</button>
+
                     <!-- Shop For -->
                     <div class="mb-4">
                         <h6 class="text-uppercase small">Shop For</h6>
+
 
                         <% categories.forEach(cat=> { %>
                             <div class="form-check">
@@ -52,7 +56,7 @@
                             <input type="number" id="maxPrice" class="form-control" placeholder="Max ₹">
                         </div>
 
-                        <button id="applyPrice" class="btn btn-sm btn-dark mt-2 w-100">Apply</button>
+                        <button id="applyPrice" class="apply-btn w-100 mt-2">Apply</button>
                     </div>
 
                 </aside>
@@ -62,7 +66,7 @@
 
                     <!-- HEADER -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="fw-bold">Our Collection</h4>
+                        <h4 class="fw-bold" style="color:#333;">Our Collection</h4>
 
                         <select id="sortSelect" class="form-select w-auto">
                             <option value="" disabled selected>Sort</option>
@@ -91,7 +95,7 @@
                                         <% if(currentPage> 1){ %>
                                             <li class="page-item">
                                                 <a class="page-link"
-                                                    href="?page=<%= currentPage - 1 %>&limit=50">Previous</a>
+                                                    href="?page=<%= currentPage - 1 %>&limit=12">Previous</a>
                                             </li>
                                             <% } else { %>
                                                 <li class="page-item disabled">
@@ -101,7 +105,7 @@
 
                                                     <% for(let i=1; i <=totalPages; i++){ %>
                                                         <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                                                            <a class="page-link" href="?page=<%= i %>&limit=50">
+                                                            <a class="page-link" href="?page=<%= i %>&limit=12">
                                                                 <%= i %>
                                                             </a>
                                                         </li>
@@ -110,7 +114,7 @@
                                                             <% if(currentPage < totalPages){ %>
                                                                 <li class="page-item">
                                                                     <a class="page-link"
-                                                                        href="?page=<%= currentPage + 1 %>&limit=50">Next</a>
+                                                                        href="?page=<%= currentPage + 1 %>&limit=12">Next</a>
                                                                 </li>
                                                                 <% } else { %>
                                                                     <li class="page-item disabled">
@@ -147,10 +151,10 @@
                         .filter(cb => cb.checked)
                         .map(cb => cb.value);
 
-                        const minPrice = minPriceInput.value;
-                        const maxPrice = maxPriceInput.value;
+                    const minPrice = minPriceInput.value;
+                    const maxPrice = maxPriceInput.value;
 
-                        const sort = sortSelect.value;
+                    const sort = sortSelect.value;
 
                     const params = new URLSearchParams();
 
@@ -170,7 +174,7 @@
                         params.append("maxPrice", maxPrice);
                     }
 
-                    if(sort) {
+                    if (sort) {
                         params.append("sort", sort);
                     }
 
@@ -188,6 +192,20 @@
                 applyPriceBtn.addEventListener("click", applyFilters);
 
                 sortSelect.addEventListener("change", applyFilters);
+
+                const clearFilter = document.getElementById("clear-filter");
+                clearFilter.addEventListener('click', async () => {
+                    categoryCheckboxes.forEach(cb => cb.checked = false);
+                    brandCheckboxes.forEach(cb => cb.checked = false);
+                    minPriceInput.value = "";
+                    maxPriceInput.value = "";
+                    sortSelect.selectedIndex = 0;
+
+                    const response = await fetch('/products/filter');
+                    const html = await response.text();
+
+                    productsGrid.innerHTML = html;
+                })
 
             </script>
 

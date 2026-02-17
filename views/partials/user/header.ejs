@@ -7,7 +7,7 @@
     <title>
         <%= title %>
     </title>
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/user/header.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -15,79 +15,103 @@
 
 <body>
     <header>
+        <!-- Sticky header for standard e-com UX -->
         <div class="top-bar">
+            <!-- Mobile hamburger (new, toggles main nav below; hidden on desktop) -->
+            <button class="hamburger-toggle" type="button" onclick="toggleMobileNav()" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+
             <div class="logo-search-container">
-                <div class="logo">WATCH NEST</div>
+                <div class="logo">
+                    <a href="/" style="text-decoration: none; color: inherit;">WATCH NEST</a>
+                </div>
                 <div class="search-bar">
-                    <input type="text" placeholder="Search products...">
+                    <!-- Enhanced search form (standard: submit button + accessibility) -->
+                    <form action="/search" method="GET" class="search-form">
+                        <input type="search" name="q" placeholder="Search products..." required
+                            aria-label="Search WATCH NEST products">
+                        <button type="submit" aria-label="Search">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
 
             <div class="nav-buttons">
-    <a href="/home" class="nav-button">
-        <i class="fas fa-home"></i>
-    </a>
-
-    <a href="/wishlist" class="nav-button">
-        <i class="fas fa-heart"></i>
-    </a>
-
-    <a href="/cart" class="nav-button">
-        <i class="fas fa-shopping-cart"></i>
-    </a>
-
-    <% if (user) { %>
-        <!-- Logged-in user -->
-        <div class="nav-button user-menu">
-            <div class="user-trigger" onclick="toggleUserMenu()">
-                <i class="fas fa-user"></i>
-                <span>Hello, <%= user.name %></span>
-                <i class="fas fa-caret-down"></i>
-            </div>
-
-            <div class="user-dropdown" id="userDropdown">
-                <a href="/profile">
-                    <i class="fas fa-id-badge"></i> Profile
+                <a href="/home" class="nav-button" aria-label="Home page">
+                    <i class="fas fa-home"></i>
                 </a>
-                <a href="/logout">
-                    <i class="fas fa-sign-out-alt"></i> Logout
+
+                <a href="/wishlist" class="nav-button" aria-label="Wishlist">
+                    <i class="fas fa-heart"></i>
                 </a>
+
+                <a href="/cart" class="nav-button" aria-label="Shopping cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <!-- Standard cart badge (dynamic via JS/backend) -->
+                    <span class="badge badge-cart" id="cartBadge">0</span>
+                </a>
+
+                <% if (user) { %>
+                    <!-- Logged-in user -->
+                    <div class="nav-button user-menu">
+                        <div class="user-trigger" onclick="toggleUserMenu()">
+                            <i class="fas fa-user"></i>
+                            <span>Hello, <%= user.name %></span>
+                            <i class="fas fa-caret-down"></i>
+                        </div>
+
+                        <div class="user-dropdown" id="userDropdown">
+                            <a href="/profile">
+                                <i class="fas fa-id-badge"></i> Profile
+                            </a>
+                            
+                            <a href="/logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                    <% } else { %>
+                        <!-- Guest user -->
+                        <a href="/login" class="nav-button" aria-label="Login">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Login</span>
+                        </a>
+
+                        <a href="/signup" class="nav-button" aria-label="Sign up">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Sign Up</span>
+                        </a>
+                        <% } %>
             </div>
         </div>
-    <% } else { %>
-        <!-- Guest user -->
-        <a href="/login" class="nav-button">
-            <i class="fas fa-sign-in-alt"></i>
-            <span>Login</span>
-        </a>
 
-        <a href="/signup" class="nav-button">
-            <i class="fas fa-user-plus"></i>
-            <span>Sign Up</span>
-        </a>
-    <% } %>
-
-</div>
-
-        </div>
-
-        <div class="black-nav">
-            <div class="black-nav-container">
-            </div>
-        </div>
+        <!-- Standard main nav bar (black background for categories, toggled on mobile) -->
+        <% if (!hideNavBar) { %>
+            <nav class="main-nav-bar" id="mainNavBar">
+                <div class="main-nav-list">
+                    <!-- Standard watch e-com categories -->
+                    <a href="/products" class="main-nav-item">Shop All</a>
+                    <a href="/products?category=mens" class="main-nav-item">Men</a>
+                    <a href="/products?category=women" class="main-nav-item">Women</a>
+                    <a href="/products?category=kids" class="main-nav-item">Kids</a>
+                </div>
+            </nav>
+            <% } %>
     </header>
 
     <script>
-function toggleUserMenu() {
-    const dropdown = document.getElementById("userDropdown");
-    dropdown.style.display =
-        dropdown.style.display === "block" ? "none" : "block";
-}
+        function toggleUserMenu() {
+            const dropdown = document.getElementById("userDropdown");
+            dropdown.style.display =
+                dropdown.style.display === "block" ? "none" : "block";
+        }
 
-document.addEventListener("click", function (e) {
-    const menu = document.querySelector(".user-menu");
-    if (menu && !menu.contains(e.target)) {
-        document.getElementById("userDropdown").style.display = "none";
-    }
-});
-</script>
+        document.addEventListener("click", function (e) {
+            const menu = document.querySelector(".user-menu");
+            if (menu && !menu.contains(e.target)) {
+                document.getElementById("userDropdown").style.display = "none";
+            }
+        });
+    </script>
