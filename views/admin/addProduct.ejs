@@ -438,6 +438,19 @@
                 const file = input.files[0];
                 if (!file) return;
 
+                const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+                if (!allowedTypes.includes(file.type)) {
+
+                    const variantDiv = input.closest(".variant");
+                    const imageError = variantDiv.querySelector(".images-error");
+
+                    imageError.textContent = "Only JPG, PNG, and WEBP images are allowed";
+
+                    input.value = ""; // reset input
+                    return;
+                }
+
                 // Store original file
                 if (!originalImages[variant])
                     originalImages[variant] = {};

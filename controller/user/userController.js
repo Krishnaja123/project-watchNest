@@ -2,7 +2,6 @@ const User = require("../../models/userModel");
 const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
 require("dotenv").config();
-//const {userAuth, adminAuth} = require("../middleware/auth")
 
 
 const loadRegister = (req, res) => {
@@ -54,13 +53,12 @@ const registerUser = async (req, res) => {
             return res.redirect("/signup");
         }
 
-        // const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        // if (!passwordRegex.test(password)) {
-        //     req.session.message = 'Password must be at least 8 characters long and include at least one uppercase letter, 
-        //                                          one lowercase letter, one number, and one special character (@$!%*?&).';
-        //     req.session.type = "error";
-        //     return res.redirect("/signup");
-        // }
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            req.session.message = 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).';
+            req.session.type = "error";
+            return res.redirect("/signup");
+        }
 
         if (password !== confirmPassword) {
             req.session.message = 'Passwords do not match';
@@ -216,7 +214,7 @@ const verifyOtp = async (req, res) => {
 
         // Check for OTP Type
         if (req.session.otpType === "forgotPassword") {
-            return res.redirect("/reset-password");
+            return res.redirect("/reset-password",);
         }
 
         // Hash password before saving
@@ -332,7 +330,8 @@ const resetPassword = async (req, res) => {
         res.render("user/resetPassword", {
             message,
             type,
-            title: "Forgot Password"
+            title: "Forgot Password",
+            hideNavBar : true
         })
 
     } catch (error) {
@@ -367,6 +366,13 @@ const saveNewPassword = async (req, res) => {
             return res.redirect("/reset-password");
         }
 
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            req.session.message = 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).';
+            req.session.type = "error";
+            return res.redirect("/reset-password");
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log(hashedPassword);
         const user = await User.updateOne({ email: email },
@@ -374,7 +380,6 @@ const saveNewPassword = async (req, res) => {
         )
 
         console.log("user: ", user);
-
 
         req.session.message = "Password updated successfully! Please login.";
         req.session.type = "success";

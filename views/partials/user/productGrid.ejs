@@ -1,34 +1,38 @@
-<% products.forEach(product=> { %>
-    <% product.variants.forEach(variant=> { %>
-<a href="/product/<%= product._id %>" class="product-link">
-            <div class="product-card">
+<% variants.forEach(variant=> { %>
+    <a href="/product/<%= variant._id %>/<%= variant.variants._id %>" class="product-link">
+        <div class="product-card">
 
             <div class="wishlist">
-                <i class="fa fa-heart"></i>
+                <i class="fa-solid fa-heart"></i>
             </div>
 
             <div class="product-image">
-                <img src="<%= variant?.images[0] %>" class="product-img" alt="<%= product.name %>">
+                <% if (variant.variants.stock===0) { %>
+                    <div class="out-of-stock-label">Out of Stock</div>
+                    <% } %>
+
+                        <img src="<%= variant.variants.images[0] %>" class="product-img" alt="<%= variant.name %>">
             </div>
 
             <div class="product-info">
                 <h3 class="product-title">
-                    <%= `${product.name} with ${variant.dial_color} dial and ${variant.strap_color} strap` %>
+                    <%= `${variant.name} with ${variant.variants.dial_color} dial and ${variant.variants.strap_color}
+                        strap` %>
                 </h3>
                 <p class="brand">
-                    Brand: <%= product.brand_id?.name %>
+                    Brand: <%= variant.brand?.name %>
                 </p>
                 <p class="price">
-                    ₹<%= variant.price %>
+                    ₹<%= variant.variants.price %>
                 </p>
 
-                <button class="add-cart-btn" data-id="<%= variant._id %>">
+                <button class="add-cart-btn" data-id="<%= variant.variants._id %>"
+                    <%= variant.variants.stock === 0 ? 'disabled' : '' %>>
                     Add to Cart
                 </button>
             </div>
 
         </div>
 
-</a>
-        <% }) %>
-            <% }) %>
+    </a>
+    <% }) %>

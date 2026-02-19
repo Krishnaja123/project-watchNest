@@ -21,10 +21,19 @@ router.post('/reset-password', userAuth, userController.saveNewPassword);
 
 
 router.get('/auth/google', passport.authenticate('google',{scope:['profile','email']}));
-router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),
-(req,res)=>{
+// router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),
+// (req,res)=>{
+//     res.redirect('/home');
+// });
+
+router.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    req.session.user = { id: req.user._id};
     res.redirect('/home');
-});
+  }
+);
 
 
 
@@ -34,6 +43,7 @@ router.get('/logout', requireLogin, userController.logout);
 router.get('/home', requireLogin, productController.loadHomePage);
 router.get('/products', requireLogin, productController.loadShowPage);
 router.get('/products/filter', requireLogin, productController.filteredShowPage);
-router.get('/product/:id', requireLogin, productController.loadProductDetails);
+router.get('/product/:productId/:variantId', requireLogin, productController.loadProductDetails);
+// router.get("/products", productController.loadProducts);
 
 module.exports = router;

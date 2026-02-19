@@ -32,7 +32,7 @@
 
         <div class="products-grid">
             <% showData.forEach(data=> { %>
-                <a href="/product/<%= data._id %>" class="product-link">
+                <a href="/product/<%= data.productId %>/<%= data.variantId %>" class="product-link">
                     <div class="product-card">
 
                         <div class="wishlist">

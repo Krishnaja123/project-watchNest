@@ -10,7 +10,7 @@ const dbConnect = require("./config/db");
 const userRouter = require("./routes/userRoutes");
 const adminRouter = require("./routes/adminRoutes");
 //const adminRouter1 = require("./routes/admin/");
-//const MongoStore = require('connect-mongo').default;
+const MongoStore = require('connect-mongo').default;
 
 dbConnect();
 const port = process.env.PORT;
@@ -22,10 +22,10 @@ app.use(session({
     secret: process.env.SESSION_SECRET, // Used to sign the session ID cookie
     resave: false, // Don't save session if unmodified
     saveUninitialized: false, // Don't create session until something is stored
-//     store: MongoStore.create({
-//     mongoUrl: process.env.MONGODB_URL, // MongoDB connection URL
-//     ttl: 14 * 24 * 60 * 60, // Session TTL (time-to-live) in seconds (14 days)
-//   }),
+    store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URL, // MongoDB connection URL
+    ttl: 14 * 24 * 60 * 60, // Session TTL (time-to-live) in seconds (14 days)
+  }),
     cookie: {
         secure: false, // Set to `true` in production (HTTPS only)
         httpOnly: true,
@@ -40,8 +40,6 @@ app.use((req,res,next) => {
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-
 
 app.use(express.static("public"));
 

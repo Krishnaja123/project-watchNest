@@ -2,7 +2,6 @@
 
     <head>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
         <style>
             body {
                 background: #f5f5f5;
@@ -223,7 +222,7 @@
                         <div class="mt-4">
                             <h6 class="fw-bold">Available Variants</h6>
 
-                            <% product.variants.forEach((variant, index)=> { %>
+                            <% viewedVariants.forEach((variant, index)=> { %>
                                 <button class="variant-btn <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>"
                                     onclick="changeVariant(this)">
                                     <img src="<%= variant.images[0] %>" class="variant-img">
@@ -299,11 +298,17 @@
     <div class="row g-4">
         <% similarProducts.forEach(item => { %>
             <div class="col-6 col-md-4 col-lg-3">
-                <a href="/product/<%= item._id %>" class="text-decoration-none text-dark">
+                <a href="/product/<%= item._id %>/<%= item.variants[0]?._id %>" class="text-decoration-none text-dark">
                     
                     <div class="card similar-card h-100 p-3">
 
                         <div class="text-center mb-3">
+                            <% if (item.variants[0]?.stock===0) { %>
+                    <div class="out-of-stock-label">Out of Stock</div>
+                    <% } %>
+                    <% if (item.variants[0]?.view=== false) { %>
+                    <div class="out-of-stock-label">Not Available</div>
+                    <% } %>
                             <img src="<%= item.variants[0].images[0] %>" 
                                  alt="<%= item.name %>" 
                                  class="similar-img">

@@ -1,134 +1,145 @@
 <%- include("../partials/user/header") %>
 
-<head>
-  <link rel="stylesheet" href="/css/user/login.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+  <head>
+    <link rel="stylesheet" href="/css/user/login.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
 
-<body style="background-color: #f6f2ea;">
-  <div class="auth-wrapper">
+  <body style="background-color: #f6f2ea;">
+    <div class="auth-wrapper">
 
-    <!-- Left Panel (Same as Login) -->
-    <div class="auth-left">
-      <img src="/images/logo/watchnest_logo.jpg" alt="Watch Nest Logo" class="logo">
-      <h1>WATCHNEST</h1>
-      <p>Your Style Starts Here</p>
-    </div>
+      <!-- Left Panel (Same as Login) -->
+      <div class="auth-left">
+        <img src="/images/logo/watchnest_logo.jpg" alt="Watch Nest Logo" class="logo">
+        <h1>WATCHNEST</h1>
+        <p>Your Style Starts Here</p>
+      </div>
 
-    <!-- Right Panel -->
-    <div class="auth-right">
-      <h2>Create Account</h2>
+      <!-- Right Panel -->
+      <div class="auth-right">
+        <h2>Create Account</h2>
 
-      <form action="/register" method="POST" id="signup-form">
+        <form action="/register" method="POST" id="signup-form">
 
-        <div class="form-group mb-3">
-          <input type="text" id="username" name="username" placeholder="Username" class="form-control">
-          <div id="error1" class="error-message"></div>
-        </div>
+          <div class="form-group mb-3">
+            <input type="text" id="username" name="username" placeholder="Username" class="form-control">
+            <div id="error1" class="error-message"></div>
+          </div>
 
-        <div class="form-group mb-3">
-          <input type="email" id="email" name="email" placeholder="Email" class="form-control">
-          <div id="error2" class="error-message"></div>
-        </div>
+          <div class="form-group mb-3">
+            <input type="email" id="email" name="email" placeholder="Email" class="form-control">
+            <div id="error2" class="error-message"></div>
+          </div>
 
-        <div class="form-group mb-3">
-          <input type="password" id="password" name="password" placeholder="Password" class="form-control">
-          <div id="error3" class="error-message"></div>
-        </div>
+          <div class="form-group mb-3">
+            <input type="password" id="password" name="password" placeholder="Password" class="form-control">
+            <div id="error3" class="error-message"></div>
+          </div>
 
-        <div class="form-group mb-3">
-          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" class="form-control">
-          <div id="error4" class="error-message"></div>
-        </div>
+          <div class="form-group mb-3">
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password"
+              class="form-control">
+            <div id="error4" class="error-message"></div>
+          </div>
 
-        <button type="submit" class="btn btn-primary w-100">Signup</button>
+          <button type="submit" class="btn btn-primary w-100">Signup</button>
 
-        <div class="d-flex mt-3">
-          <p>Already have an account?</p>
-          <a href="/login">Login</a>
-        </div>
+          <div class="d-flex mt-3">
+            <p>Already have an account?</p>
+            <a href="/login">Login</a>
+          </div>
 
-        <div class="social-login mt-3">
-          <p class="text-center">Or continue with</p>
-          <div class="d-flex justify-content-center gap-3">
-            <div class="social-icon">
-              <a href="/auth/google">
-                <img src="/images/logo/google.png" alt="google img">
-              </a>
+          <div class="social-login mt-3">
+            <p class="text-center">Or continue with</p>
+            <div class="d-flex justify-content-center gap-3">
+              <div class="social-icon">
+                <a href="/auth/google">
+                  <img src="/images/logo/google.png" alt="google img">
+                </a>
+              </div>
             </div>
           </div>
-        </div>
 
-      </form>
+        </form>
+      </div>
+
     </div>
 
-  </div>
+    <%- include('../partials/user/footer') %>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </body>
 
-  <%- include('../partials/user/footer') %>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('signup-form');
+      const usernameInput = document.getElementById('username');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
 
-      <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          const form = document.getElementById('signup-form');
-          const usernameInput = document.getElementById('username');
-          const emailInput = document.getElementById('email');
-          const passwordInput = document.getElementById('password');
-          const confirmPasswordInput = document.getElementById('confirmPassword');
+      const usernameError = document.getElementById('error1');
+      const emailError = document.getElementById('error2');
+      const passwordError = document.getElementById('error3');
+      const confirmError = document.getElementById('error4');
 
-          const usernameError = document.getElementById('error1');
-          const emailError = document.getElementById('error2');
-          const passwordError = document.getElementById('error3');
-          const confirmError = document.getElementById('error4');
+      const message = '<%= message %>';
+      const type = '<%= type %>';
 
-          const message = '<%= message %>';
-          const type = '<%= type %>';
+      if (message && message.trim() !== '') {
+        Swal.fire({ icon: type, text: message, confirmButtonColor: '#007bff' });
+      }
 
-          if (message && message.trim() !== '') {
-            Swal.fire({ icon: type, text: message, confirmButtonColor: '#007bff' });
-          }
+      usernameInput.addEventListener('input', validateUsername);
+      emailInput.addEventListener('input', validateEmail);
+      passwordInput.addEventListener('input', validatePassword);
+      confirmPasswordInput.addEventListener('input', validateConfirmPassword);
 
-          usernameInput.addEventListener('input', validateUsername);
-          emailInput.addEventListener('input', validateEmail);
-          passwordInput.addEventListener('input', validatePassword);
-          confirmPasswordInput.addEventListener('input', validateConfirmPassword);
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const validUsername = validateUsername();
+        const validEmail = validateEmail();
+        const validPassword = validatePassword();
+        const validConfirm = validateConfirmPassword();
 
-          form.addEventListener('submit', function (event) {
-            event.preventDefault();
-            const validUsername = validateUsername();
-            const validEmail = validateEmail();
-            const validPassword = validatePassword();
-            const validConfirm = validateConfirmPassword();
+        if (validUsername && validEmail && validPassword && validConfirm) {
+          form.submit();
+        }
+      });
 
-            if (validUsername && validEmail && validPassword && validConfirm) {
-              form.submit();
-            }
-          });
+      function validateUsername() {
+        const username = usernameInput.value.trim();
+        if (username.length < 4) { usernameError.textContent = 'Username must be at least 4 characters'; return false; }
+        usernameError.textContent = ''; return true;
+      }
+      function validateEmail() {
+        const email = emailInput.value.trim();
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regex.test(email)) {
+          emailError.textContent = 'Please enter a valid email';
+          return false;
+        }
+        emailError.textContent = '';
+        return true;
+      }
 
-          function validateUsername() {
-            const username = usernameInput.value.trim();
-            if (username.length < 4) { usernameError.textContent = 'Username must be at least 4 characters'; return false; }
-            usernameError.textContent = ''; return true;
-          }
-          function validateEmail() {
-            const email = emailInput.value.trim();
-            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!regex.test(email)) { emailError.textContent = 'Please enter a valid email'; return false; }
-            emailError.textContent = ''; return true;
-          }
-          function validatePassword() {
-            const password = passwordInput.value;
-            if (password.length < 4) { passwordError.textContent = 'Password must be at least 4 characters'; return false; }
-            passwordError.textContent = ''; return true;
-          }
-          function validateConfirmPassword() {
-            const password = passwordInput.value;
-            const confirm = confirmPasswordInput.value;
-            if (password !== confirm) { confirmError.textContent = 'Passwords do not match'; return false; }
-            confirmError.textContent = ''; return true;
-          }
-        });
-      </script>
+      function validatePassword() {
+        const password = passwordInput.value;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+          passwordError.textContent = 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).';
+          return false;
+        }
+        passwordError.textContent = '';
+        return true;
+      }
+      function validateConfirmPassword() {
+        const password = passwordInput.value;
+        const confirm = confirmPasswordInput.value;
+        if (password !== confirm) { confirmError.textContent = 'Passwords do not match'; return false; }
+        confirmError.textContent = ''; return true;
+      }
+    });
+  </script>
   </body>
 
   </html>

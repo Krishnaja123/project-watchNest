@@ -96,8 +96,8 @@
         if (password.length === 0) {
           passwordError.textContent = 'Please enter password';
           return false;
-        } else if (password.length < 4 ) {
-          passwordError.textContent = 'Password length must be minimum 4 characters';
+        } else if (password.length < 8 ) {
+          passwordError.textContent = 'Password length must be minimum 8 characters';
           return false;
         } else {
           passwordError.textContent = "";
