@@ -1,0 +1,97 @@
+<!-- views/profile.ejs -->
+
+<%- include("../partials/user/header") %>
+<%- include("../partials/user/userSidebar") %>
+
+        <head>
+
+            <link rel="stylesheet" href="/css/user/profile.css">
+            <link rel="stylesheet" href="/css/user/userSidebar.css">
+
+        </head>
+
+        <body>
+
+            <div class="profile-container">
+                <h1>My Profile</h1>
+
+                <div class="profile-grid">
+                    <!-- LEFT COLUMN - Personal Information -->
+                    <div class="personal-info-card">
+                        <h2>Personal Information</h2>
+
+                        <div class="info-field">
+                            <label>Name</label>
+                            <div class="value">
+                                <%= user.name || "Krishnaja Gokul BCR70" %>
+                            </div>
+                            <button class="btn btn-outline">CHANGE NAME</button>
+                        </div>
+
+                        <div class="info-field">
+                            <label>Email</label>
+                            <div class="value">
+                                <%= user.email || "krishnajagokul1@gmail.com" %>
+                            </div>
+                            <button class="btn btn-outline">CHANGE EMAIL</button>
+                        </div>
+
+                        <div class="info-field">
+                            <label>Phone Number</label>
+                            <div class="value phone-field">
+                                <input type="tel" name="phone" value="<%= user.phone || '' %>"
+                                    placeholder="Enter your phone number" />
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button class="btn btn-outline">CHANGE PASSWORD</button>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN - Profile Picture -->
+                    <div class="profile-picture-card">
+                        <h2>Update Profile Picture</h2>
+
+                        <div class="avatar-circle">
+                            <% if (user.profilePicture) { %>
+                                <img src="<%= user.profilePicture %>" alt="Profile picture" class="avatar-img" />
+                                <% } else { %>
+                                    <div class="avatar-placeholder">
+                                        <span>
+                                            <%= user.initials || "K" %>
+                                        </span>
+                                    </div>
+                                    <% } %>
+                        </div>
+
+                        <form action="/profile/upload" method="POST" enctype="multipart/form-data" class="upload-form">
+                            <div class="file-input-wrapper">
+                                <label class="file-label">
+                                    <span>Choose File</span>
+                                    <input type="file" name="profilePicture" accept="image/*" id="file-input" hidden />
+                                    <span class="file-name-display">NO FILE CHOSEN</span>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary upload-btn">
+                                <span>↑</span> UPLOAD
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // Show selected filename
+                document.getElementById('file-input')?.addEventListener('change', function (e) {
+                    const fileName = e.target.files.length > 0
+                        ? e.target.files[0].name
+                        : 'NO FILE CHOSEN';
+                    document.querySelector('.file-name-display').textContent = fileName;
+                });
+            </script>
+
+        </body>
+
+        </html>

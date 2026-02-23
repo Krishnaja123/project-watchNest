@@ -30,7 +30,7 @@ const fetchUser = async (req, res) => {
         if (req.query.page) {
             page = parseInt(req.query.page);
         }
-        const limit = 2;
+        const limit = 7;
         let customers = await User.find({
             $or: [
                 { username: { $regex: search, $options: "i" } },

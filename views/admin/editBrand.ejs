@@ -1,51 +1,59 @@
-<!-- views/customers.ejs -->
+<!-- views/editBrand.ejs -->
 <%- include("../partials/admin/header") %>
 
     <head>
-        <link rel="stylesheet" href="/css/editCategory.css">
+        <link rel="stylesheet" href="/css/admin/admin.css">
     </head>
 
     <body>
         <div class="container">
-                <div class="main">
-                    <h1>Edit Brand</h1>
+            <div class="main">
+                <h1>Edit Brand</h1>
 
-                    <form action="/admin/editBrand/<%= brand._id %>?page=<%= page %>" method="POST" class="form-container">
-                        <div class="form-group">
-                            <label>Brand ID</label>
-                            <input type="text" name="_id" value="<%= brand._id %>" readonly>
+                <div class="form-container">
+                    <form action="/admin/editBrand/<%= brand._id %>?page=<%= page %>" method="POST">
+
+                        <div class="form-grid">
+
+                            <div class="form-group">
+                                <label>Brand ID</label>
+                                <input type="text" name="_id" value="<%= brand._id %>" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" name="name" value="<%= brand.name %>" required>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                <textarea name="description" rows="4"><%= brand.descrip || "" %></textarea>
+                            </div>
+
                         </div>
 
-                        <div class="form-group">
-                            <label>Name</label>
-                            <input type="text" name="name" value="<%= brand.name %>" required>
+                        <div class="button-group">
+                            <a href="/admin/brands" class="btn btn-cancel">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update</button>
                         </div>
 
-                        <!-- Description -->
-                        <div class="form-group">
-                            <label>Description</label>
-                            <textarea name="description" rows="4" ><%= brand.descrip || "" %></textarea>
-                        </div>
-
-                        <!-- Buttons -->
-                        <button type="submit" class="btn btn-edit">Update</button>
-                        <a href="/admin/brands" class="btn btn-cancel">Cancel</a>
                     </form>
                 </div>
+            </div>
         </div>
 
         <%- include("../partials/admin/footer") %>
 
-        <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const message = "<%= message %>";
-                const type = "<%= type %>";
-                if (message) {
-                    Swal.fire({
-                        icon: type,
-                        text: message,
-                        confirmButtonColor: '#007bff'
-                    });
-                }
-        })
-    </script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const message = "<%= message %>";
+                    const type = "<%= type %>";
+                    if (message) {
+                        Swal.fire({
+                            icon: type,
+                            text: message,
+                            confirmButtonColor: '#007bff'
+                        });
+                    }
+                })
+            </script>

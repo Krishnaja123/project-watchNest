@@ -97,7 +97,7 @@
             <script>
                 const categoryCheckboxes = document.querySelectorAll('.category-filter');
                 const brandCheckboxes = document.querySelectorAll('.brand-filter');
-                const productsGrid = document.querySelector('.products-grid');
+                const productsWrapper = document.querySelector('.products-wrapper');
 
                 const minPriceInput = document.getElementById("minPrice");
                 const maxPriceInput = document.getElementById("maxPrice");
@@ -149,7 +149,7 @@
                     const html = await response.text();
                     console.log(params);
 
-                    productsGrid.innerHTML = html;
+                    productsWrapper.innerHTML = html;
 
                 }
 
@@ -171,7 +171,7 @@
                     const response = await fetch('/products/filter');
                     const html = await response.text();
 
-                    productsGrid.innerHTML = html;
+                    productsWrapper.innerHTML = html;
                 })
 
                 document.addEventListener("click", function (e) {

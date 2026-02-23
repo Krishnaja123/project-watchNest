@@ -2,7 +2,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: #f3f8ff; /* soft light blue */
+  background: #eaf6ed; /* soft mint green */
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   height: 100vh;
   display: flex;
@@ -24,15 +24,16 @@ body {
   background: #ffffff;
   padding: 40px 35px;
   border-radius: 20px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   text-align: center;
+  border-top: 4px solid #28a745; /* green accent */
 }
 
 /* Title */
 .auth-title {
   font-size: 32px;
   font-weight: 700;
-  color: #1a73e8; /* Google blue */
+  color: #28a745; /* green */
   margin-bottom: 5px;
 }
 
@@ -60,17 +61,16 @@ body {
   width: 100%;
   padding: 14px 15px;
   border-radius: 12px;
-  border: 1px solid #d0d7de;
-  background: #f8faff;
+  border: 1px solid #dcdcdc;
+  background: #ffffff;
   font-size: 14px;
   outline: none;
-  transition: 0.3s;
+  transition: 0.2s ease;
 }
 
 .form-input:focus {
-  border-color: #1a73e8;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+  border-color: #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
 }
 
 /* Button */
@@ -79,16 +79,16 @@ body {
   padding: 14px;
   border: none;
   border-radius: 12px;
-  background: #1a73e8; /* blue button */
+  background: #28a745; /* green button */
   color: #fff;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.2s ease;
 }
 
 .auth-button:hover {
-  background: #155ab6;
+  background: #218838;
   transform: translateY(-2px);
 }
 

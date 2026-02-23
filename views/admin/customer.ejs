@@ -1,9 +1,9 @@
 <!-- views/customers.ejs -->
-<%- include("../partials/admin/header") %>
+ <%- include("../partials/admin/header") %>
 
   <head>
-    <link rel="stylesheet" href="/css/sidebar.css">
-    <link rel="stylesheet" href="/css/customer.css">
+    <link rel="stylesheet" href="/css/admin/sidebar.css">
+    <link rel="stylesheet" href="/css/admin/admin.css">
   </head>
 
   <body>
@@ -15,10 +15,11 @@
         <div class="main">
           <h1>Customers</h1>
 
-          <!-- Search -->
-          <div class="search-box">
-            <input type="text" placeholder="Search" id="search">
-            <span id="clear-btn">x</span>
+          <div class="top-bar">
+            <div class="search-box">
+              <input type="text" placeholder="Search" id="search">
+              <button type="button" id="clear-btn">&times;</button>
+            </div>
           </div>
 
           <!-- Table -->

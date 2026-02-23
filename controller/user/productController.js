@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 const Product = require("../../models/productModel");
 const Category = require("../../models/categoryModel");
 const Brand = require("../../models/brandModel");
+const { getPaginatedProducts } = require("../../services/productService");
 
 
-const loadHomePage = async (req, res) => {
+const getHomePage = async (req, res) => {
     try {
 
         let message = req.session.message || "";
@@ -50,102 +51,14 @@ const loadHomePage = async (req, res) => {
     }
 }
 
-const loadShowPage = async (req, res) => {
+const showProductsPage = async (req, res) => {
     try {
         let message = req.session.message || "";
         req.session.message = "";
         let type = req.session.type || "";
         req.session.type = "";
 
-        const page = parseInt(req.query.page) || 1;
-        const limit = 8;
-        const skip = (page - 1) * limit;
-
-        let filter = { is_delete: false };
-
-        const search = req.query.q;
-        if (search) {
-            filter.name = { $regex: search, $options: "i" };
-        }
-
-        if (req.query.category) {
-
-            if (req.query.category === "mens") {
-                const category = await Category.findOne({ name: "Mens" });
-
-                if (category) {
-                    filter.cat_id = { $in: [category._id] };
-                }
-            }
-
-            else if (req.query.category === "women") {
-                const category = await Category.findOne({ name: "Women" });
-
-                if (category) {
-                    filter.cat_id = { $in: [category._id] };
-                }
-            }
-
-            else if (req.query.category === "kids") {
-                const category = await Category.findOne({ name: "Kids" });
-
-                if (category) {
-                    filter.cat_id = { $in: [category._id] };
-                }
-            }
-
-            else {
-                const categoryIds = req.query.category.split(",");
-                filter.cat_id = { $in: categoryIds };
-            }
-        }
-
-        if (req.query.brand) {
-            const brandIds = req.query.brand.split(",");
-            filter.brand_id = { $in: brandIds };
-        }
-
-
-        let sortOption = { created_at: -1 };
-
-        if (req.query.sort === "low-high") {
-            sortOption = { "variants.price": 1 };
-        }
-        else if (req.query.sort === "high-low") {
-            sortOption = { "variants.price": -1 };
-        }
-        else if (req.query.sort === "newest") {
-            sortOption = { created_at: -1 };
-        }
-
-        const variants = await Product.aggregate([
-            { $match: filter },
-            { $unwind: "$variants" },
-            { $match: { "variants.view": true } },
-            {
-                $lookup: {
-                    from: "brands",
-                    localField: "brand_id",
-                    foreignField: "_id",
-                    as: "brand"
-                }
-            },
-            { $unwind: "$brand" },
-            { $sort: sortOption },
-            { $skip: skip },
-            { $limit: limit }
-        ]);
-
-        const totalDocs = await Product.aggregate([
-            { $match: { is_delete: false } },
-            { $unwind: "$variants" },
-            { $match: { "variants.view": true } },
-            { $count: "total" }
-        ]);
-
-        const totalVariants = totalDocs[0].total;
-        const totalPages = Math.ceil(totalVariants / limit);
-
+        const { variants, currentPage, totalPages } = await getPaginatedProducts(req.query);
 
         const categories = await Category.find({ view: true });
         const brands = await Brand.find({ view: true });
@@ -154,7 +67,7 @@ const loadShowPage = async (req, res) => {
             variants,
             categories,
             brands,
-            currentPage: page,
+            currentPage,
             totalPages,
             title: "Shop",
             hideNavBar: false,
@@ -167,95 +80,15 @@ const loadShowPage = async (req, res) => {
     }
 }
 
-const filteredShowPage = async (req, res) => {
+const filterProducts = async (req, res) => {
     try {
-        let filter = { is_delete: false };
+        const { variants, currentPage, totalPages } =
+            await getPaginatedProducts(req.query);
 
-        const page = parseInt(req.query.page) || 1;
-        const limit = 8;
-        const skip = (page - 1) * limit;
-
-
-        if (req.query.category) {
-            const categoryIds = req.query.category.split(",")
-                .map(id => new mongoose.Types.ObjectId(id));
-            filter.cat_id = { $in: categoryIds };
-        }
-
-        if (req.query.brand) {
-            const brandIds = req.query.brand.split(",")
-                .map(id => new mongoose.Types.ObjectId(id));
-            filter.brand_id = { $in: brandIds };
-        }
-
-        let sortOption = { created_at: -1 };
-
-        if (req.query.sort === "low-high") {
-            sortOption = { "variants.price": 1 };
-        }
-        else if (req.query.sort === "high-low") {
-            sortOption = { "variants.price": -1 };
-        }
-
-        const pipeline = [
-            { $match: filter },
-            { $unwind: "$variants" },
-            { $match: { "variants.view": true } }
-        ];
-
-        if (req.query.minPrice || req.query.maxPrice) {
-            let priceFilter = {};
-
-            if (req.query.minPrice) {
-                priceFilter.$gte = Number(req.query.minPrice);
-            }
-
-            if (req.query.maxPrice) {
-                priceFilter.$lte = Number(req.query.maxPrice);
-            }
-
-            pipeline.push({
-                $match: { "variants.price": priceFilter }
-            });
-        }
-
-        pipeline.push(
-            {
-                $lookup: {
-                    from: "brands",
-                    localField: "brand_id",
-                    foreignField: "_id",
-                    as: "brand"
-                }
-            },
-            { $unwind: "$brand" },
-            { $sort: sortOption },
-            { $skip: skip },
-            { $limit: limit }
-        );
-        
-        const variants = await Product.aggregate(pipeline);
-        
-        // const variants = await Product.aggregate([
-        //     { $match: filter },
-        //     { $unwind: "$variants" },
-        //     { $match: { "variants.view": true } },
-        //     {
-        //         $lookup: {
-        //             from: "brands",
-        //             localField: "brand_id",
-        //             foreignField: "_id",
-        //             as: "brand"
-        //         }
-        //     },
-        //     { $unwind: "$brand" },
-        //     { $sort: sortOption },
-        //     { $skip: skip },
-        //     { $limit: limit }
-        // ]);
-
-        res.render("partials/user/productGrid", {
-            variants
+        res.render("partials/user/productSection", {
+            variants,
+            currentPage,
+            totalPages
         });
 
     } catch (err) {
@@ -266,7 +99,7 @@ const filteredShowPage = async (req, res) => {
 
 }
 
-const loadProductDetails = async (req, res) => {
+const getProductDetails = async (req, res) => {
     try {
         const productId = req.params.productId;
         const variantId = req.params.variantId;
@@ -280,6 +113,9 @@ const loadProductDetails = async (req, res) => {
             return res.status(404).send("Product not found");
         }
        product.variants = product.variants.filter(variant => variant.view === true);
+       if(product.variants.length === 0) {
+            return res.status(404).send("Product not Available");
+       }
         console.log("product: ", product);
 
         const defaultVariant = product.variants.length > 0 ? product.variants.id(variantId) : [];
@@ -323,9 +159,9 @@ const loadProductDetails = async (req, res) => {
 
 
 module.exports = {
-    loadHomePage,
-    loadShowPage,
-    filteredShowPage,
-    loadProductDetails,
+    getHomePage,
+    showProductsPage,
+    filterProducts,
+    getProductDetails,
 
 }

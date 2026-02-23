@@ -295,9 +295,13 @@ const updateProduct = async (req, res) => {
         console.log("get in to update product");
         const productId = req.params.id;
 
-         console.log("req.body: ", req.body);
+        console.log("req.body: ", req.body);
 
         let { name, category, brand, descrip, variants } = req.body;
+
+        if (!name || !brand || !category) {
+            return res.json({ type: "error", message: "Please fill all the mandatory fields" });
+        }
 
         if (typeof variants === "string") {
             variants = JSON.parse(variants);
@@ -321,7 +325,19 @@ const updateProduct = async (req, res) => {
             });
         }
 
+        const updateProductExist = await Product.findOne({
+            _id: { $ne: productId },
+            name: { $regex: `^${name.trim()}$`, $options: "i" }
+        });
 
+        if (updateProductExist) {
+            return res.json({
+        success: false,
+        message: "Product already exists",
+        type: "error"
+    });
+
+        }
         product.name = name;
         product.cat_id = Array.isArray(category) ? category : [category];
         product.brand_id = brand;
@@ -334,7 +350,7 @@ const updateProduct = async (req, res) => {
         for (let i = 0; i < variants.length; i++) {
             const variant = variants[i];
 
-            if(!variant) continue;
+            if (!variant) continue;
 
             const existing_cropped = variant?.existing_cropped_images || [];
             const existing_original = variant?.existing_original_images || [];
@@ -363,7 +379,7 @@ const updateProduct = async (req, res) => {
                 );
                 originalUrls.push(url);
             }
-console.log("variants: ", variant);
+            console.log("variants: ", variant);
             updatedVariants.push({
                 strap_color: variant.strap_color,
                 dial_color: variant.dial_color,

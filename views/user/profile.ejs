@@ -1,0 +1,84 @@
+<%- include("../partials/user/header") %>
+<%- include("../partials/user/userSidebar") %>
+
+<link rel="stylesheet" href="/css/user/profile.css">
+<link rel="stylesheet" href="/css/user/userSidebar.css">
+
+<div class="profile-wrapper">
+
+    <h2 class="page-title">My Profile</h2>
+
+    <div class="profile-container">
+
+        <!-- LEFT SIDE - PERSONAL INFO -->
+        <div class="profile-card">
+
+            <div class="card-header">
+                <h4>Personal Information</h4>
+            </div>
+
+            <div class="card-body">
+
+                <p>
+                    <strong>Name:</strong>
+                    <%= user?.username || "Not available" %>
+                </p>
+
+                <p>
+                    <strong>Phone:</strong>
+                    <%= user?.phone_number || "Not added" %>
+                </p>
+
+                <p>
+                    <strong>Email:</strong>
+                    <%= user?.email || "Not available" %>
+                </p>
+
+                <a href="/edit-profile" class="btn-custom">
+                    EDIT PROFILE
+                </a>
+
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE - ADDRESSES -->
+        <div class="profile-card">
+
+            <div class="card-header">
+                <h4>Saved Addresses</h4>
+            </div>
+
+            <div class="card-body">
+
+                <% if(addresses && addresses.length > 0){ %>
+
+                    <% addresses.forEach(address => { %>
+                        <div class="address-box">
+                            <p><strong><%= address.name %></strong></p>
+                            <p><%= address.street %>, <%= address.city %></p>
+                            <p><%= address.state %> - <%= address.pincode %></p>
+                            <p>Phone: <%= address.phone %></p>
+                        </div>
+                    <% }) %>
+
+                <% } else { %>
+
+                    <div class="alert-box">
+                        No addresses found. Please add an address.
+                    </div>
+
+                <% } %>
+
+                <div class="text-end">
+                    <a href="/add-address" class="btn-custom">
+                        ADD NEW ADDRESS
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+

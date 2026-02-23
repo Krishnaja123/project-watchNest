@@ -1,0 +1,75 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="/css/user/userSidebar.css">
+
+<div class="profile-sidebar" id="sidebar">
+
+    <!-- Header -->
+    <div class="sidebar-header">
+        <h5 class="logo-text">Profile</h5>
+        <button class="toggle-btn" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="profile-card">
+        <div class="profile-avatar">
+            <%= user?.name ? user.name.charAt(0).toUpperCase() : "K" %>
+        </div>
+        <p class="profile-name"><%= user?.name || "User" %></p>
+    </div>
+
+    <!-- Menu -->
+    <ul class="profile-menu">
+
+        <li>
+            <a href="/profile" class="menu-item">
+                <i class="fa-solid fa-user"></i>
+                <span>My Profile</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="/orders" class="menu-item">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>My Orders</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="/wishlist" class="menu-item">
+                <i class="fa-solid fa-heart"></i>
+                <span>Wishlist</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="/addresses" class="menu-item">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>Addresses</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="/wallet" class="menu-item">
+                <i class="fa-solid fa-wallet"></i>
+                <span>Wallet</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="/logout" class="menu-item logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </li>
+
+    </ul>
+
+</div>
+
+<script>
+    function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("collapsed");
+    }
+</script>

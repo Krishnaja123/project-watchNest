@@ -74,7 +74,7 @@ const fetchCategories = async (req, res) => {
             // console.log("page number in fetchcategory: ",page );      
         }
 
-        const limit = 2;
+        const limit = 7;
 
         let categories = await Category.find({
             name: { $regex: search, $options: "i" },
@@ -159,6 +159,17 @@ const updateCategory = async (req, res) => {
             req.session.message = "No category found with this ID";
             req.session.type = "error";
             return res.redirect("/admin/categories")
+        }
+
+        const updatedCategoryExist = await Category.findOne({
+            _id: {$ne: _id},
+            name: { $regex: `^${name.trim()}$`, $options: "i" }
+        });
+
+        if(updatedCategoryExist) {
+            req.session.message = "Category already exist";
+            req.session.type = "error";
+            return res.redirect(`/admin/editCategory/${_id}`);
         }
         const upadateCategory = await Category.findByIdAndUpdate(_id, { name, descrip });
 

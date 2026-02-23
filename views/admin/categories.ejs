@@ -1,9 +1,9 @@
 <!-- views/category.ejs -->
-<%- include("../partials/admin/header") %>
+ <%- include("../partials/admin/header") %>
 
     <head>
-        <link rel="stylesheet" href="/css/sidebar.css">
-        <link rel="stylesheet" href="/css/categories.css">
+        <link rel="stylesheet" href="/css/admin/sidebar.css">
+        <link rel="stylesheet" href="/css/admin/admin.css">
 
     </head>
 
@@ -16,13 +16,13 @@
                 <div class="main">
                     <h1>Categories</h1>
 
-                    <!-- Add Category -->
-                    <button id="add-category">+ Add Category</button>
+                    <div class="top-bar">
+                        <button id="add-category">+ Add Product</button>
 
-                    <!-- Search -->
-                    <div class="search-box">
-                        <input type="text" placeholder="Search" id="search">
-                        <span id="clear-btn">x</span>
+                        <div class="search-box">
+                            <input type="text" placeholder="Search" id="search">
+                            <button type="button" id="clear-btn">&times;</button>
+                        </div>
                     </div>
 
                     <!-- Table -->
@@ -234,7 +234,7 @@
                     if (currentPage > 1) {
                         const prevBtn = document.createElement("button");
                         prevBtn.textContent = "<<";
-                        prevBtn.className = "btn";
+                        prevBtn.className = "pagination-btn";
                         search = searchInput.value;
                         prevBtn.onclick = () => fetchCategory(currentPage - 1, search);
                         pagination.appendChild(prevBtn);
@@ -242,8 +242,10 @@
                     for (let i = 1; i <= totalPages; i++) {
                         const pageBtn = document.createElement("button");
                         pageBtn.textContent = i;
-                        pageBtn.className = (i === currentPage) ? "btn btn-edit" : "btn";
-                        search = searchInput.value;
+                        pageBtn.className = "pagination-btn";
+                        if (i === currentPage) {
+                            pageBtn.classList.add("active");
+                        } search = searchInput.value;
                         pageBtn.onclick = () => fetchCategory(i, search);
                         pagination.appendChild(pageBtn);
                     }
@@ -251,7 +253,7 @@
                     if (currentPage < totalPages) {
                         const nextBtn = document.createElement("button");
                         nextBtn.textContent = ">>";
-                        nextBtn.className = "btn";
+                        nextBtn.className = "pagination-btn";
                         search = searchInput.value;
                         nextBtn.onclick = () => fetchCategory(currentPage + 1, search);
                         pagination.appendChild(nextBtn);

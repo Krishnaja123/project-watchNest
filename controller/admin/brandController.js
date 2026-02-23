@@ -73,7 +73,7 @@ const fetchBrands = async (req, res) => {
             page = parseInt(req.query.page);
         }
 
-        const limit = 3;
+        const limit = 7;
 
         let brands = await Brand.find({
             name: { $regex: search, $options: "i" },
@@ -160,6 +160,18 @@ const updateBrand = async (req, res) => {
             req.session.type = "error";
             return res.redirect("/admin/brands")
         }
+
+        const updatedBrandExist = await Brand.findOne({
+            _id: { $ne: _id },
+            name: { $regex: name.trim(), $options: "i" }
+        });
+
+        if (updatedBrandExist) {
+            req.session.message = "Brand already exist";
+            req.session.type = "error";
+            return res.redirect(`/admin/editBrand/${_id}`);
+        }
+
         const upadateBrand = await Brand.findByIdAndUpdate(_id, { name, descrip });
 
         if (!upadateBrand) {
@@ -167,7 +179,7 @@ const updateBrand = async (req, res) => {
             req.session.type = "error";
             return res.redirect(`/admin/editBrand/${_id}`);
         }
-        
+
         req.session.message = "Updated brand";
         req.session.type = "success";
         res.redirect(`/admin/brands/?page=${page}`);

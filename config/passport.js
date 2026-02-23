@@ -17,19 +17,16 @@ passport.use(new GoogleStrategy({
 
             const email = profile.emails[0].value;
 
-            // 1️⃣ Check if user already exists by email
             let user = await User.findOne({ email });
 
             if (user) {
-                // 2️⃣ If exists but no googleId, attach it
-                if (!user.googleId) {
+                 if (!user.googleId) {
                     user.googleId = profile.id;
                     await user.save();
                 }
                 return done(null, user);
             }
 
-            // 3️⃣ If completely new user
             user = new User({
                 name: profile.displayName,
                 email: email,
@@ -39,18 +36,6 @@ passport.use(new GoogleStrategy({
             await user.save();
             return done(null, user);
 
-            // let user = await User.findOne({ googleId: profile.id });
-            // if (user) {
-            //     return done(null, user);
-            // } else {
-            //     user = new User({
-            //         name: profile.displayName,
-            //         email: profile.emails[0].value,
-            //         googleId: profile.id
-            //     });
-            //     await user.save();
-            //     return done(null, user);
-            // }
         } catch (error) {
             return done(error, null);
         }

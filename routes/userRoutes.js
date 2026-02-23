@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const {userAuth, requireLogin} = require("../middleware/userAuth");
 const userController = require("../controller/user/userController");
-const homepageController = require("../controller/user/hompageController");
 const productController = require("../controller/user/productController");
 const passport = require("passport");
+const profileController = require("../controller/user/profileController");
 
 // router.get('/pageNotFound', userController.pageNotFound)
 router.get('/signup', userAuth, userController.loadRegister);
@@ -21,10 +21,6 @@ router.post('/reset-password', userAuth, userController.saveNewPassword);
 
 
 router.get('/auth/google', passport.authenticate('google',{scope:['profile','email']}));
-// router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),
-// (req,res)=>{
-//     res.redirect('/home');
-// });
 
 router.get(
   '/auth/google/callback',
@@ -35,15 +31,18 @@ router.get(
   }
 );
 
-
-
 router.get('/logout', requireLogin, userController.logout);
 
 //homepage
-router.get('/home', requireLogin, productController.loadHomePage);
-router.get('/products', requireLogin, productController.loadShowPage);
-router.get('/products/filter', requireLogin, productController.filteredShowPage);
-router.get('/product/:productId/:variantId', requireLogin, productController.loadProductDetails);
-// router.get("/products", productController.loadProducts);
+router.get('/home', productController.getHomePage);
+router.get('/products', productController.showProductsPage);
+router.get('/products/filter', productController.filterProducts);
+router.get('/product/:productId/:variantId', requireLogin, productController.getProductDetails);
+
+
+//Profile
+router.get('/profile', profileController.loadProfile);
+router.get('/edit-profile', profileController.getEditProfile);
+
 
 module.exports = router;
