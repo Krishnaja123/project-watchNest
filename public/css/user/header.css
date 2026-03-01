@@ -1,12 +1,3 @@
-
-header {
-    background: #ffffff;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
 /* GLOBAL RESET */
 * {
     margin: 0;
@@ -18,11 +9,17 @@ body {
     font-family: "Segoe UI", sans-serif;
 }
 
-/* TOP BAR */
-.top-bar {
+/* HEADER */
+header {
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     position: sticky;
     top: 0;
     z-index: 1000;
+}
+
+/* TOP BAR */
+.top-bar {
     background: #ffffff;
     display: flex;
     align-items: center;
@@ -43,8 +40,7 @@ body {
     color: #d4af37;
 }
 
- 
-/* SEARCH BAR */
+/* SEARCH */
 .logo-search-container {
     display: flex;
     align-items: center;
@@ -58,10 +54,6 @@ body {
     border-radius: 30px;
     overflow: hidden;
     padding: 3px;
-}
-
-.search-form button:hover {
-    background: #c49b2f;
 }
 
 .search-form input {
@@ -81,7 +73,10 @@ body {
     transition: 0.3s;
 }
 
- 
+.search-form button:hover {
+    background: #c49b2f;
+}
+
 /* NAV BUTTONS */
 .nav-buttons {
     display: flex;
@@ -90,6 +85,10 @@ body {
 }
 
 .nav-button {
+    position: relative;   /* required for badge */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #333;
     transition: 0.3s ease;
 }
@@ -98,27 +97,30 @@ body {
     color: #d4af37;
 }
 
-.badge-cart {
-    background: #d4af37;
-    color: #fff;
-    border-radius: 50%;
-    padding: 4px 7px;
-    font-size: 11px;
-}
- 
-/* CART BADGE */
+/* CART BADGE (Single Clean Version) */
 .badge-cart {
     position: absolute;
     top: -6px;
-    right: -10px;
-    background: red;
-    color: white;
-    font-size: 11px;
+    right: -8px;
+
+    min-width: 18px;
+    height: 18px;
     padding: 2px 6px;
-    border-radius: 50%;
+
+    background-color: #ff3b3b;
+    color: white;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    line-height: 1;
 }
 
- 
 /* USER DROPDOWN */
 .user-menu {
     position: relative;
@@ -162,8 +164,8 @@ body {
 .user-dropdown.show {
     display: flex;
 }
- 
-/* MAIN NAV BAR */
+
+/* MAIN NAV */
 .main-nav-bar {
     background: #111;
     padding: 10px 0;
@@ -171,14 +173,13 @@ body {
 
 .main-nav-list {
     display: flex;
-    justify-content: center;   /* THIS centers the nav items */
+    justify-content: center;
     align-items: center;
     gap: 40px;
 }
 
 .main-nav-item {
     color: #ccc;
-    margin: 0 15px;
     text-decoration: none;
     transition: 0.3s;
 }
@@ -187,8 +188,7 @@ body {
     color: #d4af37;
 }
 
- 
-/* HAMBURGER (MOBILE) */
+/* HAMBURGER */
 .hamburger-toggle {
     display: none;
     background: none;
@@ -197,7 +197,6 @@ body {
     cursor: pointer;
 }
 
- 
 /* RESPONSIVE */
 @media (max-width: 992px) {
 
@@ -224,6 +223,21 @@ body {
     }
 
     .nav-buttons span {
-        display: none; /* hide text on mobile */
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .nav-button i {
+        font-size: 18px;
+    }
+
+    .badge-cart {
+        min-width: 16px;
+        height: 16px;
+        font-size: 10px;
+        top: -5px;
+        right: -6px;
     }
 }

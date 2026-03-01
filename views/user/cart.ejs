@@ -1,0 +1,203 @@
+<%- include("../partials/user/header", { title: "Cart" , hideNavBar: true }) %>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    body {
+    background: #f4f5f7;
+}
+
+/* Container spacing */
+.container {
+    max-width: 1200px;
+}
+
+/* Page Title */
+h3 {
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+/* Table Styling */
+.table {
+    background: #ffffff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+}
+
+.table thead {
+    background: #fafafa;
+    font-weight: 600;
+}
+
+.table th {
+    border: none;
+    padding: 16px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 16px;
+    border-top: 1px solid #f1f1f1;
+}
+
+/* Quantity Buttons */
+.qty-btn {
+    border-radius: 20px;
+    border: 1px solid #c8a27c;
+    color: #c8a27c;
+    background: transparent;
+    font-size: 14px;
+    transition: 0.3s ease;
+}
+
+.qty-btn:hover {
+    background: #c8a27c;
+    color: #fff;
+}
+
+/* Quantity Input */
+.qty-input {
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    width: 50px;
+}
+
+/* Remove Button */
+.btn-remove {
+    border-radius: 20px;
+    border: 1px solid #dc3545;
+    background: transparent;
+    color: #dc3545;
+    transition: 0.3s ease;
+    padding: 6px 14px;
+}
+
+.btn-remove:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* Cart Total Card */
+.cart-total-card {
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    padding: 30px;
+}
+
+/* Checkout Button */
+.btn-checkout {
+    width: 100%;
+    padding: 14px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #c8a27c, #a77b4e);
+    border: none;
+    color: white;
+    font-weight: 500;
+    transition: 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-checkout:hover {
+    opacity: 0.9;
+    color: white;
+}
+</style>
+    <div class="container my-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/home">Home</a></li>
+                <li class="breadcrumb-item"><a href="/products">Shop</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Cart</li>
+            </ol>
+        </nav>
+
+        <h3 class="text-center mb-4">My Cart</h3>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(cartItems && cartItems.length> 0) { %>
+                        <% cartItems.forEach(item=> { %>
+                            <tr>
+                                <td>
+                                    <img src="<%= item.image %>" alt="<%= item.name %>"
+                                        style="width:60px; height:auto;">
+                                </td>
+                                <td>
+                                    <%= item.name %>
+                                </td>
+                                <td>
+                                    <% if(item.discountedPrice && item.discountedPrice < item.price) { %>
+                                        <span>₹<%= item.discountedPrice %></span>
+                                        <del class="text-muted">₹<%= item.price %></del>
+                                        <% } else { %>
+                                            ₹<%= item.price %>
+                                                <% } %>
+                                </td>
+                                <td>
+                                    <form action="/cart/update/<%= item._id %>" method="POST"
+                                        class="d-flex justify-content-center align-items-center">
+                                        <button type="submit" name="action" value="decrease"
+                                        class="btn qty-btn btn-sm">-</button>
+                                        <input type="text" name="quantity" value="<%= item.quantity %>"
+                                            class="form-control form-control-sm text-center mx-1 qty-input" style="width:50px;"
+                                            readonly>
+                                        <button type="submit" name="action" value="increase"
+                                            class="btn qty-btn btn-sm">+</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    ₹<%= item.subTotal %>
+                                </td>
+                                <td>
+                                    <form action="/cart/delete/<%= item._id %>" method="POST"
+                                        onsubmit="return confirm('Are you sure you want to remove this product from your cart?')">
+                                        <button type="submit" class="btn btn-remove btn-sm">
+                                            REMOVE
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="7" class="text-center">Your cart is empty</td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Cart Total -->
+        <div class="cart-total-card mt-4 text-center">
+            <h5>Cart Total: ₹<%= total %>
+            </h5>
+            <a href="/checkout" class="btn-checkout mt-3" style="background-color:#b79c89; color:white;">PROCEED TO
+                CHECKOUT</a>
+        </div>
+    </div>
+
+    <%- include("../partials/user/footer") %>
+
+        <script>
+
+            const message = "<%= message %>";
+            const type = "<%= type %>";
+
+            if (message && message.trim() !== '') {
+                Swal.fire({ icon: type, text: message, confirmButtonColor: '#007bff' });
+            }
+        </script>

@@ -72,6 +72,8 @@ const showProductsPage = async (req, res) => {
             title: "Shop",
             hideNavBar: false,
             banner: null,
+            message, 
+            type
         });
 
     } catch (error) {
@@ -88,7 +90,7 @@ const filterProducts = async (req, res) => {
         res.render("partials/user/productSection", {
             variants,
             currentPage,
-            totalPages
+            totalPages,
         });
 
     } catch (err) {

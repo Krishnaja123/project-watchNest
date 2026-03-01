@@ -469,10 +469,10 @@ const loginUser = async (req, res) => {
 
 
         const PasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        // if (!PasswordRegex.test(password)) {
-        //     req.session.message = 'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
-        //     return res.redirect("/login", { message });
-        // }
+        if (!PasswordRegex.test(password)) {
+            req.session.message = 'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
+            return res.redirect("/login", { message });
+        }
 
         const existingUser = await User.findOne({ email }).select('+password_hash');
         if (!existingUser) {

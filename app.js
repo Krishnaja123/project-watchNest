@@ -5,12 +5,11 @@ const path = require("path");
 const session = require("express-session");
 const passport = require("./config/passport")
 const dbConnect = require("./config/db");
-// const multer = require("multer");
-// const upload = require("./config/multerConfig");
 const userRouter = require("./routes/userRoutes");
 const adminRouter = require("./routes/adminRoutes");
-//const adminRouter1 = require("./routes/admin/");
 const MongoStore = require('connect-mongo').default;
+
+const { injectCartCount } = require("./middleware/cartMiddleware");
 
 dbConnect();
 const port = process.env.PORT;
@@ -40,6 +39,8 @@ app.use((req,res,next) => {
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(injectCartCount);
 
 app.use(express.static("public"));
 

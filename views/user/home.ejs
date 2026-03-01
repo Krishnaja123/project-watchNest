@@ -32,12 +32,12 @@
 
         <div class="products-grid">
             <% showData.forEach(data=> { %>
-                <a href="/product/<%= data.productId %>/<%= data.variantId %>" class="product-link">
-                    <div class="product-card">
+                <div class="product-card">
 
-                        <div class="wishlist">
-                            <i class="fa fa-heart"></i>
-                        </div>
+                    <div class="wishlist">
+                        <i class="fa fa-heart"></i>
+                    </div>
+                    <a href="/product/<%= data.productId %>/<%= data.variantId %>" class="product-link">
 
                         <div class="product-image">
                             <img src="<%= data.image %>" alt="">
@@ -51,15 +51,61 @@
                             </p>
                             <p class="price">₹<%= data.price %>
                             </p>
-
-                            <button class="add-cart-btn" data-id="<%= data._id %>">
-                                Add to Cart
-                            </button>
                         </div>
-                    </div>
-                </a>
+                    </a>
+
+                    <button class="add-cart-btn" data-product-id="<%= data.productId %>"
+                        data-variant-id="<%= data.variantId %>">
+                        Add to Cart
+                    </button>
+                </div>
+
                 <% }) %>
         </div>
     </main>
 
     <%- include('../partials/user/footer') %>
+
+        <script>
+
+            // const data = <%- JSON.stringify(showData) %>
+            // console.log("show data: ", data);
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll(".add-cart-btn").forEach(button => {
+                    button.addEventListener("click", async function () {
+
+                        const productId = this.dataset.productId;
+                        const variantId = this.dataset.variantId;
+
+                        if (!productId || !variantId) {
+                            Swal.fire("Error", "Invalid product data", "error");
+                            return;
+                        }
+                        console.log("productId: ", productId);
+                        console.log("variantId: ", variantId);
+
+                        const response = await fetch("/cart/add", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ productId, variantId })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+
+                            Swal.fire("Added to Cart", "Product added to cart", "success");
+                            
+                            location.reload();
+
+                        } else {
+                            
+                            Swal.fire("Error!", "Failed to add", "error");
+                            
+                        }
+
+                    })
+                })
+            })
+        </script>

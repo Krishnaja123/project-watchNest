@@ -95,6 +95,14 @@
         <%- include("../partials/user/footer") %>
 
             <script>
+
+                            const message = '<%= message %>';
+            const type = '<%= type %>';
+
+            if (message && message.trim() !== '') {
+                Swal.fire({ icon: type, text: message, confirmButtonColor: '#007bff' });
+            }
+
                 const categoryCheckboxes = document.querySelectorAll('.category-filter');
                 const brandCheckboxes = document.querySelectorAll('.brand-filter');
                 const productsWrapper = document.querySelector('.products-wrapper');
@@ -186,6 +194,36 @@
 
                         applyFilters(page);
                     }
+                })
+
+                document.querySelectorAll(".add-cart-btn").forEach(button => {
+                    button.addEventListener("click", async function () {
+                        const variantId = this.dataset.variantId;
+                        const productId = this.dataset.productId;
+                        console.log("productId: ", productId);
+                        console.log("variantId: ", variantId);
+
+                        const response = await fetch("/cart/add", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ variantId, productId })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+
+                            Swal.fire("Added to Cart", "Product added to cart", "success");
+                            
+                            location.reload();
+
+                        } else {
+
+                            Swal.fire("Error!", "Failed to add", "error");
+                            
+                        }
+
+                    })
                 })
 
             </script>

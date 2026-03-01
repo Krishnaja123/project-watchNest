@@ -108,7 +108,7 @@
 
       function validateUsername() {
         const username = usernameInput.value.trim();
-        if (username.length < 4) { usernameError.textContent = 'Username must be at least 4 characters'; return false; }
+        if (username.length < 3) { usernameError.textContent = 'Username must be at least 3 characters'; return false; }
         usernameError.textContent = ''; return true;
       }
       function validateEmail() {

@@ -179,6 +179,27 @@
             .card-body p {
                 color: var(--accent-gold);
             }
+
+            .add-cart-btn {
+                margin-top: 15px;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 25px;
+                background: #d8a708;
+                color: #fff;
+                font-size: 14px;
+                cursor: pointer;
+                transition: 0.3s ease;
+                opacity: 1;
+            }
+
+
+            .add-cart-btn:disabled {
+                background-color: #ccc;
+                color: #666;
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
         </style>
 
     </head>
@@ -280,9 +301,18 @@
                             <%= product.descrip || "No description available" %>
                         </p>
 
-                        <div class="mt-4 d-flex gap-3">
-                            <button class="btn-primary-custom">Buy Now</button>
-                            <button class="btn-outline-custom">Add To Cart</button>
+                        <div class="mt-4 d-flex gap-3" id="actionButtons">
+                            <button type="button" id="buyNowBtn" class="add-cart-btn" <%=defaultVariant.stock <=0
+                                ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : '' %>>
+                                Buy Now
+                            </button>
+
+                            <button type="button" id="addToCartBtn" class="add-cart-btn"
+                                data-product-id="<%= product._id %>" data-variant-id="<%= defaultVariant._id %>"
+                                <%=defaultVariant.stock <=0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''
+                                %>>
+                                Add To Cart
+                            </button>
                         </div>
 
                     </div>
@@ -290,61 +320,59 @@
             </div>
         </div>
 
-        <!-- SIMILAR COLLECTION -->
         <!-- SIMILAR PRODUCTS -->
-<div class="container my-5">
-    <h4 class="fw-bold mb-4 text-center">You May Also Like</h4>
+        <div class="container my-5">
+            <h4 class="fw-bold mb-4 text-center">You May Also Like</h4>
 
-    <div class="row g-4">
-        <% similarProducts.forEach(item => { %>
-            <div class="col-6 col-md-4 col-lg-3">
-                <a href="/product/<%= item._id %>/<%= item.variants[0]?._id %>" class="text-decoration-none text-dark">
-                    
-                    <div class="card similar-card h-100 p-3">
+            <div class="row g-4">
+                <% similarProducts.forEach(item=> { %>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a href="/product/<%= item._id %>/<%= item.variants[0]?._id %>"
+                            class="text-decoration-none text-dark">
 
-                        <div class="text-center mb-3">
-                            <% if (item.variants[0]?.stock===0) { %>
-                    <div class="out-of-stock-label">Out of Stock</div>
-                    <% } %>
-                    <% if (item.variants[0]?.view=== false) { %>
-                    <div class="out-of-stock-label">Not Available</div>
-                    <% } %>
-                            <img src="<%= item.variants[0].images[0] %>" 
-                                 alt="<%= item.name %>" 
-                                 class="similar-img">
-                        </div>
+                            <div class="card similar-card h-100 p-3">
 
-                        <div class="card-body text-center p-2">
-                            <h6 class="fw-semibold" style="min-height: 45px;">
-                                <%= item.name.length > 40 
-                                    ? item.name.substring(0, 40) + "..." 
-                                    : item.name %>
-                            </h6>
+                                <div class="text-center mb-3">
+                                    <% if (item.variants[0]?.stock===0) { %>
+                                        <div class="out-of-stock-label">Out of Stock</div>
+                                        <% } %>
+                                            <% if (item.variants[0]?.view===false) { %>
+                                                <div class="out-of-stock-label">Not Available</div>
+                                                <% } %>
+                                                    <img src="<%= item.variants[0].images[0] %>" alt="<%= item.name %>"
+                                                        class="similar-img">
+                                </div>
 
-                            <p class="fw-bold mt-2" style="color:#c5a253;">
-                                ₹ <%= item.variants[0].price %>
-                            </p>
+                                <div class="card-body text-center p-2">
+                                    <h6 class="fw-semibold" style="min-height: 45px;">
+                                        <%= item.name.length> 40
+                                            ? item.name.substring(0, 40) + "..."
+                                            : item.name %>
+                                    </h6>
 
-                            <button class="btn-outline-custom w-100 mt-2">
-                                View Product
-                            </button>
-                        </div>
+                                    <p class="fw-bold mt-2" style="color:#c5a253;">
+                                        ₹ <%= item.variants[0].price %>
+                                    </p>
 
+                                    <button class="btn-outline-custom w-100 mt-2">
+                                        View Product
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </a>
                     </div>
-
-                </a>
+                    <% }) %>
             </div>
-        <% }) %>
-    </div>
-</div>
+        </div>
         <%- include("../partials/user/footer") %>
 
             <script>
 
                 updateStock(<%= defaultVariant.stock %>);
 
-                const productData = <%- JSON.stringify(product) %>;
-                const allVariants = productData.variants;
+                const allVariants = <%- JSON.stringify(viewedVariants) %>;
 
                 function changeVariant(button) {
                     const index = button.dataset.index;
@@ -386,10 +414,9 @@
 
                 function updateUI(variant) {
                     document.getElementById('name').innerText =
-                        `${productData.name} with ${variant.dial_color} dial and ${variant.strap_color} strap`;
+                        `<%= product.name %> with ${variant.dial_color} dial and ${variant.strap_color} strap`;
 
                     document.getElementById('priceValue').innerText = variant.price.$numberDecimal;
-                    console.log(variant.price)
 
                     document.getElementById('strap_color').innerHTML =
                         `<strong>Strap color:</strong> ${variant.strap_color}`;
@@ -399,11 +426,24 @@
 
                     updateStock(variant.stock);
 
+                    const addBtn = document.getElementById("addToCartBtn");
+                    const buyBtn = document.getElementById("buyNowBtn");
+
+                    if (variant.stock <= 0) {
+                        addBtn.disabled = true;
+                        buyBtn.disabled = true;
+                    } else {
+                        addBtn.disabled = false;
+                        buyBtn.disabled = false;
+                    }
+
+                    // Update variantId dynamically
+                    addBtn.dataset.variantId = variant._id;
+
                     document.getElementById("mainImage").src = variant.images[0];
 
                     updateThumbnails(variant.images);
                 }
-
                 function updateThumbnails(images) {
 
                     const thumbContainer = document.querySelector(".thumbnail-container");
@@ -419,6 +459,40 @@
                         thumbContainer.appendChild(image);
                     });
                 }
+
+                document.querySelectorAll(".add-cart-btn").forEach(button => {
+                    button.addEventListener("click", async function () {
+                        console.log("hi");
+
+                        const variantId = this.dataset.variantId;
+                        const productId = this.dataset.productId;
+                        console.log("productId: ", productId);
+                        console.log("variantId: ", variantId);
+
+                        const response = await fetch("/cart/add", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ variantId, productId })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+
+                            location.reload();
+
+                            Swal.fire("Added to Cart", "Product added to cart", "success");
+
+                        } else {
+
+                            Swal.fire("Error!", "Failed to add", "error");
+
+                        }
+
+                    })
+                })
+
+
 
             </script>
     </body>

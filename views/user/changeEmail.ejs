@@ -1,0 +1,77 @@
+<%- include("../partials/user/header") %>
+
+    <head>
+        <link rel="stylesheet" href="/css/login.css">
+    </head>
+
+    <body>
+        <div class="main-content">
+            <div class="login-container">
+                <h1>Change User Email</h1>
+
+                <form action="/profile/change-email" method="POST" id="login-form">
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" value="<%= user.email %>">
+                        <div id="error" class="error-message"></div>
+
+                    </div>
+
+                    <div class="buttons">
+                        <button type="submit" class="btn btn-signup">Update Email</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <%- include('../partials/user/footer') %>
+    </body>
+
+    </html>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const form = document.getElementById('login-form');
+            const input = document.getElementById("email");
+            const error = document.getElementById('error');
+
+            input.addEventListener('input', validateEmail);
+
+            // Form submission handler
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Prevent default form submission
+
+                const isEmailValid = validateEmail();
+
+                if (isEmailValid) {
+                    form.submit(); // Submit if validation passes
+                }
+
+            });
+
+            function validateEmail() {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const email = input.value;
+                if (!emailRegex.test(email)) {
+                    error.textContent = 'Please enter a valid email address';
+                    return false;
+                }
+                error.textContent = '';
+                return true;
+            }
+        })
+
+        const message = "<%= message %>";
+        const type = "<%= type %>";
+
+        if (message || message.trim() !== '') {
+            Swal.fire({
+                icon: type,
+                text: message,
+                confirmButtonColor: '#007bff'
+            })
+        }
+
+    </script>

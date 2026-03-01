@@ -1,11 +1,11 @@
 <% variants.forEach(variant=> { %>
-    <a href="/product/<%= variant._id %>/<%= variant.variants._id %>" class="product-link">
-        <div class="product-card">
+    <div class="product-card">
 
-            <div class="wishlist">
-                <i class="fa-solid fa-heart"></i>
-            </div>
+        <div class="wishlist">
+            <i class="fa-solid fa-heart"></i>
+        </div>
 
+        <a href="/product/<%= variant._id %>/<%= variant.variants._id %>" class="product-link">
             <div class="product-image">
                 <% if (variant.variants.stock===0) { %>
                     <div class="out-of-stock-label">Out of Stock</div>
@@ -25,14 +25,19 @@
                 <p class="price">
                     ₹<%= variant.variants.price %>
                 </p>
-
-                <button class="add-cart-btn" data-id="<%= variant.variants._id %>"
-                    <%= variant.variants.stock === 0 ? 'disabled' : '' %>>
-                    Add to Cart
-                </button>
             </div>
+        </a>
 
-        </div>
+        <button  class="add-cart-btn" 
+             data-variant-id="<%= variant.variants._id %>" 
+            data-product-id="<%= variant._id %>"   
+            <%=variant.variants.stock===0 ? 'disabled' : '' %>>
+            Add to Cart
+        </button>
 
-    </a>
+    </div>
+
+
     <% }) %>
+
+    

@@ -20,15 +20,19 @@ const addressSchema = new mongoose.Schema(
       trim: true
     },
 
-    phone: {
+    mobile: {
       type: String,
       required: true,
       trim: true
     },
 
+    phone: {
+      type: String,
+      trim: true
+    },
+
     line1: {
       type: String,
-      required: true,
       trim: true
     },
 
@@ -64,6 +68,7 @@ const addressSchema = new mongoose.Schema(
     country: {
       type: String,
       required: true,
+      default: "India",
       trim: true
     },
 

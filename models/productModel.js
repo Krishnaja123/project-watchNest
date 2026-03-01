@@ -39,6 +39,11 @@ const variantSchema = new mongoose.Schema({
         default: true,
 
     },
+    maxPurchaseQty: {
+        type: Number,
+        default: 8
+
+    }
 });
 
 const productSchema = new mongoose.Schema({

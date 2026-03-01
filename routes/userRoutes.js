@@ -5,6 +5,9 @@ const userController = require("../controller/user/userController");
 const productController = require("../controller/user/productController");
 const passport = require("passport");
 const profileController = require("../controller/user/profileController");
+const addressController = require("../controller/user/addressController");
+const cartController = require("../controller/user/cartController");
+const checkoutController = require("../controller/user/checkoutController");
 
 // router.get('/pageNotFound', userController.pageNotFound)
 router.get('/signup', userAuth, userController.loadRegister);
@@ -41,8 +44,33 @@ router.get('/product/:productId/:variantId', requireLogin, productController.get
 
 
 //Profile
-router.get('/profile', profileController.loadProfile);
-router.get('/edit-profile', profileController.getEditProfile);
+router.get('/profile', requireLogin, profileController.loadProfile);
+router.get('/edit-profile', requireLogin, profileController.getEditProfile);
+router.get('/profile/change-username', requireLogin, profileController.getChangeUserName);
+router.post('/profile/change-username', requireLogin, profileController.changeUserName);
+router.get('/profile/change-email', requireLogin, profileController.getChangeEmail);
+router.post('/profile/change-email', requireLogin, profileController.changeEmail);
+
+
+//Address
+router.get('/address', requireLogin, addressController.getAddress);
+router.post('/address/save', requireLogin, addressController.saveAddress);
+router.delete('/address/:id', requireLogin, addressController.deleteAddress);
+router.patch("/address/set-default/:id", requireLogin, addressController.setDefault);
+
+
+//Cart
+router.get('/cart', requireLogin, cartController.getCart);
+router.post('/cart/add', requireLogin, cartController.addToCart);
+router.post('/cart/update/:id', requireLogin, cartController.updateCartQuantity);
+router.post('/cart/delete/:id', requireLogin, cartController.deleteItem);
+
+//Checkout
+router.get('/checkout', requireLogin, checkoutController.getCheckout);
+
+//Order
+router.post('/order/placeOrder', requireLogin, checkoutController.createOrder);
+//router.get('/order/success/${newOrder._id}', checkoutController.getOrderSuccess)
 
 
 module.exports = router;

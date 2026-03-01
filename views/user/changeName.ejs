@@ -1,0 +1,77 @@
+<%- include("../partials/user/header") %>
+
+    <head>
+        <link rel="stylesheet" href="/css/login.css">
+    </head>
+
+    <body>
+        <div class="main-content">
+            <div class="login-container">
+                <h1>Change User Name</h1>
+
+                <form action="/profile/change-username" method="POST" id="login-form">
+
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="name" id="name" name="name" value="<%= user.username %>">
+                        <div id="error-name" class="error-message"></div>
+
+                    </div>
+
+                    <div class="buttons">
+                        <button type="submit" class="btn btn-signup">Change Name</button>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+
+        <%- include('../partials/user/footer') %>
+    </body>
+
+    </html>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        
+            const form = document.getElementById('login-form');
+            const nameInput = document.getElementById("name");
+            const nameError = document.getElementById('error-name');
+
+            nameInput.addEventListener('input', validateName);
+
+            // Form submission handler
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Prevent default form submission
+
+                const isNameValid = validateName();
+
+                if (isNameValid) {
+                    form.submit(); // Submit if validation passes
+                }
+
+            });
+
+            function validateName() {
+                const name = nameInput.value;
+                if (name.length < 4) {
+                    nameError.textContent = 'Name must be at least 4 characters';
+                    return false;
+                }
+                nameError.textContent = '';
+                return true;
+            } 
+
+        })
+
+        const message = "<%= message %>";
+        const type = "<%= type %>";
+
+        if (message || message.trim() !== '') {
+            Swal.fire({
+                icon: type,
+                text: message,
+                confirmButtonColor: '#007bff'
+            })
+        }
+
+    </script>
