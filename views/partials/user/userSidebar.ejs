@@ -14,9 +14,13 @@
     <!-- Profile Card -->
     <div class="profile-header">
         <div class="profile-avatar">
+            <% if (user.profileImage) { %>
+            <img src="<%= user.profileImage %>" alt="Profile Image">
+            <% } else { %>
             <%= user?.username ? user.username.charAt(0).toUpperCase() : "U" %>
+            <% } %>
         </div>
-        <p class="profile-name"><%= user?.username || "User" %></p>
+        <p class="profile-name"><%= user?.username || "" %></p>
     </div>
 
     <!-- Menu -->

@@ -158,11 +158,6 @@
                                                     Pin: <%= address.pincode %><br>
                                                         Ph: <%= address.phone %>
                                     </label>
-                                    <div class="d-flex justify-content-end">
-                                            <a href="/address?from=checkout" class="btn btn-primary">
-                                                Edit
-                                            </a>
-                                    </div>
                                 </div>
                                 <% }) %>
                                     <% } else { %>
@@ -242,8 +237,8 @@
                                 </div>
 
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" value="walet">
-                                    <label class="form-check-label">Walet Payment</label>
+                                    <input class="form-check-input" type="radio" name="paymentMethod" value="wallet">
+                                    <label class="form-check-label">Wallet Payment</label>
                                 </div>
 
                                 <div class="form-check">
@@ -252,7 +247,7 @@
                                     <label class="form-check-label">Cash on Delivery</label>
                                 </div>
 
-                                <button type="submit" class="place-order-btn mt-4">
+                                <button type="button" onclick="handlePlaceOrder()" class="place-order-btn mt-4">
                                     PLACE ORDER
                                 </button>
                                 </form>
@@ -264,11 +259,142 @@
 
     <%- include("../partials/user/footer") %>
 
-    <script> 
-        const message = '<%= message %>';
-            const type = '<%= type %>';
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-            if (message && message.trim() !== '') {
-                Swal.fire({ icon: type, text: message, confirmButtonColor: '#007bff' });
+        <script>
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const message = '<%= message %>';
+                const type = '<%= type %>';
+
+                if (message && message.trim() !== '') {
+                    Swal.fire({ icon: type, text: message, confirmButtonColor: '#007bff' });
+                }
+            });
+
+
+            async function handlePlaceOrder() {
+
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+                if (paymentMethod === "cod") {
+                    document.querySelector('form[action="/order/placeOrder"]').submit();
+                    return;
+                }
+
+                if (paymentMethod === "online") {
+
+                    const totalAmount = <%= subTotal %>;
+                    const selectedAddressBtn = document.querySelector('input[name="selectedAddressId"]:checked');
+
+                    if (!selectedAddressBtn) {
+                        Swal.fire({
+                            icon: "error",
+                            text: "Please select a shipping address",
+                            confirmButtonColor: '#007bff'
+                        });
+                        return;
+                    }
+
+                    const selectedAddressId = selectedAddressBtn.value;
+
+                    const response = await fetch("/payment/create-order", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            amount: totalAmount,
+                            selectedAddressId
+                        })
+                    });
+
+                    const order = await response.json();
+                    console.log("order: ", order);
+
+
+                    openRazorpay(order);
+                }
+
             }
-    </script>
+
+            // order = {
+            //     razorpayOrderId: razorpayOrder.id,
+            //             amount: razorpayOrder.amount,
+            //             orderId: order.orderId,
+            //             order_id: order._id
+            // }            
+
+
+            function openRazorpay(order) {
+
+                var options = {
+                    key: "<%= razorpayKey %>",
+                    amount: order.amount,
+                    currency: "INR",
+                    name: "Watch Nest",
+                    order_id: order.razorpayOrderId,
+
+                    handler: async function (response) {
+
+                        const verify = await fetch("/payment/verify-payment", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                ...response,
+                                orderId: order.order_id,
+                            })
+                        });
+
+                        const result = await verify.json();
+                        console.log("result: ", result);
+
+                        if (result.status) {
+                            window.location.href = `/order/success/${result.orderId}`;
+                        } else {
+                            alert("Payment verification failed");
+                        }
+
+                    },
+
+                    modal: {
+                        ondismiss: async function () {
+
+                            await fetch("/payment-failed", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    orderId: order.order_id
+                                })
+                            });
+
+                            window.location.href = `/payment-failed/${order.orderId}`;
+                        }
+                    }
+                };
+
+                var rzp = new Razorpay(options);
+
+                rzp.on("payment.failed", async function (response) {
+
+                    await fetch("/payment-failed", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            orderId: order.order_id
+                        })
+                    });
+
+                    window.location.href = `/payment-failed/${order.orderId}`;
+
+                });
+                rzp.open();
+            }
+
+        </script>

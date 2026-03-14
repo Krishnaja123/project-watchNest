@@ -9,10 +9,17 @@ const { createAddress } = require("../../services/addressService");
 const getAddress = async (req, res) => {
     try {
         const { message, type } = getSessionMessage(req);
-        const from = req.query.from || "";
         const userId = req.session.user.id;
+        const from = req.query.from || "";
+
+        if(!userId) {
+            req.session.message = "User is not logged in. Please login";
+            req.session.type = "error";
+            return res.redirect('/login');
+        }
+
         const user = await User.findById(userId);
-        const userAddresses = await Address.find({ user_id: userId });
+        const userAddresses = await Address.find({ user_id: userId }).sort({ is_default: -1 });
 
         return res.render("user/address", {
             user,
@@ -53,17 +60,18 @@ const saveAddress = async (req, res) => {
 
         if (req.body.address_id) {
             req.session.message = "Address updated successfully";
+            req.session.type = "success";
         } else {
             req.session.message = "Address saved successfully";
+                        req.session.type = "success";
+
         }
 
         let { from } = req.body;
 
         if (from === "checkout") {
             return res.redirect("/checkout");
-        } else if (from === "profile") {
-            return res.redirect("/profile");
-        } if (from === "") {
+        } else if (from === "") {
             return res.redirect("/address");
         }
 

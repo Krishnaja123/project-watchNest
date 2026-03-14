@@ -7,7 +7,7 @@ const customerController = require("../controller/admin/customerController");
 const categoryController = require("../controller/admin/categoryController");
 const brandController = require("../controller/admin/brandController");
 const productController = require("../controller/admin/productController");
-//const imageController = require("../controller/admin/imageController");
+const orderController = require("../controller/admin/adminOrdersController");
 const upload = require("../config/multerConfig");
 
 //user- login/logout
@@ -54,6 +54,13 @@ router.post("/editProduct/:id", adminAuth, upload.any(), (req, res, next) => {
   console.log("✅ Route middleware hit");
   next();
 }, productController.updateProduct);
-//router.get("/upload", upload.single("croppedImage"), imageController.uploadImage )
+
+
+//Orders
+router.get("/orders", adminAuth, orderController.getOrders);
+router.get("/fetchorders", adminAuth, orderController.fetchOrders);
+router.get("/orderDetails/:id", adminAuth, orderController.getOrderDetails);
+//router.post("order-status/:id", adminAuth, orderController.updateOrderStatus);
+router.post("/order-item-status/:id", adminAuth, orderController.updateProductStatus);
 
 module.exports = router;

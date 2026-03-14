@@ -72,7 +72,7 @@ const showProductsPage = async (req, res) => {
             title: "Shop",
             hideNavBar: false,
             banner: null,
-            message, 
+            message,
             type
         });
 
@@ -103,6 +103,11 @@ const filterProducts = async (req, res) => {
 
 const getProductDetails = async (req, res) => {
     try {
+        let message = req.session.message || "";
+        req.session.message = "";
+        let type = req.session.type || "";
+        req.session.type = "";
+
         const productId = req.params.productId;
         const variantId = req.params.variantId;
         console.log("id: ", productId)
@@ -110,17 +115,32 @@ const getProductDetails = async (req, res) => {
             .populate("cat_id", "name")
             .populate("brand_id", "name");
 
-        const viewedVariants = product.variants.filter(variant => variant.view === true);
         if (!product) {
-            return res.status(404).send("Product not found");
+            return res.status(404).render("user/404", {
+                message: "Product not found"
+            });
         }
-       product.variants = product.variants.filter(variant => variant.view === true);
-       if(product.variants.length === 0) {
-            return res.status(404).send("Product not Available");
-       }
-        console.log("product: ", product);
 
-        const defaultVariant = product.variants.length > 0 ? product.variants.id(variantId) : [];
+        const viewedVariants = product.variants.filter(variant => variant.view === true);
+
+       if (viewedVariants.length === 0) {
+            return res.status(404).render("user/404", {
+                message: "Product not available"
+            });
+        }
+
+        let defaultVariant = viewedVariants.find(
+            v => v._id.toString() === variantId
+        );
+
+        console.log("default variant: ", defaultVariant)
+
+        if (!defaultVariant) {
+            defaultVariant = viewedVariants[0];
+        }
+
+        const isOutOfStock = defaultVariant.stock <= 0;
+
         const price = parseFloat(defaultVariant.price.toString());
 
         const minPrice = price - 500;
@@ -133,9 +153,9 @@ const getProductDetails = async (req, res) => {
             cat_id: { $in: product.cat_id.map(cat => cat._id) },
             _id: { $ne: product._id },
             variants: {
-                $elemMatch: { 
+                $elemMatch: {
                     view: true,
-                    price: { $gte: minDecimal, $lte: maxDecimal } 
+                    price: { $gte: minDecimal, $lte: maxDecimal }
                 }
             }
         }).limit(4);
@@ -166,4 +186,4 @@ module.exports = {
     filterProducts,
     getProductDetails,
 
-}
+} 

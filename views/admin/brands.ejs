@@ -18,7 +18,7 @@
                     <h1>Brands</h1>
 
                     <div class="top-bar">
-                        <button id="add-category">+ Add Product</button>
+                        <button id="add-category">+ Add Brand</button>
 
                         <div class="search-box">
                             <input type="text" placeholder="Search" id="search">
@@ -31,7 +31,6 @@
                         <table id="table">
                             <thead id="thead">
                                 <tr>
-                                    <th>Id</th>
                                     <th>Name</th>
                                     <th>View</th>
                                     <th>Action</th>
@@ -142,7 +141,6 @@
                         const tr = document.createElement("tr");
 
                         const cells = [
-                            brand._id,
                             brand.name
                         ]
                         cells.forEach(data => {

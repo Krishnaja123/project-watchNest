@@ -1,7 +1,7 @@
-<%- include("../partials/user/header") %>
+<%- include("../partials/user/header", { title: "Change User Name", hideNavBar: true }) %>
 
     <head>
-        <link rel="stylesheet" href="/css/login.css">
+        <link rel="stylesheet" href="/css/user/changeName.css">
     </head>
 
     <body>
@@ -12,7 +12,7 @@
                 <form action="/profile/change-email" method="POST" id="login-form">
 
                     <div class="form-group">
-                        <label for="email">Email</label>
+                        <label for="email">Enter new Email</label>
                         <input type="email" id="email" name="email" value="<%= user.email %>">
                         <div id="error" class="error-message"></div>
 
@@ -66,7 +66,7 @@
         const message = "<%= message %>";
         const type = "<%= type %>";
 
-        if (message || message.trim() !== '') {
+        if (message && message.trim() !== '') {
             Swal.fire({
                 icon: type,
                 text: message,

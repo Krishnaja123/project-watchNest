@@ -1,0 +1,79 @@
+<%- include("../partials/user/header", { title: "Page Not Found", hideNavBar: true }) %>
+
+<style>
+    .not-found-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .not-found-card {
+        background: #fff;
+        padding: 40px;
+        border-radius: 14px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+    }
+
+    .not-found-title {
+        font-size: 120px;
+        font-weight: 700;
+        color: #dc3545;
+        line-height: 1;
+    }
+
+    .not-found-text {
+        font-size: 19px;
+        color: #6c757d;
+        margin-bottom: 25px;
+    }
+
+    .btn-back {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 10px rgba(108, 117, 125, 0.25);
+    }
+
+    .btn-back:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(108, 117, 125, 0.35);
+    }
+
+    .btn-home {
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+</style>
+
+<div class="container not-found-container">
+    <div class="not-found-card text-center">
+
+        <h1 class="not-found-title">404</h1>
+
+        <h3 class="mb-3">Oops! Page Not Found</h3>
+
+        <p class="not-found-text">
+            <%= message || "The page you are looking for does not exist or has been moved." %>
+        </p>
+
+        <div>
+            <button onclick="history.back()" class="btn-back me-2">
+                ← Go Back
+            </button>
+
+            <a href="/home" class="btn btn-primary btn-home">
+                Home
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<%- include("../partials/user/footer") %>

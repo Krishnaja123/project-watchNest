@@ -24,8 +24,9 @@ const orderItemSchema = new mongoose.Schema({
     required: true
   },
 
-  variant: {
-    type: String
+  image: {
+    type: String,
+    required: true
   },
 
   price: {
@@ -41,7 +42,28 @@ const orderItemSchema = new mongoose.Schema({
   subtotal: {
     type: Number,
     required: true
-  }
+  },
+  status: {
+    type: String,
+    enum: [
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+      "returned"
+    ],
+    default: "processing"
+  },
+  
+   cancelReason: {
+        type: String,
+        default: null
+    },
+
+    returnReason: {
+        type: String,
+        default: null
+    }
 
 }, { timestamps: true });
 

@@ -1,0 +1,243 @@
+<%- include("../partials/admin/header", { title: "Order Details" }) %>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin/sidebar.css">
+    <link rel="stylesheet" href="/css/admin/admin.css">
+
+    <div class="container-fluid">
+        <div class="row">
+
+            <!-- Sidebar -->
+            <%- include("../partials/admin/sidebar") %>
+
+                <!-- Main Content -->
+                <div class="col-md-10 p-4">
+
+                    <h2 class="mb-4">Order Details</h2>
+
+
+                    <div class="d-flex justify-content-end mb-3">
+                        <a href='/admin/orders?page=${page}' class="btn btn-secondary">← Go Back</a>
+                    </div>
+
+                    <% const status=order.status; %>
+                        <% const OrderStatusFlow={ processing:
+                            ["processing","partially_shipped","shipped","partially_cancelled","cancelled"],
+                            partially_shipped: ["partially_shipped","shipped","partially_delivered"], shipped:
+                            ["shipped","partially_delivered","delivered"], partially_delivered:
+                            ["partially_delivered","delivered"], delivered: ["delivered"], cancelled: ["cancelled"],
+                            returned: ["returned"] }; %>
+
+                            <!-- ORDER SUMMARY -->
+                            <div class="card mb-4">
+                                <div class="card-body">
+
+                                    <div class="row">
+
+                                        <div class="col-md-3">
+                                            <small class="text-muted">ORDER DATE</small><br>
+                                            <strong>
+                                                <%= new Date(order.createdAt).toDateString() %>
+                                            </strong>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <small class="text-muted">ORDER ID</small><br>
+                                            <strong>
+                                                <%= order.orderId %>
+                                            </strong>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <small class="text-muted">TOTAL</small><br>
+                                            <strong>₹<%= order.totalAmount %></strong>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <small class="text-muted">PAYMENT</small><br>
+                                            <span class="badge bg-info">
+                                                <%= order.paymentStatus %>
+                                            </span>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <small class="text-muted">CURRENT STATUS</small><br>
+                                            <span class="badge bg-secondary">
+                                                <%= order.status %>
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- EDIT ORDER STATUS 
+                            <div class="card mb-4">
+                                <div class="card-body">
+
+                                    <h5>Update Order Status</h5>
+
+                                    <form action="/admin/order-status/<%= order._id %>" method="POST">
+
+                                        <div class="row align-items-center">
+
+                                            <div class="col-md-4">
+                                                <select name="status" class="form-select" required>
+                                                    <option value="processing" <%=status==="pending" ? "selected" : ""
+                                                        %>
+                                                        >Processing</option>
+                                                    <option value="shipped" <%=status==="shipped" ? "selected" : "" %>
+                                                        >Shipped</option>
+                                                    <option value="delivered" <%=status==="delivered" ? "selected" : ""
+                                                        %>
+                                                        >Delivered</option>
+                                                    <option value="cancelled" <%=status==="cancelled" ? "selected" : ""
+                                                        %>
+                                                        >Cancelled</option>
+                                                    <option value="returned" <%=status==="returned" ? "selected" : "" %>
+                                                        >Returned</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <button type="submit" class="btn btn-primary">
+                                                    Update Status
+                                                </button>
+                                            </div>
+
+                                        </div>
+
+                                    </form>
+
+                                </div>
+                            </div>
+
+                            -->
+
+                            <!-- PRODUCT LIST -->
+                            <% const productStatusFlow={ processing: ["processing","shipped","cancelled"], shipped:
+                                ["shipped","delivered"], delivered: ["delivered"], cancelled: ["cancelled"], returned:
+                                ["returned"] }; %>
+
+                                <div class="card mb-4">
+                                    <div class="card-body">
+
+                                        <h5 class="mb-3">Ordered Products</h5>
+
+                                        <% orderItems.forEach(item=> { %>
+
+                                            <div class="row mb-3 align-items-center">
+
+                                                <div class="col-md-2">
+                                                    <img src="<%= item.image %>" class="img-fluid rounded">
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <strong>
+                                                        <%= item.productName %>
+                                                    </strong><br>
+                                                    Quantity: <%= item.quantity %><br>
+                                                        Price: ₹<%= item.price %>
+                                                </div>
+
+                                                <div class="col-md-2">
+                                                    <strong>Status:</strong><br>
+                                                    <span class="badge bg-secondary">
+                                                        <%= item.status %>
+                                                    </span>
+                                                </div>
+
+                                                <td>
+
+                                                    <% if(!["cancelled","returned","delivered"].includes(item.status)){
+                                                        %>
+
+                                                        <form action="/admin/order-item-status/<%= item._id %>"
+                                                            method="POST"
+                                                            class="statusForm d-flex align-items-center gap-2">
+
+                                                            <select name="status" class="form-select form-select-sm">
+
+                                                                <% productStatusFlow[item.status].forEach(statusOption=>
+                                                                    { %>
+
+                                                                    <option value="<%= statusOption %>"
+                                                                        <%=statusOption===item.status ? "selected" : ""
+                                                                        %>>
+
+                                                                        <%= statusOption.charAt(0).toUpperCase() +
+                                                                            statusOption.slice(1) %>
+
+                                                                    </option>
+
+                                                                    <% }) %>
+
+                                                            </select>
+
+                                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                                Update
+                                                            </button>
+
+                                                        </form>
+
+                                                        <% } else { %>
+
+                                                            <span class="text-muted">No actions available</span>
+
+                                                            <% } %>
+
+                                                </td>
+                                            </div>
+
+                                            <hr>
+
+                                            <% }) %>
+
+                                    </div>
+                                </div>
+
+                                <!-- SHIPPING ADDRESS -->
+                                <div class="card">
+                                    <div class="card-body">
+
+                                        <h5>Shipping Address</h5>
+
+                                        <strong>
+                                            <%= order.shippingAddress?.fullName || "N/A" %>
+                                        </strong><br>
+                                        <%= order.shippingAddress?.street || "" %><br>
+                                            <%= order.shippingAddress?.city || "" %>,
+                                                <%= order.shippingAddress?.state || "" %><br>
+                                                    Pin: <%= order.shippingAddress?.pincode || "" %><br>
+                                                        Phone: <%= order.shippingAddress?.phone || "" %>
+                                    </div>
+                                </div>
+                </div>
+        </div>
+    </div>
+
+    <%- include("../partials/admin/footer") %>
+
+        <script>
+            const message = "<%= message %>";
+            const type = "<%= type %>";
+            if (message) {
+                Swal.fire({
+                    title: type,
+                    icon: type,
+                    text: message,
+                    confirmButtonColor: '#007bff',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const productUpdateForm = document.querySelectorAll("#product-status-update");
+                productUpdateForm.forEach(updateForm => {
+                    updateForm.addEventListener("")
+                })
+            })
+        </script>

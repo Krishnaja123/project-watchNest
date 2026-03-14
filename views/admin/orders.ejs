@@ -1,0 +1,188 @@
+<!-- views/orders.ejs -->
+<%- include("../partials/admin/header") %>
+
+
+    <head>
+        <link rel="stylesheet" href="/css/admin/sidebar.css">
+        <link rel="stylesheet" href="/css/admin/admin.css">
+
+    </head>
+
+    <body>
+        <div class="container">
+            <!-- Sidebar -->
+            <%- include("../partials/admin/sidebar") %>
+
+                <!-- Main Content -->
+                <div class="main">
+                    <h1>Orders</h1>
+
+                    <div class="top-bar">
+
+                        <div class="search-box">
+                            <input type="text" placeholder="Search" id="search">
+                            <button type="button" id="clear-btn">&times;</button>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-container">
+                        <table id="table">
+                            <thead id="thead">
+                                <tr>
+                                    <th>OrderID</th>
+                                    <th>Name</th>
+                                    <th>Payment</th>
+                                    <th>Status</th>
+                                    <th>Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination"></div>
+                </div>
+        </div>
+    </body>
+
+    <%- include("../partials/admin/footer") %>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const message = "<%= message %>";
+                const type = "<%= type %>";
+                if (message) {
+                    Swal.fire({
+                        icon: type,
+                        text: message,
+                        confirmButtonColor: '#007bff'
+                    });
+                }
+
+                
+                const searchInput = document.getElementById("search");
+                const clearBtn = document.getElementById("clear-btn");
+
+                searchInput.addEventListener("input", function () {
+                    clearBtn.style.display = searchInput.value ? "inline" : "none";
+                })
+
+                clearBtn.addEventListener("click", function () {
+                    searchInput.value = "";
+                    clearBtn.style.display = "none";
+                    searchInput.focus();
+                    fetchOrder();
+                })
+                let page = "<%= page %>";
+                console.log("page :", page);
+
+                fetchOrder(page);
+
+                searchInput.addEventListener("input", function (e) {
+                    let searchValue = e.target.value;
+                    fetchOrder(1, searchValue);
+                })
+
+                const tbody = document.getElementById("tbody");
+
+                async function fetchOrder(page = 1, search = "") {
+                    try {
+                        const response = await fetch(`/admin/fetchOrders?page=${page}&search=${search}`);
+                        console.log("response from fetchOrder: ", response);
+
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+                        const data = await response.json();
+                        //console.log("data", data);
+
+                        await renderOrders(data.orders, data.currentPage);
+                        console.log("1")
+                        renderPagination(data.totalPages, data.currentPage);
+
+                    } catch (error) {
+                        console.log("Error fetching orders:", error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to load brands'
+                        });
+                    }
+                }
+
+ function renderOrders(orders, currentPage) {
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+
+    orders.forEach(order => {
+        const tr = document.createElement("tr");
+
+        const cells = [
+            order.orderId,
+            order.shippingAddress?.fullName || "N/A",
+            order.paymentStatus,
+            order.status,
+            order.totalAmount,
+        ];
+
+        cells.forEach(data => {
+            const td = document.createElement("td");
+            td.textContent = data;
+            tr.appendChild(td);
+        });
+
+        const actionTd = document.createElement("td");
+        const editLink = document.createElement("a");
+        editLink.href = `/admin/orderDetails/${order._id}?page=${currentPage}`;
+        editLink.className = "btn btn-edit";
+        editLink.textContent = "View";
+
+        actionTd.appendChild(editLink);
+        tr.appendChild(actionTd);
+        tbody.appendChild(tr);
+    });
+}
+                function renderPagination(totalPages, currentPage) {
+                    console.log("get in to renderPagination");
+
+                    const pagination = document.querySelector(".pagination");
+                    pagination.innerHTML = "";
+
+                    if (currentPage > 1) {
+                        const prevBtn = document.createElement("button");
+                        prevBtn.textContent = "<<";
+                        prevBtn.className = "pagination-btn";
+                        search = searchInput.value;
+                        prevBtn.onclick = () => fetchOrder(currentPage - 1, search);
+                        pagination.appendChild(prevBtn);
+                    }
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageBtn = document.createElement("button");
+                        pageBtn.textContent = i;
+                        pageBtn.className = "pagination-btn";
+                        if (i === currentPage) {
+                            pageBtn.classList.add("active");
+                        } search = searchInput.value;
+                        pageBtn.onclick = () => fetchOrder(i, search);
+                        pagination.appendChild(pageBtn);
+                    }
+                    console.log("total page:", totalPages);
+                    if (currentPage < totalPages) {
+                        const nextBtn = document.createElement("button");
+                        nextBtn.textContent = ">>";
+                        nextBtn.className = "pagination-btn";
+                        search = searchInput.value;
+                        nextBtn.onclick = () => fetchOrder(currentPage + 1, search);
+                        pagination.appendChild(nextBtn);
+                    }
+                }
+
+            });
+
+
+
+
+
+        </script>

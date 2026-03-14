@@ -3,6 +3,7 @@
     <link rel="stylesheet" href="/css/user/profile.css">
     <link rel="stylesheet" href="/css/user/userSidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <div class="profile-layout">
 
@@ -17,10 +18,14 @@
                 <div class="profile-grid">
 
                     <!-- LEFT CARD - SAVED ADDRESSES -->
-                    <div class="card">
+                    <div class="card full-width-card">
 
-                        <div class="card-header">
-                            <h2>Saved Addresses</h2>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0">Saved Addresses</h2>
+
+                            <button id="openModalBtn" class="btn-add-address btn">
+                                + Add New Address
+                            </button>
                         </div>
 
                         <div class="card-body" id="addressContainer">
@@ -77,88 +82,84 @@
                                         <% }) %>
 
                                             <% } %>
-
                         </div>
                     </div>
-
-
-                    <!-- RIGHT CARD - ADD ADDRESS -->
-                    <div class="card">
-
-                        <div class="card-header">
-                            <h2>Add New Address</h2>
-                        </div>
-
-                        <div class="card-body">
-
-                            <form action="/address/save" method="POST" id="addres-form">
-
-                                <div class="form-group">
-                                    <input type="text" name="_id" id="_id" hidden>
-                                </div>
-
-                                <div>
-                                    <input type="text" name="from" id="from" value="<%= from %>" hidden>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="text" name="name" id="name" placeholder="Full Name">
-                                    <div id="error-name" class="error-message"></div>
-
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="text" name="locality" id="locality" placeholder="Locality">
-                                    <div id="error-locality" class="error-message"></div>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="text" name="city" id="city" placeholder="City">
-                                    <div id="error-city" class="error-message"></div>
-                                </div>
-
-                                <div class="form-group">
-                                    <select name="state" id="state">
-                                        <option value="">Select State</option>
-                                        <% states.forEach(state=> { %>
-                                            <option value="<%= state %>">
-                                                <%= state %>
-                                            </option>
-                                            <% }) %>
-                                    </select>
-                                    <div id="error-state" class="error-message"></div>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="text" name="pincode" id="pincode" placeholder="Pincode">
-                                    <div id="error-pincode" class="error-message"></div>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="tel" name="mobile" id="mobile" placeholder="Mobile Number">
-                                    <div id="error-mobile" class="error-message"></div>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="text" name="alternateNumber" id="alternateNumber"
-                                        placeholder="Alternate Mobile Number (optional)">
-                                    <div id="error-alternateNumber" class="error-message"></div>
-                                </div>
-                                <div>
-                                    
-                                </div>
-
-                                <button type="submit" class="btn-primary full-width" id="saveBtn">
-                                    Save Address
-                                </button>
-
-                            </form>
-
-                        </div>
-                    </div>
-
                 </div>
 
+            </div>
+
+            <!-- CUSTOM ADDRESS MODAL -->
+            <div id="addressModal" class="custom-modal">
+                <div class="custom-modal-content">
+
+                    <div class="custom-modal-header">
+                        <h3 id="modalTitle">Add New Address</h3>
+                        <span class="close-modal">&times;</span>
+                    </div>
+
+                    <div class="custom-modal-body">
+
+                        <form action="/address/save" method="POST" id="addres-form">
+
+                            <input type="text" name="_id" id="_id" hidden>
+
+
+                            <div>
+                                <input type="text" name="from" id="from" value="<%= from %>" hidden>
+                            </div>
+
+
+                            <div class="form-group">
+                                <input type="text" name="name" id="name" placeholder="Full Name">
+                                <div id="error-name" class="error-message"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <input type="text" name="locality" id="locality" placeholder="Locality">
+                                <div id="error-locality" class="error-message"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <input type="text" name="city" id="city" placeholder="City">
+                                <div id="error-city" class="error-message"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <select name="state" id="state">
+                                    <option value="">Select State</option>
+                                    <% states.forEach(state=> { %>
+                                        <option value="<%= state %>">
+                                            <%= state %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                                <div id="error-state" class="error-message"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <input type="text" name="pincode" id="pincode" placeholder="Pincode">
+                                <div id="error-pincode" class="error-message"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <input type="tel" name="mobile" id="mobile" placeholder="Mobile Number">
+                                <div id="error-mobile" class="error-message"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <input type="text" name="alternateNumber" id="alternateNumber"
+                                    placeholder="Alternate Mobile Number (optional)">
+                                <div id="error-alternateNumber" class="error-message"></div>
+                            </div>
+
+                            <button type="submit" class="btn-primary full-width" id="saveBtn">
+                                Save Address
+                            </button>
+
+                        </form>
+
+                    </div>
+                </div>
             </div>
 
     </div>
@@ -184,11 +185,18 @@
             const mobileError = document.getElementById('error-mobile');
             const alternateNumberError = document.getElementById('error-alternateNumber');
 
-            const message = '<%= message %>';
-            const type = '<%= type %>';
-
-            if (message && message.trim() !== '') {
-                Swal.fire({ icon: type, text: message, confirmButtonColor: '#007bff' });
+            const message = "<%= message %>";
+            const type = "<%= type %>";
+            if (message) {
+                Swal.fire({
+                    title: type,
+                    icon: type,
+                    text: message,
+                    confirmButtonColor: '#007bff',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: true
+                });
             }
 
             form.addEventListener('submit', function (e) {
@@ -276,20 +284,50 @@
                 return true;
             }
 
+            const modal = document.getElementById("addressModal");
+            const openModalBtn = document.getElementById("openModalBtn");
+            const closeModal = document.querySelector(".close-modal");
+
+            openModalBtn.addEventListener("click", function () {
+                modal.style.display = "flex";
+                form.reset();
+                idInput.value = "";
+                document.getElementById("modalTitle").textContent = "Add New Address";
+                document.getElementById("saveBtn").textContent = "Save Address";
+            });
+
+            closeModal.addEventListener("click", function () {
+                modal.style.display = "none";
+            });
+
+            window.addEventListener("click", function (e) {
+                if (e.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+
             const addresses = <%- JSON.stringify(addresses) %>;
             const editBtns = document.querySelectorAll(".btn-outline");
             editBtns.forEach(button => {
                 button.addEventListener('click', function (e) {
+                    const errors = document.querySelectorAll(".error-message");
+                    errors.forEach(error => {
+                        error.textContent = "";
+                    })
+
 
                     const editAddressId = this.id;
+                    modal.style.display = "flex";
+                    form.reset();
+                    idInput.value = "";
+                    document.getElementById("modalTitle").textContent = "Edit Address";
+                    document.getElementById("saveBtn").textContent = "Update Address";
 
                     const editAddress = addresses.find(address => {
                         return address._id === editAddressId;
                     });
 
                     console.log("editAddress: ", editAddress);
-
-                    const saveBtn = document.getElementById('saveBtn');
 
                     if (!editAddress) return;
 
@@ -301,48 +339,44 @@
                     pincodeInput.value = editAddress.postal_code;
                     mobileInput.value = editAddress.mobile;
                     alternateNumberInput.value = editAddress.phone || "";
-
-                    if (idInput.value) {
-                        saveBtn.textContent = "Update Address";
-                    }
-                })
-            })
+                });
+            });
 
             const defaultBtns = document.querySelectorAll(".btn-set-default");
 
-defaultBtns.forEach(button => {
-    button.addEventListener("click", async function () {
+            defaultBtns.forEach(button => {
+                button.addEventListener("click", async function () {
 
-        const addressId = this.dataset.id;
+                    const addressId = this.dataset.id;
 
-        const result = await Swal.fire({
-            title: "Set as default address?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "Yes"
-        });
+                    const result = await Swal.fire({
+                        title: "Set as default address?",
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes"
+                    });
 
-        if (!result.isConfirmed) return;
+                    if (!result.isConfirmed) return;
 
-        try {
-            const response = await fetch(`/address/set-default/${addressId}`, {
-                method: "PATCH"
+                    try {
+                        const response = await fetch(`/address/set-default/${addressId}`, {
+                            method: "PATCH"
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            Swal.fire("Updated!", "Default address changed", "success")
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire("Error!", "Failed to update", "error");
+                        }
+
+                    } catch (err) {
+                        Swal.fire("Error!", "Something went wrong", "error");
+                    }
+                });
             });
-
-            const data = await response.json();
-
-            if (data.success) {
-                Swal.fire("Updated!", "Default address changed", "success")
-                    .then(() => location.reload());
-            } else {
-                Swal.fire("Error!", "Failed to update", "error");
-            }
-
-        } catch (err) {
-            Swal.fire("Error!", "Something went wrong", "error");
-        }
-    });
-});
 
             const deleteBtns = document.querySelectorAll(".btn-danger-outline");
 

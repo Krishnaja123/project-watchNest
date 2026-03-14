@@ -1,0 +1,337 @@
+<%- include("../partials/user/header", { title: "Your Orders" , hideNavBar: true }) %>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/user/profile.css">
+    <link rel="stylesheet" href="/css/user/userSidebar.css">
+
+    <!-- Breadcrumb -->
+    <div class="container mt-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/home">Home</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    Your Orders
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="profile-layout">
+
+        <%- include("../partials/user/userSidebar") %>
+
+            <div class="profile-main">
+
+
+                <h1 class="main-title">Your Orders</h1>
+
+                <div class="row mb-4">
+
+                    <div class="col-md-6">
+                        <form action="/orders" method="GET" class="d-flex">
+
+                            <input type="text" name="search" value="<%= search || '' %>" class="form-control me-2"
+                                placeholder="Search by Order ID or Product Name">
+
+                            <button class="btn btn-dark">
+                                Search
+                            </button>
+
+                        </form>
+                    </div>
+
+                </div>
+
+                <% if (orders.length===0) { %>
+                    <div class="alert-box">
+                        No orders found.
+                    </div>
+                    <% } %>
+
+                        <% orders.forEach(data=> { %>
+
+                            <div class="card mb-4">
+                                <div class="card-body">
+
+                                    <!-- Order Info Row -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-2">
+                                            <small class="text-muted">ORDER PLACED</small><br>
+                                            <strong>
+                                                <%= new Date(data.createdAt).toDateString() %>
+                                            </strong>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <small class="text-muted">ORDER ID</small><br>
+                                            <strong>
+                                                <%= data.orderId %>
+                                            </strong>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <small class="text-muted">TOTAL</small><br>
+                                            <strong>₹<%= data.totalAmount %></strong>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <small class="text-muted">ORDER STATUS</small><br>
+                                            <span class="badge 
+          <% if(data.status===" processing"){ %> bg-warning text-dark
+                                                <% } else if(data.status==="shipped" ){ %> bg-info
+                                                    <% } else if(data.status==="delivered" ){ %> bg-success
+                                                        <% } else if(data.status==="cancelled" ){ %> bg-danger
+                                                            <% } else if(data.status==="returned" ){ %> bg-dark
+                                                                <% } else { %> bg-secondary <% } %>">
+                                                                        <%= data.status.charAt(0).toUpperCase() +
+                                                                            data.status.slice(1) %>
+                                            </span>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <small class="text-muted">PAYMENT STATUS</small><br>
+                                            <span class="badge 
+          <% if(data.paymentStatus===" pending"){ %> bg-warning text-dark
+                                                <% } else if(data.paymentStatus==="failed" ){ %> bg-danger
+                                                    <% } else if(data.paymentStatus==="paid" ){ %> bg-success
+                                                        <% } else { %> bg-secondary <% } %>">
+                                                                <%= data.paymentStatus.charAt(0).toUpperCase() +
+                                                                    data.paymentStatus.slice(1) %>
+                                            </span>
+                                        </div>
+
+                                        <div class="col-md-2 text-end">
+                                            <a href="/orders/<%= data._id %>"
+                                                class="btn btn-primary btn-sm mb-1">View</a>
+
+                                            <% if (data.status==="processing" ) { %>
+                                                <form action="/orders/cancel/<%= data.orderId %>" method="POST"
+                                                    style="display:inline;" class="cancelOrderForm">
+                                                    <input type="hidden" name="cancelReason" class="cancelReason">
+                                                    <button type="submit" class="btn btn-danger btn-sm mb-1">Cancel
+                                                        Order</button>
+                                                </form>
+                                                <% } %>
+
+                                                    <% if(data.paymentStatus==="failed" ) { %>
+                                                        <a href="/retry-payment/<%= data._id %>"
+                                                            class="btn btn-warning btn-sm mb-1">Retry Payment</a>
+                                                        <% } %>
+
+                                        </div>
+
+                                        <hr>
+
+                                        <!-- Order Items -->
+                                        <% orderItems.filter(item=> item.order_id.toString() === data._id.toString())
+                                            .forEach(item => { %>
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                                <div class="d-flex align-items-center">
+                                                    <img src="<%= item.image %>" width="60" class="me-3 rounded">
+
+                                                    <div>
+                                                        <a href="/product/<%= item.product_id %>/<%= item.variant_id %>"
+                                                            class="text-decoration-none text-dark">
+                                                            <strong>
+                                                                <%= item.productName %>
+                                                            </strong><br>
+                                                            Qty: <%= item.quantity %><br>
+                                                                Price: ₹<%= item.price %><br>
+                                                                    Status:
+                                                                    <% if(item.status==="processing" ){ %>
+                                                                        <span
+                                                                            class="badge bg-warning text-dark">Processing</span>
+                                                                        <% } else if(item.status==="shipped" ){ %>
+                                                                            <span class="badge bg-info">Shipped</span>
+                                                                            <% } else if(item.status==="delivered" ){ %>
+                                                                                <span
+                                                                                    class="badge bg-success">Delivered</span>
+                                                                                <% } else if(item.status==="cancelled"
+                                                                                    ){ %>
+                                                                                    <span
+                                                                                        class="badge bg-danger">Cancelled</span>
+                                                                                    <% } else
+                                                                                        if(item.status==="returned" ){
+                                                                                        %>
+                                                                                        <span
+                                                                                            class="badge bg-dark">Returned</span>
+                                                                                        <% } %>
+                                                        </a>
+                                                    </div>
+                                                </div>
+
+                                                <% if(item.status==="pending" || item.status==="processing" ){ %>
+
+                                                    <form action="/orders/item-cancel/<%= item._id %>" method="POST"
+                                                        class="cancelProductForm">
+
+                                                        <input type="hidden" name="cancelReason" class="cancelReason">
+
+                                                        <button type="submit"
+                                                            class="btn btn-outline-danger btn-sm cancel-product-btn">
+                                                            Cancel Product
+                                                        </button>
+
+                                                    </form>
+
+                                                    <% } else if(item.status==="delivered" ){ %>
+
+                                                        <form action="/orders/item-return/<%= item._id %>" method="POST"
+                                                            class="returnProductForm">
+
+                                                            <input type="hidden" name="returnReason"
+                                                                class="returnReason">
+
+                                                            <button type="submit"
+                                                                class="btn btn-outline-warning btn-sm return-product-btn">
+                                                                Return Product
+                                                            </button>
+
+                                                        </form>
+
+                                                        <% } %>
+
+                                            </div>
+                                            <hr>
+                                            <% }) %>
+
+                                    </div>
+                                </div>
+                                <% }) %>
+
+                            </div>
+            </div>
+
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+
+                    <% if(currentPage> 1){ %>
+                        <li class="page-item">
+                            <a class="page-link" href="/orders?page=<%= currentPage - 1 %>&search=<%= search || '' %>">
+                                Previous
+                            </a>
+                        </li>
+                        <% } %>
+
+                            <% for(let i=1; i <=totalPages; i++){ %>
+                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                    <a class="page-link" href="/orders?page=<%= i %>&search=<%= search || '' %>">
+                                        <%= i %>
+                                    </a>
+                                </li>
+                                <% } %>
+
+                                    <% if(currentPage < totalPages){ %>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="/orders?page=<%= currentPage + 1 %>&search=<%= search || '' %>">
+                                                Next
+                                            </a>
+                                        </li>
+                                        <% } %>
+
+                </ul>
+            </nav>
+
+            <%- include("../partials/user/footer") %>
+
+                <script>
+
+                    const message = "<%= message %>";
+                    const type = "<%= type %>";
+                    if (message) {
+                        Swal.fire({
+                            icon: type,
+                            text: message,
+                            confirmButtonColor: '#007bff',
+                            timer: 5000, // closes after 2 seconds (2000 ms)
+                        });
+                    }
+
+                    document.querySelectorAll(".cancelOrderForm, .cancelProductForm").forEach(form => {
+
+                        form.addEventListener("submit", async function (e) {
+
+                            e.preventDefault();
+
+                            const result = await Swal.fire({
+                                title: "Select cancellation reason",
+                                icon: "warning",
+                                input: "select",
+                                inputOptions: {
+                                    "Ordered by mistake": "Ordered by mistake",
+                                    "Found cheaper elsewhere": "Found cheaper elsewhere",
+                                    "Delivery is too slow": "Delivery is too slow",
+                                    "Changed my mind": "Changed my mind",
+                                    "Other": "Other"
+                                },
+                                inputPlaceholder: "Choose a reason",
+                                showCancelButton: true,
+                                confirmButtonText: "Submit",
+                                cancelButtonText: "Close",
+                                inputValidator: (value) => {
+                                    if (!value) {
+                                        return "Please select a reason!";
+                                    }
+                                }
+                            });
+
+                            if (result.isConfirmed) {
+
+                                const reasonInput = form.querySelector(".cancelReason");
+                                reasonInput.value = result.value;
+
+                                form.submit();
+                            }
+
+                        });
+
+                    });
+
+                    document.querySelectorAll(".returnProductForm").forEach(form => {
+
+                        form.addEventListener("submit", async function (e) {
+
+                            e.preventDefault();
+
+                            const result = await Swal.fire({
+                                title: "Select return reason",
+                                icon: "warning",
+                                input: "select",
+                                inputOptions: {
+                                    "Damaged product": "Damaged product",
+                                    "Wrong item received": "Wrong item received",
+                                    "Product not as described": "Product not as described",
+                                    "Quality not satisfactory": "Quality not satisfactory",
+                                    "Size/Fit issue": "Size/Fit issue",
+                                    "Received incomplete item": "Received incomplete item",
+                                    "Other": "Other"
+                                },
+                                inputPlaceholder: "Choose a reason",
+                                showCancelButton: true,
+                                confirmButtonText: "Submit",
+                                cancelButtonText: "Close",
+                                inputValidator: (value) => {
+                                    if (!value) {
+                                        return "Please select a reason!";
+                                    }
+                                }
+                            });
+
+                            if (result.isConfirmed) {
+
+                                const reasonInput = form.querySelector(".returnReason");
+                                reasonInput.value = result.value;
+
+                                form.submit();
+                            }
+
+                        });
+
+                    });
+
+                </script>

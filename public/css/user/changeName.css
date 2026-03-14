@@ -1,0 +1,189 @@
+/* ===== PAGE BACKGROUND ===== */
+
+body{
+    background:#f4f6f9;
+    font-family:system-ui,-apple-system,sans-serif;
+}
+
+/* ===== CENTER PAGE ===== */
+
+.page-wrapper{
+    min-height:80vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* ===== CARD ===== */
+
+.form-card{
+    width:420px;
+    background:white;
+    padding:35px 40px;
+    border-radius:12px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.05);
+}
+
+/* ===== TITLE ===== */
+
+.card-title{
+    font-size:22px;
+    margin-bottom:5px;
+}
+
+.card-subtitle{
+    font-size:14px;
+    color:#777;
+    margin-bottom:25px;
+}
+
+/* ===== FORM ===== */
+
+.form-group{
+    margin-bottom:20px;
+}
+
+.form-group label{
+    display:block;
+    font-size:13px;
+    color:#555;
+    margin-bottom:6px;
+}
+
+.form-group input{
+    width:100%;
+    padding:11px 12px;
+    border-radius:6px;
+    border:1px solid #ddd;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.form-group input:focus{
+    border-color:#007bff;
+    outline:none;
+    box-shadow:0 0 0 2px rgba(0,123,255,0.1);
+}
+
+/* ===== ERROR ===== */
+
+.error-message{
+    font-size:12px;
+    color:#e53935;
+    margin-top:4px;
+}
+
+/* ===== BUTTON ===== */
+
+.buttons{
+    margin-top:20px;
+}
+
+.btn-primary{
+    width:100%;
+    padding:11px;
+    border:none;
+    border-radius:6px;
+    background:#007bff;
+    color:white;
+    font-size:14px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.btn-primary:hover{
+    background:#0056b3;
+}
+
+/* Page background */
+body {
+    background: #f4f6f9;
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+}
+
+/* Center the card */
+.main-content {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card container */
+.login-container {
+    width: 420px;
+    background: #ffffff;
+    padding: 35px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+/* Title */
+.login-container h1 {
+    font-size: 22px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Form group */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+/* Input field */
+.form-group input {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.1);
+}
+
+/* Error message */
+.error-message {
+    font-size: 12px;
+    color: #e53935;
+    margin-top: 4px;
+}
+
+/* Button container */
+.buttons {
+    margin-top: 20px;
+}
+
+/* Button */
+.btn-signup {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 6px;
+    background: #007bff;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-signup:hover {
+    background: #0056b3;
+}
+.error-message {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}

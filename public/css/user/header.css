@@ -37,7 +37,7 @@ header {
 }
 
 .logo a span {
-    color: #d4af37;
+    color: #c8a27c;
 }
 
 /* SEARCH */
@@ -66,7 +66,7 @@ header {
 
 .search-form button {
     border: none;
-    background: #d4af37;
+    background: #c8a27c;
     color: white;
     padding: 8px 15px;
     border-radius: 25px;
@@ -74,7 +74,7 @@ header {
 }
 
 .search-form button:hover {
-    background: #c49b2f;
+    background: #c8a27c;
 }
 
 /* NAV BUTTONS */
@@ -94,7 +94,7 @@ header {
 }
 
 .nav-button:hover {
-    color: #d4af37;
+    color: #c8a27c;
 }
 
 /* CART BADGE (Single Clean Version) */
@@ -185,7 +185,7 @@ header {
 }
 
 .main-nav-item:hover {
-    color: #d4af37;
+    color: #c8a27c;
 }
 
 /* HAMBURGER */

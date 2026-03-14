@@ -68,6 +68,13 @@ app.use((req, res, next) => {
  app.use("/", userRouter);
  app.use("/admin", adminRouter);
 
+ 
+app.use((req, res) => {
+    res.status(404).render("user/404", {
+        message: "The page you are looking for does not exist.",
+    });
+});
+
 app.listen(port,()=>{
     console.log(`Server running in port ${port}`);
 });

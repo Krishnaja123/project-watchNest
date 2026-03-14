@@ -6,7 +6,7 @@ const orderSchema = new mongoose.Schema({
     ref: "User",
     required: true
   },
-  
+
   orderId: {
     type: String,
     required: true,
@@ -34,14 +34,33 @@ const orderSchema = new mongoose.Schema({
 
   paymentStatus: {
     type: String,
-    enum: ["Pending", "Paid", "Failed", "Refunded"],
+    enum: ["pending", "paid", "failed", "refunded"],
     default: "Pending"
   },
 
+  razorpayOrderId: String,
+  
+  razorpayPaymentId: String,
+
   status: {
     type: String,
-    enum: ["Placed", "Cancelled", "Shipped", "Delivered", "Returned"],
-    default: "Placed"
+    enum: [
+      "processing",
+      "partially_shipped",
+      "shipped",
+      "partially_delivered",
+      "delivered",
+      "partially_cancelled",
+      "cancelled",
+      "partially_returned",
+      "returned"
+    ],
+    default: "processing"
+  },
+
+  cancelReason: {
+    type: String,
+    default: null
   }
 
 }, { timestamps: true });

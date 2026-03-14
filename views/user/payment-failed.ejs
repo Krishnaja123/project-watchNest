@@ -1,4 +1,4 @@
-<%- include("../partials/user/header", { title: "Order Successful", hideNavBar: true }) %>
+<%- include("../partials/user/header", { title: "Payment Failed", hideNavBar: true }) %>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -7,14 +7,14 @@
         background: #f4f5f7;
     }
 
-    .success-container {
+    .failed-container {
         min-height: 80vh;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    .success-card {
+    .failed-card {
         background: #ffffff;
         border-radius: 20px;
         padding: 50px 40px;
@@ -25,23 +25,23 @@
         transition: 0.3s ease;
     }
 
-    .success-card:hover {
+    .failed-card:hover {
         transform: translateY(-5px);
     }
 
-    .success-icon {
+    .failed-icon {
         font-size: 70px;
-        color: #28a745;
+        color: #dc3545;
         margin-bottom: 20px;
     }
 
-    .success-title {
+    .failed-title {
         font-weight: 600;
         font-size: 28px;
         margin-bottom: 10px;
     }
 
-    .success-text {
+    .failed-text {
         color: #6c757d;
         margin-bottom: 25px;
     }
@@ -55,8 +55,8 @@
         display: inline-block;
     }
 
-    .btn-gold {
-        background: linear-gradient(135deg, #c8a27c, #a77b4e);
+    .btn-retry {
+        background: #dc3545;
         border: none;
         color: #fff;
         padding: 12px 25px;
@@ -65,24 +65,10 @@
         transition: 0.3s ease;
     }
 
-    .btn-gold:hover {
-        opacity: 0.9;
-        color: #fff;
-    }
-
-    .btn-outline-gold {
-        border: 1px solid #c8a27c;
-        color: #c8a27c;
+    .btn-outline-secondary {
         padding: 12px 25px;
         border-radius: 30px;
         font-weight: 500;
-        background: transparent;
-        transition: 0.3s ease;
-    }
-
-    .btn-outline-gold:hover {
-        background: #c8a27c;
-        color: #fff;
     }
 
     .btn-group-custom {
@@ -93,21 +79,21 @@
     }
 </style>
 
-<div class="container success-container">
-    <div class="success-card">
+<div class="container failed-container">
+    <div class="failed-card">
 
-        <!-- Illustration -->
-        <div class="success-icon">
-            ✅
+        <!-- Icon -->
+        <div class="failed-icon">
+            ❌
         </div>
 
-        <div class="success-title">
-            Thank You for Your Order!
+        <div class="failed-title">
+            Payment Failed
         </div>
 
-        <p class="success-text">
-            Your order has been placed successfully. We are preparing it for shipment.
-           <!-- You will receive a confirmation email shortly. -->
+        <p class="failed-text">
+            Unfortunately, your payment could not be processed.  
+            Please try again or choose another payment method.
         </p>
 
         <!-- Order ID -->
@@ -117,13 +103,19 @@
 
         <!-- Buttons -->
         <div class="btn-group-custom">
-            <a href="/orders" class="btn btn-gold">
-                View Order Details
+
+            <a href="/retry-payment/<%= order_id %>" class="btn btn-retry">
+                Retry Payment
             </a>
 
-            <a href="/products" class="btn btn-outline-gold">
+            <a href="/orders" class="btn btn-outline-secondary">
+                View Orders
+            </a>
+
+            <a href="/products" class="btn btn-outline-secondary">
                 Continue Shopping
             </a>
+
         </div>
 
     </div>

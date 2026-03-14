@@ -1,0 +1,59 @@
+<%- include("../partials/user/header", { title: "Verify OTP" , hideNavBar: true }) %>
+    <link rel="stylesheet" href="/css/otp.css">
+
+    <div class="main-wrapper">
+        <div class="otp-container">
+            <h1>Verify OTP</h1>
+            <p>OTP sent to: <%= email %>
+            </p>
+
+            <form action="/profile/verify-change-email" method="POST" id="otp-form">
+                <div class="otp-input-container">
+                    <% for(let i=0; i < 6; i++) { %>
+                        <input type="text" name="otp[]" maxlength="1" class="otp-input">
+                        <% } %>
+                </div>
+
+                <div class="resend-otp">
+                    Didn't receive OTP?
+                    <span id="resend-text">
+                        <a href="#" id="resend-btn" style="color:#007bff; display:none;">Resend OTP</a>
+                    </span>
+                    <span id="countdown-timer"></span>
+                </div>
+
+                <button type="submit" class="verify-btn">Verify</button>
+            </form>
+
+            <% if(message) { %>
+                <p class="error-message">
+                    <%= message %>
+                </p>
+                <% } %>
+        </div>
+    </div>
+
+    <%- include('../partials/user/footer') %>
+
+        <script>
+            const form = document.getElementById("otp-form");
+            const otpInputs = document.querySelectorAll(".otp-input");
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('input', function (e) {
+                    if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === "Backspace" && !input.value && index > 0) {
+                        otpInputs[index - 1].focus();
+                    }
+                });
+            })
+
+            const countdownTimer = document.getElementById("countdown-timer");
+            const resendBtn = document.getElementById("resend-btn");
+            let timeLeft = "<%="
+            console.log(otpInputs);
+        </script>

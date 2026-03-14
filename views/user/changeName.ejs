@@ -1,38 +1,48 @@
-<%- include("../partials/user/header") %>
+<%- include("../partials/user/header", { title: "Change User Name", hideNavBar: true }) %>
 
     <head>
-        <link rel="stylesheet" href="/css/login.css">
+        <link rel="stylesheet" href="/css/user/changeName.css">
     </head>
 
     <body>
-        <div class="main-content">
-            <div class="login-container">
-                <h1>Change User Name</h1>
 
-                <form action="/profile/change-username" method="POST" id="login-form">
+            <div class="page-wrapper">
 
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input type="name" id="name" name="name" value="<%= user.username %>">
-                        <div id="error-name" class="error-message"></div>
+                <div class="form-card">
 
-                    </div>
+                    <h2 class="card-title">Change User Name</h2>
+                    <p class="card-subtitle">Update your account name</p>
 
-                    <div class="buttons">
-                        <button type="submit" class="btn btn-signup">Change Name</button>
-                    </div>
-                    
-                </form>
+                    <form action="/profile/change-username" method="POST" id="login-form">
+
+                        <div class="form-group">
+                            <label for="name">New Name</label>
+
+                            <input type="text" id="name" name="name" value="<%= user.username %>"
+                                placeholder="Enter new name">
+
+                            <div id="error-name" class="error-message"></div>
+                        </div>
+
+                        <div class="buttons">
+                            <button type="submit" class="btn-primary">
+                                Change Name
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+
             </div>
-        </div>
 
-        <%- include('../partials/user/footer') %>
+            <%- include('../partials/user/footer') %>
     </body>
 
     </html>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-        
+
             const form = document.getElementById('login-form');
             const nameInput = document.getElementById("name");
             const nameError = document.getElementById('error-name');
@@ -59,7 +69,7 @@
                 }
                 nameError.textContent = '';
                 return true;
-            } 
+            }
 
         })
 

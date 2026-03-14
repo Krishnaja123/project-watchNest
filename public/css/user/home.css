@@ -296,7 +296,7 @@ header {
 .price {
     font-size: 18px;
     font-weight: 600;
-    color: #d4af37; /* gold color */
+    color: #c8a27c; /* gold color */
     margin-top: 12px;
 }
 
@@ -325,7 +325,7 @@ header {
     padding: 10px 20px;
     border: none;
     border-radius: 25px;
-    background: #d8a708;
+    background: #c8a27c;
     color: #fff;
     font-size: 14px;
     cursor: pointer;

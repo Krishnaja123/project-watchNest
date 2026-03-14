@@ -40,12 +40,7 @@
                         <strong>Name:</strong>
                         <%= user?.username || "Not available" %>
                     </p>
-
-                    <p>
-                        <strong>Phone:</strong>
-                        <%= user?.phone_number || "Not added" %>
-                    </p>
-
+                    
                     <p>
                         <strong>Email:</strong>
                         <%= user?.email || "Not available" %>
@@ -63,7 +58,7 @@
             <div class="card">
 
                 <div class="card-header">
-                    <h2>Saved Addresses</h2>
+                    <h2>Default Address</h2>
                 </div>
 
                 <div class="card-body">
@@ -72,10 +67,10 @@
 
                         <% addresses.forEach(address => { %>
                             <div class="address-box">
-                                <p><strong><%= address.name %></strong></p>
+                                <p><strong><%= address.full_name %></strong></p>
                                 <p><%= address.street %>, <%= address.city %></p>
-                                <p><%= address.state %> - <%= address.pincode %></p>
-                                <p>Phone: <%= address.phone %></p>
+                                <p><%= address.state %> - <%= address.postal_code %></p>
+                                <p>Phone: <%= address.mobile %></p>
                             </div>
                         <% }) %>
 
@@ -87,10 +82,6 @@
 
                     <% } %>
 
-                    <a href="/address?from=profile" class="btn btn-primary">
-                        Add New Address
-                    </a>
-
                 </div>
             </div>
 
@@ -98,3 +89,19 @@
 
     </div>
 </div>
+
+<script>
+    const message = "<%= message %>";
+            const type = "<%= type %>";
+            if (message) {
+                Swal.fire({
+                    title: type,
+                    icon: type,
+                    text: message,
+                    confirmButtonColor: '#007bff',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: true
+                });
+            }
+</script>

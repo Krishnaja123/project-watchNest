@@ -20,8 +20,8 @@ aside h6 {
 }
 
 .form-check-input:checked {
-    background-color: #d4af37;
-    border-color: #d4af37;
+    background-color: #c8a27c;
+    border-color: #c8a27c;
 }
 
 .form-check-label {
@@ -116,7 +116,7 @@ aside h6 {
 .price {
     font-size: 18px;
     font-weight: 600;
-    color: #d4af37; /* gold color */
+    color: #c8a27c; /* gold color */
     margin-top: 12px;
 }
 
@@ -165,7 +165,7 @@ aside h6 {
     padding: 10px 20px;
     border: none;
     border-radius: 25px;
-    background: #d8a708;
+    background: #c8a27c;
     color: #fff;
     font-size: 14px;
     cursor: pointer;
@@ -187,8 +187,8 @@ aside h6 {
 }
 
 .pagination .active .page-link {
-    background-color: #d4af37;
-    border-color: #d4af37;
+    background-color: #c8a27c;
+    border-color: #c8a27c;
     color: white;
 }
 
@@ -196,7 +196,7 @@ aside h6 {
     padding: 10px;
     border: none;
     border-radius: 25px;
-    background: #d4af37;
+    background: #c8a27c;
     color: #fff;
     font-size: 14px;
     font-weight: 500;
@@ -204,7 +204,7 @@ aside h6 {
 }
 
 .apply-btn:hover {
-    background: #c49b2f;
+    background: #c8a27c;
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
 }

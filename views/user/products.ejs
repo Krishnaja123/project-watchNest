@@ -96,12 +96,20 @@
 
             <script>
 
-                            const message = '<%= message %>';
-            const type = '<%= type %>';
+                const message = '<%= message %>';
+                const type = '<%= type %>';
 
-            if (message && message.trim() !== '') {
-                Swal.fire({ icon: type, text: message, confirmButtonColor: '#007bff' });
-            }
+                if (message && message.trim() !== '') {
+                    Swal.fire({
+                        title: type,
+                        icon: type,
+                        text: message,
+                        confirmButtonColor: '#007bff',
+                        confirmButtonText: 'OK',
+                        showConfirmButton: true,
+                        timerProgressBar: true
+                    })
+                }
 
                 const categoryCheckboxes = document.querySelectorAll('.category-filter');
                 const brandCheckboxes = document.querySelectorAll('.brand-filter');
@@ -153,6 +161,8 @@
                     params.append("page", page);
                     params.append("limit", 12);
 
+                    window.history.pushState({}, "", `/products?${params.toString()}`);
+
                     const response = await fetch(`/products/filter?${params.toString()}`)
                     const html = await response.text();
                     console.log(params);
@@ -196,12 +206,57 @@
                     }
                 })
 
-                document.querySelectorAll(".add-cart-btn").forEach(button => {
-                    button.addEventListener("click", async function () {
-                        const variantId = this.dataset.variantId;
-                        const productId = this.dataset.productId;
-                        console.log("productId: ", productId);
-                        console.log("variantId: ", variantId);
+                // document.querySelectorAll(".add-cart-btn").forEach(button => {
+                //     button.addEventListener("click", async function () {
+                //         const variantId = this.dataset.variantId;
+                //         const productId = this.dataset.productId;
+                //         console.log("productId: ", productId);
+                //         console.log("variantId: ", variantId);
+
+                //         const response = await fetch("/cart/add", {
+                //             method: "POST",
+                //             headers: { "Content-Type": "application/json" },
+                //             body: JSON.stringify({ variantId, productId })
+                //         });
+
+                //         const result = await response.json();
+
+                //         if (result.success) {
+
+                //             Swal.fire({
+                //                 title: "Added to Cart",
+                //                 text: result.message,
+                //                 icon: "success",
+                //                 timer: 1500,              // ⏳ close after 1.5 seconds
+                //                 showConfirmButton: false
+                //             }).then(() => {
+                //                 location.reload();
+                //             });
+
+                //         } else {
+
+                //             Swal.fire({
+                //                 title: "Error!",
+                //                 text: result.message,
+                //                 icon: "error",
+                //                 timer: 2000,
+                //                 showConfirmButton: false
+                //             });
+
+                //         }
+
+                //     })
+                // })
+
+                document.addEventListener("click", async function (e) {
+
+                    if (e.target.classList.contains("add-cart-btn")) {
+
+                        const variantId = e.target.dataset.variantId;
+                        const productId = e.target.dataset.productId;
+
+                        console.log("productId:", productId);
+                        console.log("variantId:", variantId);
 
                         const response = await fetch("/cart/add", {
                             method: "POST",
@@ -213,19 +268,31 @@
 
                         if (result.success) {
 
-                            Swal.fire("Added to Cart", "Product added to cart", "success");
-                            
-                            location.reload();
+                            Swal.fire({
+                                title: "Added to Cart",
+                                text: result.message,
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload();
+                            });
 
                         } else {
 
-                            Swal.fire("Error!", "Failed to add", "error");
-                            
+                            Swal.fire({
+                                title: "Error!",
+                                text: result.message,
+                                icon: "error",
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+
                         }
 
-                    })
-                })
+                    }
 
+                });
             </script>
 
     </body>

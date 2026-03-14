@@ -1,0 +1,198 @@
+<%- include("../partials/user/header", { title: "Invoice", hideNavBar: true }) %>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+    }
+
+    .invoice-container {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 20px auto;
+        background: #fff;
+        padding: 25mm;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+    }
+
+    .company-details h4 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .section-title {
+        font-weight: bold;
+        margin-bottom: 8px;
+        margin-top: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    table th {
+        background: #f0f0f0;
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        font-size: 14px;
+    }
+
+    table td {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    .summary {
+        width: 40%;
+        margin-left: auto;
+        margin-top: 20px;
+    }
+
+    .summary table td {
+        padding: 6px 10px;
+    }
+
+    .total-row {
+        font-weight: bold;
+        font-size: 16px;
+        border-top: 2px solid #000;
+    }
+
+    .footer-note {
+        margin-top: 40px;
+        font-size: 13px;
+        color: #555;
+    }
+
+    @media print {
+        body {
+            background: white;
+        }
+
+        .invoice-container {
+            box-shadow: none;
+            margin: 0;
+        }
+
+        .btn {
+            display: none;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+    }
+</style>
+
+<div class="invoice-container">
+
+    <!-- HEADER -->
+    <div class="invoice-header">
+        <div class="company-details">
+            <h4>WATCHNEST</h4>
+            <p>
+                123 Business Street <br>
+                City, State, 670001 <br>
+                Email: support@watchnest.com <br>
+                Phone: +91 9876543210
+            </p>
+        </div>
+
+        <div>
+            <h3>INVOICE</h3>
+            <p>
+                <strong>Invoice No:</strong> INV-<%= order.orderId %><br>
+                <strong>Order ID:</strong> <%= order.orderId %><br>
+                <strong>Date:</strong> <%= new Date(order.createdAt).toLocaleDateString() %><br>
+                <strong>Status:</strong> <%= order.status.toUpperCase() %>
+            </p>
+        </div>
+    </div>
+
+    <!-- SHIPPING ADDRESS -->
+    <div class="section-title">Shipping Address</div>
+    <p>
+        <strong><%= order.shippingAddress.fullName %></strong><br>
+        <%= order.shippingAddress.street %><br>
+        <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %><br>
+        Pin: <%= order.shippingAddress.pincode %><br>
+        Phone: <%= order.shippingAddress.phone %>
+    </p>
+
+    <!-- PRODUCT TABLE -->
+    <div class="section-title">Order Details</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th class="text-right">Price</th>
+                <th class="text-right">Quantity</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% let subtotal = 0; %>
+            <% orderItems.forEach(item => { 
+                let total = item.price * item.quantity;
+                subtotal += total;
+            %>
+                <tr>
+                    <td><%= item.productName %></td>
+                    <td class="text-right">₹<%= item.price %></td>
+                    <td class="text-right"><%= item.quantity %></td>
+                    <td class="text-right">₹<%= total %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+    <!-- SUMMARY -->
+    <div class="summary">
+        <table>
+            <tr>
+                <td>Subtotal</td>
+                <td class="text-right">₹<%= subtotal %></td>
+            </tr>
+            <tr>
+                <td>Discount</td>
+                <td class="text-right">₹<%= order.discount || 0 %></td>
+            </tr>
+            <tr class="total-row">
+                <td>Total</td>
+                <td class="text-right">₹<%= order.totalAmount %></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-note">
+        Thank you for shopping with WatchNest.<br>
+        This is a computer-generated invoice and does not require a signature.
+    </div>
+
+    <!-- PRINT BUTTON -->
+    <div style="margin-top:30px;">
+        <button onclick="window.print()" class="btn btn-dark">
+            Print Invoice
+        </button>
+    </div>
+
+</div>
+
+<%- include("../partials/user/footer") %>

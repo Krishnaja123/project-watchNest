@@ -86,7 +86,6 @@ const registerUser = async (req, res) => {
         req.session.otpType = "signup";
         req.session.userData = { username, email, password };
         req.session.otpExpiry = Date.now() + 45 * 1000
-
         req.session.message = "OTP sent to your registered email";
         req.session.type = "success";
         req.session.canResend = false;
@@ -136,7 +135,7 @@ const loadVerifyOtp = async (req, res) => {
         let type = req.session.type || "";
         let email = req.session.userData?.email || "";
         let canResend = req.session.canResend ?? false;
-        //console.log(type);
+        console.log("email: ", email);
         //console.log(message);
         let remainingTime = req.session.remainingTime ?? 0;
         let otp = req.session.userOtp || "";
@@ -150,8 +149,6 @@ const loadVerifyOtp = async (req, res) => {
             remainingTime,
             message,
             type,
-            title: "OTP Verification",
-            hideNavBar: true
         });
 
     } catch (error) {
@@ -167,7 +164,6 @@ const verifyOtp = async (req, res) => {
         const userData = req.session.userData;
 
         console.log(otp, savedOtp, userData);
-
 
         //Validate empty OTP
         if (!otp || otp.trim() === "") {
@@ -215,6 +211,34 @@ const verifyOtp = async (req, res) => {
         // Check for OTP Type
         if (req.session.otpType === "forgotPassword") {
             return res.redirect("/reset-password",);
+        }
+
+        if (req.session.otpType === "change-email") {
+            const email = req.session.email;
+            const userId = req.session.user.id;
+            const user = await User.findById(userId);
+            if (!user) {
+                req.session.message = "Please login";
+                req.session.type = "error";
+                return res.redirect("/login");
+            }
+
+            await User.findByIdAndUpdate(userId, { email });
+
+            req.session.message = "Successfully updated email";
+            req.session.type = "success";
+            return res.redirect("/profile",);
+        }
+
+        if (req.session.otpType === "change-password") {
+            const userId = req.session.user.id;
+            const password = req.session.newPassword;
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await User.findByIdAndUpdate(userId, { password_hash: hashedPassword });
+
+            req.session.message = "Successfully updated password";
+            req.session.type = "success";
+            return res.redirect("/profile",);
         }
 
         // Hash password before saving
@@ -281,9 +305,9 @@ const forgotPassword = async (req, res) => {
             return res.redirect("/forgotPassword");
         }
 
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email }).select("+password_hash");
         if (!existingUser) {
-            req.session.message = "Not a registered email";
+            req.session.message = "invalid credentials";
             req.session.type = "error";
             return res.redirect("/signup");
         }
@@ -331,7 +355,7 @@ const resetPassword = async (req, res) => {
             message,
             type,
             title: "Forgot Password",
-            hideNavBar : true
+            hideNavBar: true
         })
 
     } catch (error) {
@@ -483,7 +507,7 @@ const loginUser = async (req, res) => {
         console.log(password);
         console.log(existingUser.password_hash);
 
-        if(existingUser.userStatus === "Blocked"){
+        if (existingUser.userStatus === "Blocked") {
             req.session.message = "You are blocked by admin";
         }
 

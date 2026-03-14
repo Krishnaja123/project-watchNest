@@ -1,0 +1,179 @@
+
+<%- include("../partials/user/header", { title: "Payment Failed", hideNavBar: true }) %>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    body {
+        background: #f4f5f7;
+    }
+
+    .failed-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .failed-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 50px 40px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        max-width: 600px;
+        width: 100%;
+        transition: 0.3s ease;
+    }
+
+    .failed-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .failed-icon {
+        font-size: 70px;
+        color: #dc3545;
+        margin-bottom: 20px;
+    }
+
+    .failed-title {
+        font-weight: 600;
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .failed-text {
+        color: #6c757d;
+        margin-bottom: 25px;
+    }
+
+    .order-id {
+        background: #fafafa;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        margin-bottom: 30px;
+        display: inline-block;
+    }
+
+    .btn-retry {
+        background: #dc3545;
+        border: none;
+        color: #fff;
+        padding: 12px 25px;
+        border-radius: 30px;
+        font-weight: 500;
+        transition: 0.3s ease;
+    }
+
+    .btn-outline-secondary {
+        padding: 12px 25px;
+        border-radius: 30px;
+        font-weight: 500;
+    }
+
+    .btn-group-custom {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+</style>
+
+<div class="container failed-container">
+    <div class="failed-card">
+
+
+        <!-- Order ID -->
+        <div class="order-id">
+            Order ID: <strong><%= order.orderId %></strong>
+        </div>
+
+        <!-- Buttons -->
+        <div class="btn-group-custom">
+
+            <a href="/retry-payment/<%= order.orderId %>" class="btn btn-retry">
+                Retry Payment
+            </a>
+
+            <a href="/orders" class="btn btn-outline-secondary">
+                View Orders
+            </a>
+
+            <a href="/products" class="btn btn-outline-secondary">
+                Continue Shopping
+            </a>
+
+        </div>
+
+    </div>
+</div>
+
+<%- include("../partials/user/footer") %>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    const order_id = "<%= order._id %>";
+    console.log(order_id);
+    
+    var options = {
+        key: "<%= key %>",
+        amount: "<%= razorpayOrder.amount %>",
+        currency: "INR",
+        order_id: "<%= razorpayOrder.id %>",
+
+        handler: async function (response) {
+
+            const verify = await fetch("/payment/verify-payment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    ...response,
+                    order_id
+                })
+            });
+
+            const result = await verify.json();
+
+            console.log("result: ",result);
+            
+
+            if (result.status) {
+                window.location.href = `/payment-success/${result.orderId}`;
+            } else {
+                alert("Payment verification failed");
+            }
+
+        },
+
+        modal: {
+            ondismiss: function () {
+                window.location.href = `/payment-failed/${order.orderId}`;
+            }
+        }
+    };
+
+    var rzp = new Razorpay(options);
+
+    rzp.on("payment.failed", async function (response) {
+
+        await fetch("/payment-failed", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                orderId: order.order_id
+            })
+        });
+
+        window.location.href = `/payment-failed/${order.orderId}`;
+
+    });
+
+    rzp.open();
+
+</script>
