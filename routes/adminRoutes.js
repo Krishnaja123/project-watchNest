@@ -62,5 +62,5 @@ router.get("/fetchorders", adminAuth, orderController.fetchOrders);
 router.get("/orderDetails/:id", adminAuth, orderController.getOrderDetails);
 //router.post("order-status/:id", adminAuth, orderController.updateOrderStatus);
 router.post("/order-item-status/:id", adminAuth, orderController.updateProductStatus);
-
+router.post("/order-item-return/:id", adminAuth, orderController.returnAcceptOrReject);
 module.exports = router;

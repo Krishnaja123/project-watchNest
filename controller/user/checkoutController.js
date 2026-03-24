@@ -8,7 +8,7 @@ const { getSessionMessage } = require("../../utils/sessionHelper");
 const getCheckout = async (req, res) => {
     try {
         const { message, type } = getSessionMessage(req);
-        const userId = req.session.user.id;
+        const userId = req.user._id;
 
         const userCart = await Cart.findOne({ user_id: userId, is_active: true });
 

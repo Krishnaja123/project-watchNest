@@ -2,8 +2,8 @@ const cartService = require("../services/cartService");
 
 const injectCartCount = async (req, res, next) => {
     try {
-        if (req.session && req.session.user) {
-            const count = await cartService.getCartCount(req.session.user.id);
+        if (req.user) {
+            const count = await cartService.getCartCount(req.user._id);
             res.locals.cartCount = count;
         } else {
             res.locals.cartCount = 0;

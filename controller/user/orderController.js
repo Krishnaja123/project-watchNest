@@ -13,15 +13,15 @@ const { createOrderService } = require("../../services/createOrderService");
 const createOrder = async (req, res) => {
     try {
         console.log("hit the controller");
-        console.log("req.session.user: ", req.session.user);
+        console.log("req.user: ", req.user);
 
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const user = await User.findById(userId);
 
 
         const { selectedAddressId, paymentMethod } = req.body;
         let paymentStatus = "pending"
-        
+
         const order = await createOrderService(
             userId,
             selectedAddressId,
@@ -29,7 +29,7 @@ const createOrder = async (req, res) => {
             paymentStatus
         );
 
-         return res.redirect(`/order/success/${order._id}`);
+        return res.redirect(`/order/success/${order.orderId}`);
 
         // return res.render('user/order-success', {
         //     orderId: order.orderId
@@ -49,9 +49,9 @@ const orderSuccess = async (req, res) => {
         const orderId = req.params.id;
 
         console.log("orderID: ", orderId);
-        
 
-        const order = await Order.findById(orderId);
+
+        const order = await Order.findOne({ orderId });
 
         return res.render('user/order-success', {
             orderId: order.orderId
@@ -69,7 +69,7 @@ const getOrders = async (req, res) => {
     try {
         const { message, type } = getSessionMessage(req);
 
-        const userId = req.session.user.id;
+        const userId = req.user._id;
 
         const user = await User.findById(userId);
 
@@ -93,6 +93,9 @@ const getOrders = async (req, res) => {
         const orderIds = orders.map(order => order._id);
 
         const orderItems = await OrderItem.find({ order_id: { $in: orderIds } });
+
+        console.log("orders: ", orders);
+
 
         return res.render("user/orders", {
             user,
@@ -119,7 +122,7 @@ const getOrderDetails = async (req, res) => {
         const { message, type } = getSessionMessage(req);
 
         const orderId = req.params.id;
-        const userId = req.session.user.id;
+        const userId = req.user._id;
 
         if (!userId) {
             req.session.message = "User is not authorized to access orders. Please login";
@@ -177,9 +180,16 @@ const getOrderInvoice = async (req, res) => {
 
 const cancelProduct = async (req, res) => {
     try {
-        console.log("hi");
-
         const orderItemId = req.params.id;
+
+        const { reason } = req.body;
+
+        if (!reason || !reason.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Cancellation reason is required"
+            });
+        }
 
         const item = await OrderItem.findById(orderItemId);
         console.log("item: ", item);
@@ -195,7 +205,7 @@ const cancelProduct = async (req, res) => {
         }
 
         item.status = "cancelled";
-        item.cancelReason = req.body.cancelReason;
+        item.cancelReason = reason;
         item.save();
 
         const product = await Product.findById(item.product_id);
@@ -228,15 +238,22 @@ const cancelOrder = async (req, res) => {
     try {
         const { message, type } = getSessionMessage(req);
 
-        const orderId = req.params.id;
-        console.log("orderId: ", orderId)
+        const order_id = req.params.id;
+        console.log("orderId: ", order_id)
 
-        const { cancelReason } = req.body;
+        const { reason } = req.body;
 
-        const order = await Order.findOne({ orderId });
+        if (!reason || !reason.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Cancellation reason is required"
+            });
+        }
+
+        const order = await Order.findById(order_id);
 
         if (!order) {
-            console.log("No order found for id:", orderId);
+            console.log("No order found for id:", order_id);
             return res.status(404).json({ error: "Item not found" });
         };
 
@@ -247,10 +264,10 @@ const cancelOrder = async (req, res) => {
         };
 
         order.status = "cancelled";
-        order.cancelReason = cancelReason;
+        order.cancelReason = reason;
         await order.save();
 
-        const orderItems = await OrderItem.find({ order_id: order._id })
+        const orderItems = await OrderItem.find({ order_id })
             .populate("product_id");
 
         for (let item of orderItems) {
@@ -278,54 +295,65 @@ const cancelOrder = async (req, res) => {
     }
 }
 
-// const returnProduct = async (req, res) => {
-//     try {
-//          console.log("hi");
+const returnProduct = async (req, res) => {
+    try {
+        console.log("hi");
 
-//         const returnItemId = req.params.id;
+        const itemId = req.params.id;
 
-//         const item = await OrderItem.findById(returnItemId);
-//         console.log("item: ", item);
-//         if (!item) {
-//             console.log("No item found for id:", returnItemId);
-//             return res.status(404).json({ error: "Item not found" });
-//         }
+         const { reason } = req.body;
 
-//         if (item.status != "delivered") {
-//             req.session.message = "This order cannot be returned";
-//             req.session.type = "error";
-//             return res.redirect("/orders");
-//         }
+        if (!reason || !reason.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Cancellation reason is required"
+            });
+        }
 
-//         item.status = "returned";
-//         item.returnReason = req.body.returnReason;
-//         item.save();
+        const item = await OrderItem.findById(itemId);
+        console.log("item: ", item);
 
-//         const product = await Product.findById(item.product_id);
-//         console.log("product: ", product);
+        if (!item) {
+            console.log("No item found for id:", itemId);
+            return res.status(404).json({ error: "Item not found" });
+        }
 
-//         const variant = product?.variants?.id(item.variant_id);
-//         variant.stock += item.quantity;
+        if (item.status != "delivered") {
+            req.session.message = "This order cannot be returned";
+            req.session.type = "error";
+            return res.redirect("/orders");
+        }
 
-//         product.save();
+        // item.status = "returned";
+        item.returnRequested = true;
+        item.returnReason = reason;
+        item.save();
 
-//         const orderItems = await OrderItem.find({ order_id: item.order_id });
-//         const newOrderStatus = calculateOrderStatus(orderItems);
+        // const product = await Product.findById(item.product_id);
+        // console.log("product: ", product);
 
-//         await Order.findByIdAndUpdate(item.order_id, {
-//             status: newOrderStatus
-//         });
+        // const variant = product?.variants?.id(item.variant_id);
+        // variant.stock += item.quantity;
 
-//         req.session.message = "Product cancelled successfully";
-//         req.session.type = "success";
+        // product.save();
 
-//         res.redirect('/orders');
-        
-//     } catch (error) {
-//       console.error(error);
-//         res.status(500).send("Internal Server Error");  
-//     }
-// }
+        // const orderItems = await OrderItem.find({ order_id: item.order_id });
+        // const newOrderStatus = calculateOrderStatus(orderItems);
+
+        // await Order.findByIdAndUpdate(item.order_id, {
+        //     status: newOrderStatus
+        // });
+
+        req.session.message = "Return requestd successfully";
+        req.session.type = "success";
+
+        res.redirect('/orders');
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+}
 
 
 
@@ -337,6 +365,6 @@ module.exports = {
     getOrderInvoice,
     cancelProduct,
     cancelOrder,
-   // returnProduct
-    
+    returnProduct
+
 }

@@ -29,14 +29,6 @@ body {
     display: block;
 }
 
-/* ===== CARD (FULL WIDTH) ===== */
-.card {
-    background: #ffffff;
-    border-radius: 18px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
 
 .card:hover {
     transform: translateY(-4px);
@@ -255,12 +247,6 @@ body {
     to { transform: translateY(0); opacity: 1; }
 }
 
-/* ===== ORDERS PAGE ===== */
-
-.profile-main {
-    padding: 30px 40px;
-}
-
 /* Title */
 .main-title {
     font-size: 28px;
@@ -290,7 +276,7 @@ form.d-flex button {
     margin-top: 10px;
 }
 
-/* Order Card */
+Order Card
 .card {
     border-radius: 12px;
     border: 1px solid #e3e6eb;

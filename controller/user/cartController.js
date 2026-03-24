@@ -76,13 +76,13 @@ const { getSessionMessage } = require("../../utils/sessionHelper");
 //     }
 // };
 
-
+ 
 const getCart = async (req, res) => {
     try {
 
         const { message, type } = getSessionMessage(req);
 
-        const userId = req.session.user.id;
+        const userId = req.user._id;
 
         const userCart = await Cart.findOne({
             user_id: userId,
@@ -169,7 +169,7 @@ const getCart = async (req, res) => {
 
 const addToCart = async (req, res) => {
     try {
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const { productId, variantId } = req.body;
 
         if (!productId || !variantId) {
@@ -304,8 +304,8 @@ const updateCartQuantity = async (req, res) => {
         cartItem.quantity = newQuantity;
         await cartItem.save();
 
-        req.session.message = "Cart updated successfully.";
-        req.session.type = "success";
+        // req.session.message = "Cart updated successfully.";
+        // req.session.type = "success";
 
         res.redirect("/cart");
 
@@ -318,7 +318,7 @@ const updateCartQuantity = async (req, res) => {
 
 const deleteItem = async (req, res) => {
     try {
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const itemId = req.params.id;
 
         const cart = await Cart.findOne({

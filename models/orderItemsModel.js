@@ -54,16 +54,31 @@ const orderItemSchema = new mongoose.Schema({
     ],
     default: "processing"
   },
-  
-   cancelReason: {
-        type: String,
-        default: null
-    },
 
-    returnReason: {
-        type: String,
-        default: null
-    }
+  cancelReason: {
+    type: String,
+    default: null
+  },
+
+  returnRequested: {
+    type: Boolean,
+    default: false
+  },
+
+  returnAccepted: {
+    type: Boolean,
+    default: false
+  },
+
+   returnRejected: {
+    type: Boolean,
+    default: false
+  },
+
+  returnReason: {
+    type: String,
+    default: null
+  }
 
 }, { timestamps: true });
 

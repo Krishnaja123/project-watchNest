@@ -28,7 +28,7 @@ passport.use(new GoogleStrategy({
             }
 
             user = new User({
-                name: profile.displayName,
+                username: profile.displayName,
                 email: email,
                 googleId: profile.id
             });
@@ -43,10 +43,12 @@ passport.use(new GoogleStrategy({
 ));
 
 passport.serializeUser((user, done) => {
+    // console.log("serializeUser:", user._id);
     done(null, user.id)
 });
 
 passport.deserializeUser((id, done) => {
+    // console.log("deserializeUser:", id);
     User.findById(id)
         .then(user => {
             done(null, user)

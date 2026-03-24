@@ -99,7 +99,7 @@ router.get('/orders/:id', requireLogin, orderController.getOrderDetails);
 router.get('/order/:id/invoice', requireLogin, orderController.getOrderInvoice);
 router.post('/orders/item-cancel/:id', requireLogin, orderController.cancelProduct);
 router.post('/orders/cancel/:id', requireLogin, orderController.cancelOrder);
-// router.post('/orders/item-return/:id', requireLogin, orderController.returnProduct);
+router.post('/orders/item-return/:id', requireLogin, orderController.returnProduct);
 
 
 

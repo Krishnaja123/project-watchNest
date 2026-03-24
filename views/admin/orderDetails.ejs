@@ -17,62 +17,64 @@
 
 
                     <div class="d-flex justify-content-end mb-3">
-                        <a href='/admin/orders?page=${page}' class="btn btn-secondary">← Go Back</a>
+                        <a href='/admin/orders?page=<%= page %>' class="btn btn-secondary">← Go Back</a>
                     </div>
 
                     <% const status=order.status; %>
-                        <% const OrderStatusFlow={ processing:
-                            ["processing","partially_shipped","shipped","partially_cancelled","cancelled"],
-                            partially_shipped: ["partially_shipped","shipped","partially_delivered"], shipped:
-                            ["shipped","partially_delivered","delivered"], partially_delivered:
-                            ["partially_delivered","delivered"], delivered: ["delivered"], cancelled: ["cancelled"],
-                            returned: ["returned"] }; %>
+                        <!-- <% const OrderStatusFlow={ processing: ["processing","shipped","cancelled"],
+                            shipped: ["shipped","delivered"], delivered: ["delivered"], cancelled: ["cancelled"],
+                            returned: ["returned"] }; %> -->
 
-                            <!-- ORDER SUMMARY -->
-                            <div class="card mb-4">
-                                <div class="card-body">
+                        <!-- ORDER SUMMARY -->
+                        <div class="card mb-4">
+                            <div class="card-body">
 
-                                    <div class="row">
+                                <div class="row">
 
-                                        <div class="col-md-3">
-                                            <small class="text-muted">ORDER DATE</small><br>
-                                            <strong>
-                                                <%= new Date(order.createdAt).toDateString() %>
-                                            </strong>
-                                        </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">ORDER DATE</small><br>
+                                        <strong>
+                                            <%= new Date(order.createdAt).toDateString() %>
+                                        </strong>
+                                    </div>
 
-                                        <div class="col-md-3">
-                                            <small class="text-muted">ORDER ID</small><br>
-                                            <strong>
-                                                <%= order.orderId %>
-                                            </strong>
-                                        </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">ORDER ID</small><br>
+                                        <strong>
+                                            <%= order.orderId %>
+                                        </strong>
+                                    </div>
 
-                                        <div class="col-md-2">
-                                            <small class="text-muted">TOTAL</small><br>
-                                            <strong>₹<%= order.totalAmount %></strong>
-                                        </div>
+                                    <div class="col-md-2">
+                                        <small class="text-muted">TOTAL</small><br>
+                                        <strong>₹<%= order.totalAmount %></strong>
+                                    </div>
 
-                                        <div class="col-md-2">
-                                            <small class="text-muted">PAYMENT</small><br>
-                                            <span class="badge bg-info">
-                                                <%= order.paymentStatus %>
-                                            </span>
-                                        </div>
+                                    <div class="col-md-2">
+                                        <small class="text-muted">PAYMENT</small><br>
+                                        <span class="badge 
+    <%= order.paymentStatus === 'pending' ? 'bg-warning text-dark' :
+        order.paymentStatus === 'paid' ? 'bg-success' :
+        order.paymentStatus === 'failed' ? 'bg-danger' :
+        order.paymentStatus === 'refunded' ? 'bg-info text-dark' :
+        'bg-secondary' %>">
+                                            <%= order.paymentStatus %>
+                                        </span>
+                                    </div>
 
-                                        <div class="col-md-2">
-                                            <small class="text-muted">CURRENT STATUS</small><br>
-                                            <span class="badge bg-secondary">
-                                                <%= order.status %>
-                                            </span>
-                                        </div>
-
+                                    <div class="col-md-2">
+                                        <small class="text-muted">CURRENT STATUS</small><br>
+                                        <span class="badge bg-secondary">
+                                            <%= order.status %>
+                                        </span>
                                     </div>
 
                                 </div>
-                            </div>
 
-                            <!-- EDIT ORDER STATUS 
+                            </div>
+                        </div>
+
+                        <!-- EDIT ORDER STATUS 
                             <div class="card mb-4">
                                 <div class="card-body">
 
@@ -115,17 +117,20 @@
 
                             -->
 
-                            <!-- PRODUCT LIST -->
-                            <% const productStatusFlow={ processing: ["processing","shipped","cancelled"], shipped:
-                                ["shipped","delivered"], delivered: ["delivered"], cancelled: ["cancelled"], returned:
-                                ["returned"] }; %>
+                        <!-- PRODUCT LIST -->
+                        <% const productStatusFlow={ processing: ["processing","shipped","cancelled"], shipped:
+                            ["shipped","delivered"], delivered: ["delivered","returned"], cancelled: ["cancelled"],
+                            returned: ["returned"] }; %>
 
-                                <div class="card mb-4">
-                                    <div class="card-body">
+                            <div class="card mb-4">
+                                <div class="card-body">
 
-                                        <h5 class="mb-3">Ordered Products</h5>
+                                    <h5 class="mb-3">Ordered Products</h5>
 
-                                        <% orderItems.forEach(item=> { %>
+                                    <% orderItems.forEach(item=> { %>
+
+                                        <% const endStatus=(item.returnRequested && item.returnAccepted) ?
+                                            ["cancelled", "returned" ] : ["cancelled", "returned" , "delivered" ]; %>
 
                                             <div class="row mb-3 align-items-center">
 
@@ -143,15 +148,70 @@
 
                                                 <div class="col-md-2">
                                                     <strong>Status:</strong><br>
-                                                    <span class="badge bg-secondary">
+
+                                                    <span class="badge 
+    <%= item.status === 'processing' ? 'bg-warning text-dark' :
+        item.status === 'shipped' ? 'bg-primary' :
+        item.status === 'delivered' ? 'bg-success' :
+        item.status === 'cancelled' ? 'bg-danger' :
+        item.status === 'returned' ? 'bg-dark' :
+        'bg-secondary' %>">
                                                         <%= item.status %>
                                                     </span>
+                                                    <% if(item.status==="cancelled" ) { %>
+                                                        <div class="mt-2 p-2 rounded"
+                                                            style="background-color:#f8f9fa; border-left: 4px solid #dc3545;">
+                                                            <small class="text-muted">
+                                                                <strong>Cancel Reason:</strong><br>
+                                                                <%= item.cancelReason || order.cancelReason %>
+                                                            </small>
+                                                        </div>
+                                                        <% } %>
+
+                                                            <% if(item.status==="delivered" &&
+                                                                item.returnRequested===true) { %>
+                                                                <div class="mt-2">
+                                                                    <% if(item.returnRejected===false &&
+                                                                        item.returnAccepted===false) { %>
+                                                                        <button type="button"
+                                                                            class="btn btn-danger btn-sm return-accept-btn"
+                                                                            data-id="<%= item._id %>">
+                                                                            Handle Return
+                                                                        </button>
+                                                                        <% } %>
+                                                                            <% if(item.returnAccepted) { %>
+                                                                                <span class="badge bg-success">
+                                                                                    Return Accepted
+                                                                                </span>
+                                                                                <% } else if(item.returnRejected) { %>
+                                                                                    <span class="badge bg-danger">
+                                                                                        Return Rejected
+                                                                                    </span>
+                                                                                    <% } %>
+                                                                                        <small class="text-muted">
+                                                                                            <strong><br>Return
+                                                                                                Reason:</strong>
+                                                                                            <%= item.returnReason %>
+                                                                                        </small>
+                                                                </div>
+
+                                                                <% } %>
+
+                                                                    <div>
+                                                                        <% if(item.status==="returned" ) { %>
+                                                                            <small class="text-muted">
+                                                                                <strong><br>Return
+                                                                                    Reason:</strong>
+                                                                                <%= item.returnReason %>
+                                                                            </small>
+                                                                            <% } %>
+                                                                    </div>
                                                 </div>
 
-                                                <td>
 
-                                                    <% if(!["cancelled","returned","delivered"].includes(item.status)){
-                                                        %>
+                                                <div>
+
+                                                    <% if(!endStatus.includes(item.status)){ %>
 
                                                         <form action="/admin/order-item-status/<%= item._id %>"
                                                             method="POST"
@@ -183,36 +243,37 @@
 
                                                         <% } else { %>
 
-                                                            <span class="text-muted">No actions available</span>
+                                                            <span class="text-muted">No actions
+                                                                available</span>
 
                                                             <% } %>
 
-                                                </td>
+                                                </div>
                                             </div>
 
                                             <hr>
 
                                             <% }) %>
 
-                                    </div>
                                 </div>
+                            </div>
 
-                                <!-- SHIPPING ADDRESS -->
-                                <div class="card">
-                                    <div class="card-body">
+                            <!-- SHIPPING ADDRESS -->
+                            <div class="card">
+                                <div class="card-body">
 
-                                        <h5>Shipping Address</h5>
+                                    <h5>Shipping Address</h5>
 
-                                        <strong>
-                                            <%= order.shippingAddress?.fullName || "N/A" %>
-                                        </strong><br>
-                                        <%= order.shippingAddress?.street || "" %><br>
-                                            <%= order.shippingAddress?.city || "" %>,
-                                                <%= order.shippingAddress?.state || "" %><br>
-                                                    Pin: <%= order.shippingAddress?.pincode || "" %><br>
-                                                        Phone: <%= order.shippingAddress?.phone || "" %>
-                                    </div>
+                                    <strong>
+                                        <%= order.shippingAddress?.fullName || "N/A" %>
+                                    </strong><br>
+                                    <%= order.shippingAddress?.street || "" %><br>
+                                        <%= order.shippingAddress?.city || "" %>,
+                                            <%= order.shippingAddress?.state || "" %><br>
+                                                Pin: <%= order.shippingAddress?.pincode || "" %><br>
+                                                    Phone: <%= order.shippingAddress?.phone || "" %>
                                 </div>
+                            </div>
                 </div>
         </div>
     </div>
@@ -228,16 +289,53 @@
                     icon: type,
                     text: message,
                     confirmButtonColor: '#007bff',
-                    timer: 2000,
+                    confirmButtonText: "OK",
+                    // timer: 2000,
                     timerProgressBar: true,
-                    showConfirmButton: false
                 });
             }
 
             document.addEventListener("DOMContentLoaded", function () {
-                const productUpdateForm = document.querySelectorAll("#product-status-update");
-                productUpdateForm.forEach(updateForm => {
-                    updateForm.addEventListener("")
+
+                const returnRequests = document.querySelectorAll(".return-accept-btn");
+                returnRequests.forEach(btn => {
+                    btn.addEventListener("click", function () {
+                        const itemId = btn.getAttribute("data-id");
+
+                        Swal.fire({
+                            title: "Return Request",
+                            text: "Do you want to accept or reject this return request?",
+                            icon: "question",
+                            showCancelButton: true,
+                            showDenyButton: true,
+
+                            confirmButtonText: "Accept",
+                            denyButtonText: "Reject",
+                            cancelButtonText: "Cancel",
+
+                            confirmButtonColor: "#28a745",
+                            denyButtonColor: "#dc3545"
+                        }).then((result) => {
+
+                                if (result.isConfirmed || result.isDenied) {
+
+                                    const form = document.createElement("form");
+                                    form.method = "POST";
+                                    form.action = `/admin/order-item-return/${itemId}`;
+
+                                    const actionInput = document.createElement("input");
+                                    actionInput.type = "hidden";
+                                    actionInput.name = "action";
+                                    actionInput.value = result.isConfirmed ? "acceptReturn" : "rejectReturn";
+
+                                    form.appendChild(actionInput);
+
+                                    document.body.appendChild(form);
+                                    form.submit();
+                                }
+
+                        });
+                    })
                 })
             })
         </script>

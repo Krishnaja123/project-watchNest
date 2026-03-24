@@ -8,16 +8,16 @@ const userAuth = (req, res, next) => {
 }
 
 const requireLogin = async (req, res, next) => {
-    if (!req.session.user) {
+    if (!req.user) {
         return res.redirect("/login");
     }
 
     try {
-        console.log(req.session.user);
-        const user = await User.findById(req.session.user.id);
+        console.log(req.user);
+        const user = await User.findById(req.user._id);
 
         if (!user || user.userStatus === "Blocked") {
-            delete req.session.user; 
+            delete req.user; 
             req.session.message = "You are not authorized. Please contact admin.";
             req.session.type = "error";
             return res.redirect("/login");

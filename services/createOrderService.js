@@ -6,6 +6,7 @@ const Order = require("../models/orderModel");
 const OrderItem = require("../models/orderItemsModel");
 
 const createOrderService = async (userId, selectedAddressId, paymentMethod, paymentStatus) => {
+    console.log("get in to service");
 
     const address = await Address.findById(selectedAddressId);
 
@@ -29,7 +30,9 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
     const orderId = "ORD-" + Date.now();
     let totalAmount = 0;
 
-    const orderItems = cartItems.map(item => {
+    const orderItems = [];
+
+    for (const item of cartItems) {
         const variant = item.product_id.variants.find(
             v => v._id.toString() === item.variant_id.toString()
         );
@@ -38,15 +41,16 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
             throw new Error("Stock not available for some products");
         }
 
-        //if (paymentMethod === "cod") {
-            variant.stock -= item.quantity;
-            item.product_id.save();
-        //}
+        // Reduce stock
+        variant.stock -= item.quantity;
+
+        // Save product properly (await it!)
+        await item.product_id.save();
 
         const subtotal = variant.price * item.quantity;
         totalAmount += subtotal;
 
-        return {
+        orderItems.push({
             product_id: item.product_id._id,
             productName: item.product_id.name,
             variant_id: item.variant_id,
@@ -54,8 +58,8 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
             image: variant.images[0],
             quantity: item.quantity,
             subtotal,
-        };
-    });
+        });
+    }
 
     const newOrder = await Order.create({
         user_id: userId,
@@ -73,9 +77,9 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
         });
     }
 
-   // if (paymentMethod === "cod") {
-        cart.is_active = false;
-        await cart.save();
+    // if (paymentMethod === "cod") {
+    cart.is_active = false;
+    await cart.save();
     //}
     return newOrder;
 };

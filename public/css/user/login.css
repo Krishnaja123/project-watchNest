@@ -112,6 +112,16 @@ body, html {
   cursor: pointer;
 }
 
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;
+  z-index: 2;
+}
+
 /* Error messages */
 .error-message {
   color: red;

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Order = require("../../models/orderModel");
 const OrderItem = require("../../models/orderItemsModel");
 
-const  { calculateOrderStatus } = require("../../utils/orderStatusHelper");
+const { calculateOrderStatus } = require("../../utils/orderStatusHelper");
 const { getSessionMessage } = require("../../utils/sessionHelper");
 const Product = require("../../models/productModel");
 
@@ -12,6 +12,19 @@ const getOrders = async (req, res) => {
 
         let page = parseInt(req.query.page) || 1;
 
+        // const orders = await Order.find();
+
+        // for (const order of orders) {
+
+        //     const orderItems = await OrderItem.find({ order_id: order._id });
+
+        //     const newOrderStatus = calculateOrderStatus(orderItems);
+
+        //     await Order.findByIdAndUpdate(order._id, {
+        //         status: newOrderStatus
+        //     });
+
+        // }
         return res.render("admin/orders", { message, type, page });
 
     } catch (error) {
@@ -130,7 +143,7 @@ const updateProductStatus = async (req, res) => {
             item.status = status;
             await item.save();
 
-            if(status === "cancelled") {
+            if (status === "cancelled") {
                 const product = await Product.findById(item.product_id);
                 const variant = product?.variants?.id(item.variant_id);
                 variant.stock += item.quantity;
@@ -138,20 +151,37 @@ const updateProductStatus = async (req, res) => {
             }
 
         } else if (item.status === "shipped") {
-            if(status !== "delivered") {
+
+            if (status !== "delivered") {
                 req.session.message = `can not change the product status to ${status} as its allreay shipped.`;
-            req.session.type = "error";
-            return res.redirect(`/admin/orderDetails/${item.order_id}`);
+                req.session.type = "error";
+                return res.redirect(`/admin/orderDetails/${item.order_id}`);
             }
+
             item.status = status;
             await item.save();
+
+        } else if (item.status === "delivered") {
+            if (item.returnRequested && item.returnAccepted) {
+                item.status = status;
+                await item.save();
+                const product = await Product.findById(item.product_id);
+                const variant = product?.variants?.id(item.variant_id);
+                variant.stock += item.quantity;
+                await product.save();
+            } else {
+                req.session.message = `can not change the product status to ${status} until you accept the return request from user.`
+                req.session.type = "error";
+                return res.redirect(`/admin/orderDetails/${item.order_id}`);
+            }
+
         } else {
             req.session.message = "This status cannot be changed.";
             req.session.type = "error";
             return res.redirect(`/admin/orderDetails/${item.order_id}`);
         }
 
-        const orderItems = await OrderItem.find({ order_id : item.order_id });
+        const orderItems = await OrderItem.find({ order_id: item.order_id });
         const newOrderStatus = calculateOrderStatus(orderItems);
 
         await Order.findByIdAndUpdate(item.order_id, {
@@ -169,11 +199,51 @@ const updateProductStatus = async (req, res) => {
     }
 }
 
+const returnAcceptOrReject = async (req, res) => {
+
+    const { action } = req.body;
+
+    const orderItemId = req.params.id;
+    const item = await OrderItem.findById(orderItemId);
+
+    if (!item) {
+        console.log("No item found for id:", orderItemId);
+        return res.status(404).json({ error: "Item not found" });
+    }
+
+    if (!action) {
+        return res.status(404).json({ error: "No action found" });
+    }
+
+    if (action === "acceptReturn") {
+        item.returnAccepted = true;
+        item.returnRejected = false;
+
+    } else {
+
+        item.returnAccepted = false;
+        item.returnRejected = true;
+    }
+
+    await item.save();  // ✅ IMPORTANT
+
+    req.session.message = action === "acceptReturn"
+        ? "Return request accepted successfully"
+        : "Return request rejected successfully";
+
+    req.session.type = "success";
+
+    res.redirect(`/admin/orderDetails/${item.order_id}`);
+
+
+
+}
 
 module.exports = {
     getOrders,
     fetchOrders,
     getOrderDetails,
     //updateOrderStatus,
-    updateProductStatus
+    updateProductStatus,
+    returnAcceptOrReject
 }

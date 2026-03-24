@@ -15,7 +15,7 @@ const loadProfile = async (req, res) => {
 
         const { message, type } = getSessionMessage(req);
 
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const user = await User.findById(userId);
 
         console.log("user: ", user);
@@ -40,7 +40,7 @@ const getEditProfile = async (req, res) => {
     try {
         const { message, type } = getSessionMessage(req);
 
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const user = await User.findById(userId);
 
         res.render("user/editProfile", {
@@ -63,7 +63,7 @@ const getChangeUserName = async (req, res) => {
     try {
         const { message, type } = getSessionMessage(req);
 
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const user = await User.findById(userId);
 
         res.render("user/changeName", {
@@ -81,7 +81,7 @@ const getChangeUserName = async (req, res) => {
 const changeUserName = async (req, res) => {
     try {
         const newName = req.body.name;
-        const userId = req.session.user.id;
+        const userId = req.user._id;
 
         const user = await User.findById(userId);
 
@@ -115,7 +115,7 @@ const getChangeEmail = async (req, res) => {
     try {
         const { message, type } = getSessionMessage(req);
 
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const user = await User.findById(userId);
 
         res.render("user/changeEmail", {
@@ -137,7 +137,7 @@ const changeEmail = async (req, res) => {
         const email = req.body.email;
         console.log(email);
 
-        const userId = req.session.user.id;
+        const userId = req.user._id;
 
         const user = await User.findById(userId);
 
@@ -189,7 +189,7 @@ const changeEmail = async (req, res) => {
 const getChangePasswordPage = async (req, res) => {
     try {
         const { message, type } = getSessionMessage(req);
-        const userId = req.session.user.id;
+        const userId = req.user._id;
 
         if (!userId) {
             req.session.message = "User is not logged in. Please login";
@@ -202,7 +202,7 @@ const getChangePasswordPage = async (req, res) => {
         res.render("user/changePassword", {
             message,
             type,
-            email: req.session.user.email
+            email: req.user.email
         });
 
     } catch (error) {
@@ -214,7 +214,7 @@ const getChangePasswordPage = async (req, res) => {
 const changePassword = async (req, res) => {
     try {
 
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const { currentPassword, newPassword, confirmPassword } = req.body;
 
         if (!currentPassword || !newPassword || !confirmPassword) {
@@ -320,7 +320,7 @@ const updateProfileImage = async (req, res) => {
         }
 
         const imageUrl = await uploadToCloudinary(req.file.buffer, "profile_pictures");
-        await User.findByIdAndUpdate(req.session.user.id, {
+        await User.findByIdAndUpdate(req.user._id, {
             profileImage: imageUrl
         });
 

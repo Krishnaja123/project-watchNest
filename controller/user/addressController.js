@@ -9,7 +9,7 @@ const { createAddress } = require("../../services/addressService");
 const getAddress = async (req, res) => {
     try {
         const { message, type } = getSessionMessage(req);
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const from = req.query.from || "";
 
         if(!userId) {
@@ -38,7 +38,7 @@ const getAddress = async (req, res) => {
 const saveAddress = async (req, res) => {
     try {
 
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const user = await User.findById(userId);
 
         if (!user || user.userStatus === "Blocked") {
@@ -86,7 +86,7 @@ const deleteAddress = async (req, res) => {
 
         const address = await Address.findOne({
             _id: req.params.id,
-            user_id: req.session.user.id
+            user_id: req.user._id
         });
 
         if (!address) {
@@ -99,7 +99,7 @@ const deleteAddress = async (req, res) => {
         const wasDefault = address.is_default;
 
         const addressId = req.params.id;
-        const userId = req.session.user.id;
+        const userId = req.user._id;
 
         const result = await Address.deleteOne({
             _id: addressId,
@@ -135,7 +135,7 @@ const deleteAddress = async (req, res) => {
 
 const setDefault = async (req, res) => {
     try {
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const addressId = req.params.id;
 
         await Address.updateMany(

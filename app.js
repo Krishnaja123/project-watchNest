@@ -32,13 +32,19 @@ app.use(session({
     }
 }));
 
-app.use((req,res,next) => {
-    res.locals.user = req.session.user || null;
-    next();
-})
+// app.use((req,res,next) => {
+//     res.locals.user = req.session.user || "";
+//     next();
+// })
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use((req,res,next) => {
+    res.locals.user = req.user || null;
+        // console.log("user: ", res.locals.user);
+    next();
+})
 
 app.use(injectCartCount);
 

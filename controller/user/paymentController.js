@@ -9,7 +9,7 @@ const crypto = require("crypto");
 
 const createRazorpayOrder = async (req, res) => {
     try {
-        const userId = req.session.user.id;
+        const userId = req.user._id;
         const { amount, selectedAddressId } = req.body;
 
         const order = await createOrderService(
@@ -45,8 +45,10 @@ const verifyPayment = async (req, res) => {
 
     console.log("Hi");
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
+    console.log("orderId: ", orderId);
+    
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
     const expectedSignature = crypto
@@ -55,7 +57,7 @@ const verifyPayment = async (req, res) => {
         .digest("hex");
 
     if (expectedSignature === razorpay_signature) {
-        const userId = req.session.user.id;
+        const userId = req.user._id;
 
         // if (paymentMethod === "online") {
         //     const orderItems = await OrderItem.find({ order_id: orderId }).populate("product_id");
@@ -77,7 +79,10 @@ const verifyPayment = async (req, res) => {
         //     }
 
         // }
-        const order = await Order.findById(order_id);
+        const order = await Order.findById(orderId);
+
+        console.log("order: ", order);
+        
 
         order.paymentStatus = "paid";
         order.razorpayOrderId = razorpay_order_id;

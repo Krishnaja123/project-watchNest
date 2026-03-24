@@ -92,6 +92,7 @@ const registerUser = async (req, res) => {
         req.session.remainingTime = 45;
         res.redirect("/verify-otp");
         console.log(`OTP sent ${otp}`);
+        console.log("req.session.userData:", req.session.userData);
 
     } catch (error) {
         console.error(error);
@@ -133,7 +134,7 @@ const loadVerifyOtp = async (req, res) => {
     try {
         let message = req.session.message || "";
         let type = req.session.type || "";
-        let email = req.session.userData?.email || "";
+        let email = req.session.userData?.email || req.session.email || "";
         let canResend = req.session.canResend ?? false;
         console.log("email: ", email);
         //console.log(message);
@@ -215,7 +216,7 @@ const verifyOtp = async (req, res) => {
 
         if (req.session.otpType === "change-email") {
             const email = req.session.email;
-            const userId = req.session.user.id;
+            const userId = req.user._id;
             const user = await User.findById(userId);
             if (!user) {
                 req.session.message = "Please login";
@@ -231,7 +232,7 @@ const verifyOtp = async (req, res) => {
         }
 
         if (req.session.otpType === "change-password") {
-            const userId = req.session.user.id;
+            const userId = req.user._id;
             const password = req.session.newPassword;
             const hashedPassword = await bcrypt.hash(password, 10);
             await User.findByIdAndUpdate(userId, { password_hash: hashedPassword });
@@ -469,7 +470,7 @@ const resendOtp = async (req, res) => {
     }
 }
 
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
     try {
         console.log("get into loadlogin")
         req.session.message = "";
@@ -495,7 +496,7 @@ const loginUser = async (req, res) => {
         const PasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         if (!PasswordRegex.test(password)) {
             req.session.message = 'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
-            return res.redirect("/login", { message });
+            return res.redirect("/login");
         }
 
         const existingUser = await User.findOne({ email }).select('+password_hash');
@@ -509,6 +510,7 @@ const loginUser = async (req, res) => {
 
         if (existingUser.userStatus === "Blocked") {
             req.session.message = "You are blocked by admin";
+            return res.redirect("/login");
         }
 
         if (!existingUser.password_hash && existingUser.googleId !== null) {
@@ -525,15 +527,21 @@ const loginUser = async (req, res) => {
             req.session.message = "Invalid password";
             return res.redirect("/login");
         }
-        req.session.user = {
-            id: existingUser._id,
-            name: existingUser.username,
-            email: existingUser.email
-        };
-        console.log(req.session.user);
 
+        // req.session.user = {
+        //     id: existingUser._id,
+        //     name: existingUser.username,
+        //     email: existingUser.email
+        // };
 
-        return res.redirect("/home");
+        console.log("existing User: ", existingUser);
+        req.login(existingUser, (err) => {
+            if (err) return next(err);
+            console.log("LOGIN SUCCESS");
+            return res.redirect("/home"); 
+        });
+
+        //return res.redirect("/home");
 
     } catch (error) {
         console.error(error);
