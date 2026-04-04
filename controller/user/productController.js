@@ -2,7 +2,10 @@ const mongoose = require("mongoose");
 const Product = require("../../models/productModel");
 const Category = require("../../models/categoryModel");
 const Brand = require("../../models/brandModel");
+const Wishlist = require("../../models/wishlistModel");
+
 const { getPaginatedProducts } = require("../../services/productService");
+const { find } = require("../../models/orderModel");
 
 
 const getHomePage = async (req, res) => {
@@ -23,6 +26,13 @@ const getHomePage = async (req, res) => {
             .select("name variants brand_id");
         //console.log(product);
 
+        const wishlist = await Wishlist.findOne({ user_id: req.user?._id });
+
+        let wishlistProductIds = [];
+
+        wishlistProductIds = wishlist?.products?.map(item => {
+            return item.product_id.toString();
+        });
         const showData = products.map(product => {
             const viewedProducts = product.variants.filter(variant => variant.view === true && variant.stock > 0);
             console.log("viewedProducts: ", viewedProducts);
@@ -43,6 +53,7 @@ const getHomePage = async (req, res) => {
             title: "Home",
             showData,
             hideNavBar: false,
+            wishlistProductIds
         });
         // console.log(req.session.message);
     } catch (error) {
@@ -63,12 +74,21 @@ const showProductsPage = async (req, res) => {
         const categories = await Category.find({ view: true });
         const brands = await Brand.find({ view: true });
 
+        const wishlist = await Wishlist.findOne({ user_id: req.user?._id });
+
+        let wishlistVariantIds = [];
+
+        wishlistVariantIds = wishlist?.products?.map(item => {
+            return item.variant_id.toString();
+        });
+
         res.render("user/products", {
             variants,
             categories,
             brands,
             currentPage,
             totalPages,
+            wishlistVariantIds ,
             title: "Shop",
             hideNavBar: false,
             banner: null,
@@ -87,10 +107,19 @@ const filterProducts = async (req, res) => {
         const { variants, currentPage, totalPages } =
             await getPaginatedProducts(req.query);
 
+            const wishlist = await Wishlist.findOne({ user_id: req.user?._id });
+
+        let wishlistVariantIds = [];
+
+        wishlistVariantIds = wishlist?.products?.map(item => {
+            return item.variant_id.toString();
+        });
+
         res.render("partials/user/productSection", {
             variants,
             currentPage,
             totalPages,
+            wishlistVariantIds
         });
 
     } catch (err) {
@@ -123,7 +152,7 @@ const getProductDetails = async (req, res) => {
 
         const viewedVariants = product.variants.filter(variant => variant.view === true);
 
-       if (viewedVariants.length === 0) {
+        if (viewedVariants.length === 0) {
             return res.status(404).render("user/404", {
                 message: "Product not available"
             });

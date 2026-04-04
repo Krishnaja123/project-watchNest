@@ -39,8 +39,7 @@ const saveBrand = async (req, res) => {
         newBrand.save();
         req.session.message = "Successfully created Brand";
         req.session.type = "success";
-        return res.redirect("/admin/brands")
-
+        return res.redirect("/admin/brands");
     } catch (error) {
         console.log("server error", error);
         res.status(500).send("server error")

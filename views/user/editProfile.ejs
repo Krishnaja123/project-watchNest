@@ -1,14 +1,18 @@
-<%- include("../partials/user/header", { title: "My Profile", hideNavBar: true }) %>
+<%- include("../partials/user/header", { title: "My Profile" , hideNavBar: true }) %>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/user/editProfile.css">
 <link rel="stylesheet" href="/css/user/userSidebar.css">
 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <div class="container mt-3">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/home">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">My Profile</li>
+            <li class="breadcrumb-item active">My Profile</li>
         </ol>
     </nav>
 </div>
@@ -22,7 +26,6 @@
         <h1 class="main-title">My Profile</h1>
 
         <div class="card">
-
             <div class="card-header">
                 <h2>Profile Details</h2>
             </div>
@@ -32,10 +35,11 @@
                 <!-- Avatar -->
                 <div class="mb-4 text-center">
                     <% if (user.profileImage) { %>
-                        <img src="<%= user.profileImage %>" class="rounded-circle" width="100" height="100">
+                        <img id="profilePreview" src="<%= user.profileImage %>" 
+                             class="rounded-circle" width="100" height="100">
                     <% } else { %>
                         <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto"
-                            style="width: 100px; height: 100px; font-size: 32px;">
+                             style="width: 100px; height: 100px; font-size: 32px;">
                             <%= user.username ? user.username.charAt(0).toUpperCase() : "U" %>
                         </div>
                     <% } %>
@@ -62,19 +66,12 @@
                 <hr>
 
                 <!-- Upload -->
-                <form action="/profile/upload" method="POST" enctype="multipart/form-data">
+                <label class="form-label">Update Profile Picture</label>
 
-                    <label class="form-label">Update Profile Picture</label>
-
-                    <div class="d-flex align-items-center gap-2">
-                        <input type="file" name="profilePicture" id="profileImage" class="form-control">
-                        <small class="text-muted" id="imageError"></small>
-                        <button type="submit" class="btn btn-primary">
-                            Upload
-                        </button>
-                    </div>
-
-                </form>
+                <div class="d-flex align-items-center gap-2">
+                    <input type="file" id="profileImage" class="form-control">
+                    <small class="text-danger" id="imageError"></small>
+                </div>
 
             </div>
         </div>
@@ -82,43 +79,129 @@
     </div>
 </div>
 
+<!-- Crop Modal -->
+<div class="modal fade" id="cropModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crop Image</h5>
+            </div>
+            <div class="modal-body">
+                <img id="cropImage" style="max-width: 100%;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cropBtn" class="btn btn-success">
+                    Crop & Upload
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    document.getElementById("profileImage").addEventListener("change", function () {
+let cropper;
+const input = document.getElementById("profileImage");
+const error = document.getElementById("imageError");
+const cropImage = document.getElementById("cropImage");
+const modalEl = document.getElementById("cropModal");
+
+const modal = new bootstrap.Modal(modalEl);
+
+// File select
+input.addEventListener("change", function () {
 
     const file = this.files[0];
-    const error = document.getElementById("imageError");
-
     if (!file) return;
 
+    // Validation
     const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-    const maxSize = 2 * 1024 * 1024; // 2MB
+    const maxSize = 2 * 1024 * 1024;
 
     if (!allowedTypes.includes(file.type)) {
-        error.textContent = "Only JPG, JPEG, and PNG images are allowed.";
+        error.textContent = "Only JPG, JPEG, PNG allowed";
         this.value = "";
         return;
     }
 
     if (file.size > maxSize) {
-        error.textContent = "Image size must be less than 2MB.";
+        error.textContent = "Max size 2MB";
         this.value = "";
         return;
     }
 
     error.textContent = "";
+
+    // Load image
+    const reader = new FileReader();
+    reader.onload = function (e) {
+
+        cropImage.src = e.target.result;
+        modal.show();
+
+        if (cropper) cropper.destroy();
+
+        cropper = new Cropper(cropImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            responsive: true,
+            autoCropArea: 1
+        });
+    };
+
+    reader.readAsDataURL(file);
 });
 
-const message = "<%= message %>";
-            const type = "<%= type %>";
-            if (message) {
-                Swal.fire({
-                    title: type,
-                    icon: type,
-                    text: message,
-                    confirmButtonColor: '#007bff',
-                    timer: 2000,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                });
+
+// Crop & Upload
+document.getElementById("cropBtn").addEventListener("click", function () {
+
+    if (!cropper) return;
+
+    const canvas = cropper.getCroppedCanvas({
+        width: 300,
+        height: 300
+    });
+
+    canvas.toBlob(async function (blob) {
+
+        const formData = new FormData();
+        formData.append("profilePicture", blob, "profile.jpg");
+
+        try {
+            const res = await fetch("/profile/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            if (res.ok) {
+
+                // Preview instantly
+                const preview = document.getElementById("profilePreview");
+                if (preview) {
+                    preview.src = URL.createObjectURL(blob);
+                }
+
+                modal.hide();
+                cropper.destroy();
+                cropper = null;
+
+                // Optional reload (can remove if using preview)
+                setTimeout(() => location.reload(), 500);
             }
+
+        } catch (err) {
+            console.error(err);
+        }
+
+    }, "image/jpeg");
+});
+
+
+// Cleanup when modal closes
+modalEl.addEventListener("hidden.bs.modal", () => {
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+});
 </script>

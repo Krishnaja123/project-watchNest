@@ -10,17 +10,21 @@ const crypto = require("crypto");
 const createRazorpayOrder = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { amount, selectedAddressId } = req.body;
+        const { amount, selectedAddressId, couponCode, discount } = req.body;
+
+        amountInPaise  = Math.round(amount * 100);
 
         const order = await createOrderService(
             userId,
             selectedAddressId,
             "online",
-            "pending"
+            "pending",
+            discount,
+            couponCode
         );
 
         const options = {
-            amount: amount * 100,
+            amount: amountInPaise,
             currency: "INR",
             receipt: "order_" + Date.now()
         };

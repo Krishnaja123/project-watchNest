@@ -1,4 +1,5 @@
 const User = require("../../models/userModel");
+const Wallet = require("../../models/walletModel");
 const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
 require("dotenv").config();
@@ -253,6 +254,11 @@ const verifyOtp = async (req, res) => {
         });
 
         const savedUser = await user.save();
+
+        await Wallet.create({
+            user_id: savedUser._id
+        });
+
         console.log(savedUser);
 
         req.session.message = "Account created successfully! Please log in.";

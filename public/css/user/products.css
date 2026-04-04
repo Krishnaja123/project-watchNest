@@ -98,6 +98,21 @@ aside h6 {
     color: #e63946;
 }
 
+.wishlist i.active {
+    color: red;
+    
+}
+.wishlist-btn {
+    color: gray;
+    border: none;
+    background: none;
+    font-size: 20px;
+}
+
+.wishlist-btn.active {
+    color: red;
+}
+
 
 /* PRODUCT INFO */
 .product-title {

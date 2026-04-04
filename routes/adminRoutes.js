@@ -8,6 +8,7 @@ const categoryController = require("../controller/admin/categoryController");
 const brandController = require("../controller/admin/brandController");
 const productController = require("../controller/admin/productController");
 const orderController = require("../controller/admin/adminOrdersController");
+const couponController = require("../controller/admin/adminCouponController")
 const upload = require("../config/multerConfig");
 
 //user- login/logout
@@ -63,4 +64,16 @@ router.get("/orderDetails/:id", adminAuth, orderController.getOrderDetails);
 //router.post("order-status/:id", adminAuth, orderController.updateOrderStatus);
 router.post("/order-item-status/:id", adminAuth, orderController.updateProductStatus);
 router.post("/order-item-return/:id", adminAuth, orderController.returnAcceptOrReject);
+
+//Coupon
+router.get("/coupons/create", adminAuth, couponController.createCoupon);
+router.post("/save-coupon", adminAuth, couponController.saveCoupon);
+router.get("/coupons", adminAuth, couponController.listCoupons);
+router.get("/fetchCoupon", adminAuth, couponController.fetchCoupons);
+router.get("/coupons/editCoupon/:id", adminAuth, couponController.editCouponPage);
+router.post("/editCoupon/:id", adminAuth, couponController.updateCoupon);
+router.put("/coupons/:id", adminAuth, couponController.deleteCoupon);
+
+
 module.exports = router;
+

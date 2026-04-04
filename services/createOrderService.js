@@ -4,8 +4,11 @@ const Address = require("../models/addressModel");
 const User = require("../models/userModel");
 const Order = require("../models/orderModel");
 const OrderItem = require("../models/orderItemsModel");
+const Wallet = require("../models/walletModel");
+const { debitWallet } = require("../services/walletServices");
 
-const createOrderService = async (userId, selectedAddressId, paymentMethod, paymentStatus) => {
+
+const createOrderService = async (userId, selectedAddressId, paymentMethod, paymentStatus, discount = 0, couponCode = null) => {
     console.log("get in to service");
 
     const address = await Address.findById(selectedAddressId);
@@ -41,10 +44,8 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
             throw new Error("Stock not available for some products");
         }
 
-        // Reduce stock
         variant.stock -= item.quantity;
 
-        // Save product properly (await it!)
         await item.product_id.save();
 
         const subtotal = variant.price * item.quantity;
@@ -61,10 +62,16 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
         });
     }
 
+    const finalAmount = totalAmount - discount;
+    const couponDiscount = totalAmount - finalAmount;
+
     const newOrder = await Order.create({
         user_id: userId,
         orderId,
-        totalAmount,
+        totalAmount: finalAmount,
+        originalAmount: totalAmount,
+        couponCode,
+        couponDiscount,
         shippingAddress: address,
         paymentMethod,
         paymentStatus
@@ -76,6 +83,13 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
             ...item
         });
     }
+
+    if (paymentMethod === "wallet") {
+            const wallet = await Wallet.findOne({ userId});
+            const reason = `Order Payment against order ${order.orderId}`;
+            debitWallet(userId, newOrder.totalAmount, reason);
+        }
+
 
     // if (paymentMethod === "cod") {
     cart.is_active = false;

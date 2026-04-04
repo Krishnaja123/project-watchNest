@@ -9,7 +9,7 @@ const userRouter = require("./routes/userRoutes");
 const adminRouter = require("./routes/adminRoutes");
 const MongoStore = require('connect-mongo').default;
 
-const { injectCartCount } = require("./middleware/cartMiddleware");
+const { injectCountsMiddleware } = require("./middleware/countMiddleware");
 
 dbConnect();
 const port = process.env.PORT;
@@ -46,7 +46,7 @@ app.use((req,res,next) => {
     next();
 })
 
-app.use(injectCartCount);
+app.use(injectCountsMiddleware);
 
 app.use(express.static("public"));
 

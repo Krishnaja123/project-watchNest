@@ -267,17 +267,31 @@ header {
     transition: 0.3s;
 }
 
-.wishlist i {
-    color: #777;
-}
-
 .wishlist:hover {
     background: white;
 }
 
-.wishlist:hover i {
-    color: #e63946;
+.wishlist i {
+    color: gray;
 }
+
+.wishlist i.active {
+    color: red;
+    
+}
+.wishlist-btn {
+    color: gray;
+    border: none;
+    background: none;
+    font-size: 20px;
+}
+
+.wishlist-btn.active {
+    color: red;
+}
+/* .wishlist:hover i {
+    color: #e63946;
+} 
 
 /* PRODUCT INFO */
 .product-title {

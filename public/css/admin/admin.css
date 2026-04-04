@@ -636,3 +636,35 @@ textarea {
 table td{
     vertical-align:middle;
 }
+
+.error {
+    color: red;
+    font-size: 13px;
+    margin-top: 5px;
+    display: block;
+}
+
+input.error-border, select.error-border {
+    border-color: red;
+}
+
+/* Align checkbox + text properly */
+.checkbox-group {
+    margin-top: 10px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    color: #333;
+    cursor: pointer;
+}
+
+/* Make checkbox slightly bigger and neat */
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}

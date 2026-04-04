@@ -1,0 +1,235 @@
+<%- include("../partials/user/header", { title: "Coupons" , hideNavBar: true }) %>
+
+    <link rel="stylesheet" href="/css/user/home.css">
+
+    <style>
+        /* Container */
+        .coupon-container {
+            padding: 40px 20px;
+            background: #f8f9fa;
+        }
+
+        /* Heading */
+        .coupon-heading {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        /* Grid */
+        .coupon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        /* Card */
+        .coupon-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            transition: 0.3s ease;
+            border: 1px solid #eee;
+        }
+
+        .coupon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Top row */
+        .coupon-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        /* Badge */
+        .coupon-badge {
+            background: #28a745;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .expired-badge {
+            background: #edc606;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        /* Code box */
+        .coupon-code-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px dashed #ccc;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* Code text */
+        .code {
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* Buttons */
+        .copy-btn {
+            background: black;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+        }
+
+        .apply-btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+        }
+
+        /* Bottom section */
+        .coupon-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Disabled */
+        .disabled {
+            opacity: 0.5;
+        }
+
+        .disabled button {
+            cursor: not-allowed;
+            background: gray;
+        }
+    </style>
+
+    <div class="coupon-container">
+        <h3 class="coupon-heading">🎁 Available Coupons</h3>
+
+        <% const validCoupons=[]; const invalidCoupons=[]; const expiredCoupons=[]; coupons.forEach(coupon=> {
+            if (cartTotal >= coupon.minAmount && coupon.expiryDate >= Date.now()) {
+            validCoupons.push(coupon);
+            } else if(cartTotal < coupon.minAmount && coupon.expiryDate>= Date.now()) {
+                invalidCoupons.push(coupon);
+                } else {
+                expiredCoupons.push(coupon);
+                }
+                });
+
+                const sortedCoupons = [...validCoupons, ...invalidCoupons, ...expiredCoupons];
+                %>
+
+                <div class="coupon-grid">
+                    <% sortedCoupons.forEach(coupon=> {
+                        const isValid = cartTotal >= coupon.minAmount && coupon.expiryDate > Date.now();
+                        %>
+
+                        <div class="coupon-card <%= !isValid ? 'disabled' : '' %>">
+
+                            <div class="coupon-top">
+                                <span class="min-order">Min Order: ₹<%= coupon.minAmount %></span>
+                                <% let discount=0; const cart=Number(cartTotal) || 0; const
+                                    value=Number(coupon.discountValue) || 0; if (coupon.discountType==="percentage" ) {
+                                    discount=(cart * value) / 100; } else { discount=value; } %>
+
+                                    <span class="coupon-badge">SAVE ₹<%= discount.toFixed(0) %></span>
+                            </div>
+
+                            <div class="coupon-code-box">
+                                <span class="code">
+                                    <%= coupon.code %>
+                                </span>
+
+                                <button class="copy-btn" onclick="copyCode('<%= coupon.code %>')" <%=!isValid
+                                    ? 'disabled' : '' %>>
+                                    COPY
+                                </button>
+                            </div>
+
+                            <div class="coupon-actions">
+                                <!-- <button class="apply-btn" <%=!isValid ? 'disabled' : '' %>
+                                    onclick="applyCoupon('<%= coupon.code %>')">
+                                        APPLY
+                                </button> -->
+
+                                <% if (!isValid) { %>
+                                    <small class="text-danger">
+                                        <% if(cartTotal < coupon.minAmount) { %>
+                                            Add ₹<%= coupon.minAmount - cartTotal %> more
+                                                <% } else if(coupon.expiryDate < Date.now()){ %>
+                                                    <span class="expired-badge"> Expired </span>
+                                                    <% } %>
+                                    </small>
+                                    <% } %>
+                            </div>
+
+                        </div>
+
+                        <% }) %>
+                </div>
+    </div>
+    <%- include("../partials/user/footer") %>
+
+        <script>
+            function copyCode(code) {
+                navigator.clipboard.writeText(code).then(() => {
+                    showToast("Coupon copied: " + code);
+                });
+            }
+
+            /* Toast instead of alert */
+            function showToast(message) {
+                const toast = document.createElement("div");
+                toast.innerText = message;
+                toast.style.position = "fixed";
+                toast.style.bottom = "20px";
+                toast.style.right = "20px";
+                toast.style.background = "#000";
+                toast.style.color = "#fff";
+                toast.style.padding = "10px 15px";
+                toast.style.borderRadius = "5px";
+                toast.style.zIndex = "9999";
+
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 2000);
+            }
+
+            async function applyCoupon(code) {
+                try {
+                    const response = await fetch('/apply-coupon', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ code })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showToast("Coupon Applied! Discount: ₹" + result.discount);
+                        // Optionally reload or update cart total on page
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast(result.message);
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                    showToast("Something went wrong!");
+                }
+            }
+        </script>

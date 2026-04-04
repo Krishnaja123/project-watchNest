@@ -1,0 +1,126 @@
+<%- include("../partials/admin/header") %>
+
+    <head>
+        <link rel="stylesheet" href="/css/admin/sidebar.css">
+        <link rel="stylesheet" href="/css/admin/admin.css">
+    </head>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <%- include("../partials/admin/sidebar") %>
+
+            <!-- Main Content -->
+            <div class="content">
+                <div class="header">Edit Coupon</div>
+
+                <div class="form-container">
+                    <form action="/admin/editCoupon/<%= coupon._id %>?page=<%= page %>" method="POST">
+
+                        <!-- CODE -->
+                        <div class="form-group">
+                            <label for="code">Coupon Code</label>
+                            <input type="text" id="code" name="code" value="<%= coupon.code || '' %>"
+                                style="text-transform: uppercase;" required>
+                            <small class="error">
+                                <%= errors?.code || '' %>
+                            </small>
+                        </div>
+
+                        <!-- DISCOUNT TYPE -->
+                        <div class="form-group">
+                            <label for="discountType">Discount Type</label>
+                            <select id="discountType" name="discountType" required>
+                                <option value="percentage" <%=coupon.discountType==="percentage" ? "selected" : "" %>>
+                                    Percentage
+                                </option>
+                                <option value="fixed" <%=coupon.discountType==="fixed" ? "selected" : "" %>>
+                                    Fixed
+                                </option>
+                            </select>
+                            <small class="error">
+                                <%= errors?.discountType || '' %>
+                            </small>
+                        </div>
+
+                        <!-- DISCOUNT VALUE -->
+                        <div class="form-group">
+                            <label for="discountValue">Discount Value</label>
+                            <input type="number" id="discountValue" name="discountValue"
+                                value="<%= coupon.discountValue || '' %>" required>
+                            <small class="error">
+                                <%= errors?.discountValue || '' %>
+                            </small>
+                        </div>
+
+                        <!-- MIN AMOUNT -->
+                        <div class="form-group">
+                            <label for="minAmount">Minimum Purchase Amount</label>
+                            <input type="number" id="minAmount" name="minAmount" value="<%= coupon.minAmount || '' %>">
+                            <small class="error">
+                                <%= errors?.minAmount || '' %>
+                            </small>
+                        </div>
+
+                        <!-- MAX DISCOUNT -->
+                        <div class="form-group">
+                            <label for="maxDiscount">Maximum Discount</label>
+                            <input type="number" id="maxDiscount" name="maxDiscount"
+                                value="<%= coupon.maxDiscount || '' %>">
+                            <small class="error">
+                                <%= errors?.maxDiscount || '' %>
+                            </small>
+                        </div>
+
+                        <!-- USAGE LIMIT -->
+                        <div class="form-group">
+                            <label for="usageLimit">Usage Limit</label>
+                            <input type="number" id="usageLimit" name="usageLimit"
+                                value="<%= coupon.usageLimit || '' %>">
+                            <small class="error">
+                                <%= errors?.usageLimit || '' %>
+                            </small>
+                        </div>
+
+                        <!-- EXPIRY DATE -->
+                        <div class="form-group">
+                            <label for="expiryDate">Expiry Date</label>
+                            <input type="date" id="expiryDate" name="expiryDate"
+                                value="<%= coupon.expiryDate ? coupon.expiryDate.toISOString().split('T')[0] : '' %>"
+                                required>
+                            <small class="error">
+                                <%= errors?.expiryDate || '' %>
+                            </small>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="isActive" name="isActive" value="true" <%=coupon.isActive
+                                    !==false ? 'checked' : '' %> >
+                                <span>Coupon is active (visible to users)</span>
+                            </label>
+                        </div>
+
+                        <!-- BUTTONS -->
+                        <div class="button-group">
+                            <a href="/admin/coupons?page=<%= page %>" class="btn btn-cancel">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Coupon</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+    </div>
+
+    <%- include("../partials/admin/footer") %>
+
+    <script>
+        const message = "<%= message %>";
+                const type = "<%= type %>";
+                if (message) {
+                    Swal.fire({
+                        icon: type,
+                        text: message,
+                        confirmButtonColor: '#007bff'
+                    });
+                }
+    </script>

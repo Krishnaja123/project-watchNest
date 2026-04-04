@@ -1,8 +1,9 @@
 <% variants.forEach(variant=> { %>
     <div class="product-card">
 
-        <div class="wishlist">
-            <i class="fa-solid fa-heart"></i>
+        <div class="wishlist" data-product-id="<%= variant._id %>" data-variant-id="<%= variant.variants._id %>">
+            <i
+                class="fa fa-heart <%= (wishlistVariantIds || []).includes(variant.variants._id.toString()) ? 'active' : '' %>"></i>
         </div>
 
         <a href="/product/<%= variant._id %>/<%= variant.variants._id %>" class="product-link">
@@ -28,9 +29,7 @@
             </div>
         </a>
 
-        <button  class="add-cart-btn" 
-             data-variant-id="<%= variant.variants._id %>" 
-            data-product-id="<%= variant._id %>"   
+        <button class="add-cart-btn" data-variant-id="<%= variant.variants._id %>" data-product-id="<%= variant._id %>"
             <%=variant.variants.stock===0 ? 'disabled' : '' %>>
             Add to Cart
         </button>
@@ -39,5 +38,3 @@
 
 
     <% }) %>
-
-    

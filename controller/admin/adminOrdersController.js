@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
 const Order = require("../../models/orderModel");
 const OrderItem = require("../../models/orderItemsModel");
+const Product = require("../../models/productModel");
 
 const { calculateOrderStatus } = require("../../utils/orderStatusHelper");
 const { getSessionMessage } = require("../../utils/sessionHelper");
-const Product = require("../../models/productModel");
+const { creditWallet } = require("../../services/walletServices");
+
 
 const getOrders = async (req, res) => {
     try {
@@ -165,10 +167,22 @@ const updateProductStatus = async (req, res) => {
             if (item.returnRequested && item.returnAccepted) {
                 item.status = status;
                 await item.save();
+
                 const product = await Product.findById(item.product_id);
                 const variant = product?.variants?.id(item.variant_id);
                 variant.stock += item.quantity;
                 await product.save();
+
+                const order = await Order.findOne({ _id: item.order_id });
+                const discountRatio = order.couponDiscount / order.originalAmount;
+                const itemTotal = item.price * item.quantity;
+                const itemDiscount = itemTotal * discountRatio;
+                const refundAmount = itemTotal - itemDiscount;
+
+                console.log("refund: ", refundAmount);
+
+                const userId = req.user._id;
+                await creditWallet(userId, refundAmount, `Refund for returned product`);
             } else {
                 req.session.message = `can not change the product status to ${status} until you accept the return request from user.`
                 req.session.type = "error";

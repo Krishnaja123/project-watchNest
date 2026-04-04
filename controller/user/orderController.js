@@ -5,10 +5,12 @@ const User = require("../../models/userModel");
 const Order = require("../../models/orderModel");
 const OrderItem = require("../../models/orderItemsModel");
 const Product = require("../../models/productModel");
+const Coupon = require("../../models/couponSchema");
 
 const { getSessionMessage } = require("../../utils/sessionHelper");
 const { calculateOrderStatus } = require("../../utils/orderStatusHelper");
 const { createOrderService } = require("../../services/createOrderService");
+const { creditWallet } = require("../../services/walletServices");
 
 const createOrder = async (req, res) => {
     try {
@@ -19,14 +21,18 @@ const createOrder = async (req, res) => {
         const user = await User.findById(userId);
 
 
-        const { selectedAddressId, paymentMethod } = req.body;
+        const { selectedAddressId, paymentMethod, couponCode } = req.body;
+
         let paymentStatus = "pending"
+        console.log("couponCode: ", couponCode);
+
 
         const order = await createOrderService(
             userId,
             selectedAddressId,
             paymentMethod,
-            paymentStatus
+            paymentStatus,
+            couponCode
         );
 
         return res.redirect(`/order/success/${order.orderId}`);
@@ -184,6 +190,10 @@ const cancelProduct = async (req, res) => {
 
         const { reason } = req.body;
 
+        console.log("hi ");
+
+        console.log("reason: ", reason);
+
         if (!reason || !reason.trim()) {
             return res.status(400).json({
                 success: false,
@@ -206,8 +216,26 @@ const cancelProduct = async (req, res) => {
 
         item.status = "cancelled";
         item.cancelReason = reason;
-        item.save();
+        await item.save();
 
+        const order = await Order.findOne({ _id: item.order_id });
+        if (order.paymentMethod !== "COD" && order.paymentStatus === "paid") {
+            const userId = req.user._id;
+
+            const discountRatio = order.couponDiscount / order.originalAmount;
+
+            const itemTotal = item.price * item.quantity;
+            const itemDiscount = itemTotal * discountRatio;
+
+            const refundAmount = itemTotal - itemDiscount;
+
+            console.log("refund: ", refundAmount);
+            
+            // const amount = item.price * item.quantity;
+            await creditWallet(userId, refundAmount, `Refund for cancelled product`);
+            console.log("hi");
+
+        }
         const product = await Product.findById(item.product_id);
         console.log("product: ", product);
 
@@ -236,12 +264,14 @@ const cancelProduct = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const { message, type } = getSessionMessage(req);
 
         const order_id = req.params.id;
         console.log("orderId: ", order_id)
 
         const { reason } = req.body;
+
+        console.log("reason: ", reason);
+        
 
         if (!reason || !reason.trim()) {
             return res.status(400).json({
@@ -266,6 +296,18 @@ const cancelOrder = async (req, res) => {
         order.status = "cancelled";
         order.cancelReason = reason;
         await order.save();
+
+        if (order.paymentMethod !== "COD" && order.paymentStatus === "paid") {
+            const userId = req.user._id;
+
+            const refundAmount = order.totalAmount;
+
+            console.log("refund: ", refundAmount);
+            
+            await creditWallet(userId, refundAmount, `Refund for cancelled order`);
+            console.log("hi");
+
+        }
 
         const orderItems = await OrderItem.find({ order_id })
             .populate("product_id");
@@ -295,13 +337,13 @@ const cancelOrder = async (req, res) => {
     }
 }
 
-const returnProduct = async (req, res) => {
+const productReturnRequest = async (req, res) => {
     try {
         console.log("hi");
 
         const itemId = req.params.id;
 
-         const { reason } = req.body;
+        const { reason } = req.body;
 
         if (!reason || !reason.trim()) {
             return res.status(400).json({
@@ -355,7 +397,72 @@ const returnProduct = async (req, res) => {
     }
 }
 
+const showCoupons = async (req, res) => {
+    try {
+        const cartTotal = Number(req.query.cartTotal) || 0;
 
+        const coupons = await Coupon.find({ is_delete: false, isActive: true });
+
+        res.render("user/coupons", {
+            coupons,
+            cartTotal
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+const applyCoupon = async (req, res) => {
+    try {
+        const { code } = req.body;
+        const userId = req.user?._id;
+
+        if (!userId) return res.json({ success: false, message: "Login first to apply coupon." });
+
+        const cart = await Cart.findOne({ user_id: userId, is_active: true });
+        const cartItems = await CartItem.find({ cart_id: cart._id });
+        if (!cart || cartItems.length === 0)
+            return res.json({ success: false, message: "Cart is empty!" });
+
+        const coupon = await Coupon.findOne({ code: code.toUpperCase() });
+        if (!coupon) return res.json({ success: false, message: "Invalid Coupon!" });
+
+        const cartTotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+        if (cartTotal < coupon.minAmount)
+            return res.json({ success: false, message: `Add ₹${coupon.minAmount - cartTotal} more to use this coupon.` });
+
+        if (coupon.expiryDate < Date.now())
+            return res.json({ success: false, message: "Coupon expired!" });
+
+        let discount = 0;
+        if (coupon.discountType === 'percentage') {
+            discount = (cartTotal * coupon.discountValue) / 100;
+        } else {
+            discount = coupon.discountValue;
+        }
+
+        const finalTotal = cartTotal - discount;
+
+        req.session.appliedCoupon = {
+            code: coupon.code,
+            discount: discount,
+            finalTotal: finalTotal
+        };
+
+        return res.json({
+            success: true,
+            discount: discount,
+            finalTotal: finalTotal
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.json({ success: false, message: "Server error!" });
+    }
+}
 
 module.exports = {
     createOrder,
@@ -365,6 +472,8 @@ module.exports = {
     getOrderInvoice,
     cancelProduct,
     cancelOrder,
-    returnProduct
+    productReturnRequest,
+    showCoupons,
+    applyCoupon
 
 }

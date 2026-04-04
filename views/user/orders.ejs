@@ -89,14 +89,20 @@
 
                                         <div class="col-md-2">
                                             <small>PAYMENT STATUS</small><br>
-                                            <span class="badge 
-    <%= data.paymentStatus === 'pending' ? 'bg-warning text-dark' :
-        data.paymentStatus === 'paid' ? 'bg-success' :
-        data.paymentStatus === 'failed' ? 'bg-danger' :
-        data.paymentStatus === 'refunded' ? 'bg-info text-dark' :
-        'bg-secondary' %>">
-                                                <%= data.paymentStatus %>
-                                            </span>
+
+                                            <% if (data.paymentStatus==="failed" ) { %>
+                                                <a href="/retry-payment/<%= data._id %>" class="btn btn-danger btn-sm">
+                                                    Retry Payment
+                                                </a>
+                                                <% } else { %>
+                                                    <span class="badge 
+            <%= data.paymentStatus === 'pending' ? 'bg-warning text-dark' :
+                data.paymentStatus === 'paid' ? 'bg-success' :
+                data.paymentStatus === 'refunded' ? 'bg-info text-dark' :
+                'bg-secondary' %>">
+                                                        <%= data.paymentStatus %>
+                                                    </span>
+                                                    <% } %>
                                         </div>
 
                                         <div class="col-md-2 text-end">
@@ -157,27 +163,29 @@
                                                         Cancel
                                                     </button>
                                                     <% } else if (item.status==="delivered" ) { %>
-                                                        <% if (!item.returnRequested && !item.returnAccepted && !item.returnRejected) { %>
+                                                        <% if (!item.returnRequested && !item.returnAccepted &&
+                                                            !item.returnRejected) { %>
                                                             <button type="button"
                                                                 class="btn btn-outline-danger btn-sm return-product-btn"
                                                                 data-id="<%= item._id %>">
                                                                 Return
                                                             </button>
-                                                            <% } else if(item.returnRequested && !item.returnAccepted && !item.returnRejected) { %>
+                                                            <% } else if(item.returnRequested && !item.returnAccepted &&
+                                                                !item.returnRejected) { %>
                                                                 <span class="badge bg-danger">
                                                                     Return Requested
                                                                 </span>
                                                                 <% } else if(item.returnAccepted) { %>
-                                                                <span class="badge bg-success">
-                                                                    Return Accepted
-                                                                </span>
-                                                                <% } else if(item.returnRejected) { %>
-                                                                    <span class="badge bg-danger">
-                                                                        Return Rejected
+                                                                    <span class="badge bg-success">
+                                                                        Return Accepted
                                                                     </span>
-                                                                    <% } %>
-
+                                                                    <% } else if(item.returnRejected) { %>
+                                                                        <span class="badge bg-danger">
+                                                                            Return Rejected
+                                                                        </span>
                                                                         <% } %>
+
+                                                                            <% } %>
 
                                             </div>
 

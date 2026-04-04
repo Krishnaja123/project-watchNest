@@ -3,6 +3,7 @@ const Address = require("../../models/addressModel");
 const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
 const cloudinary = require("../../config/cloudinary");
+const multer = require("multer");
 
 const uploadToCloudinary = require("../../utils/cloudinaryUpload");
 const { getSessionMessage } = require("../../utils/sessionHelper");
@@ -316,21 +317,36 @@ const sentVerificationMail = async (email, otp) => {
 const updateProfileImage = async (req, res) => {
     try {
         if (!req.file) {
+            req.session.message = "No file uploaded";
+            req.session.type = "error";
+            return res.redirect("/profile");
+        }
+
+        // Validate file type
+        if (!req.file.mimetype.startsWith("image/")) {
+            req.session.message = "Invalid file type";
+            req.session.type = "error";
             return res.redirect("/profile");
         }
 
         const imageUrl = await uploadToCloudinary(req.file.buffer, "profile_pictures");
+
         await User.findByIdAndUpdate(req.user._id, {
             profileImage: imageUrl
         });
+
+        req.session.message = "Profile image updated successfully";
+        req.session.type = "success";
 
         res.redirect("/profile");
 
     } catch (error) {
         console.log(error);
+        req.session.message = "Something went wrong";
+        req.session.type = "error";
         res.redirect("/profile");
     }
-}
+};
 
 
 

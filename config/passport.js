@@ -1,4 +1,6 @@
 require("dotenv").config();
+const Wallet = require("../models/walletModel");
+
 console.log("CLIENT ID:", process.env.GOOGLE_CLIENT_ID);
 const passport = require("passport");
 // const GoogleStrategy = require("passport-google-oauth20");
@@ -27,13 +29,18 @@ passport.use(new GoogleStrategy({
                 return done(null, user);
             }
 
-            user = new User({
+            user = await new User({
                 username: profile.displayName,
                 email: email,
                 googleId: profile.id
             });
 
             await user.save();
+
+            const wallet = await new Wallet({
+                userId: user._id
+            });
+            wallet.save();
             return done(null, user);
 
         } catch (error) {

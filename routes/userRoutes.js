@@ -10,6 +10,7 @@ const cartController = require("../controller/user/cartController");
 const checkoutController = require("../controller/user/checkoutController");
 const paymentController = require("../controller/user/paymentController");
 const orderController = require("../controller/user/orderController");
+const wishlistController = require("../controller/user/wishlistController");
 const upload = require("../config/multerConfig");
 
 
@@ -89,7 +90,7 @@ router.post("/payment/verify-payment", requireLogin, paymentController.verifyPay
 router.post("/payment-failed", requireLogin, paymentController.paymentFailed);
 router.get("/payment-failed/:id", requireLogin, paymentController.paymentFailedPage);
 router.get("/payment-success/:id", requireLogin, paymentController.paymentSuccessPage);
-router.get("/retry-payment/:id", paymentController.retryPaymentPage);
+router.get("/retry-payment/:id", requireLogin, paymentController.retryPaymentPage);
 
 //Order
 router.post('/order/placeOrder', requireLogin, orderController.createOrder);
@@ -99,8 +100,15 @@ router.get('/orders/:id', requireLogin, orderController.getOrderDetails);
 router.get('/order/:id/invoice', requireLogin, orderController.getOrderInvoice);
 router.post('/orders/item-cancel/:id', requireLogin, orderController.cancelProduct);
 router.post('/orders/cancel/:id', requireLogin, orderController.cancelOrder);
-router.post('/orders/item-return/:id', requireLogin, orderController.returnProduct);
+router.post('/orders/item-return/:id', requireLogin, orderController.productReturnRequest);
 
+router.get("/coupons", requireLogin, orderController.showCoupons);
+router.post('/apply-coupon',requireLogin, orderController.applyCoupon);
+
+router.get('/wishlist', requireLogin, wishlistController.getWishlist);
+router.post('/toggle-wishlist', requireLogin, wishlistController.toggleWishlist);
+router.post("/wishlist/move-to-cart", requireLogin, wishlistController.moveToCart);
+router.post("/remove-from-wishlist", requireLogin, wishlistController.removeProduct);
 
 
 

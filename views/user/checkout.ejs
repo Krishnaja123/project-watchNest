@@ -144,6 +144,8 @@
                     </div>
                     <form action="/order/placeOrder" method="POST">
 
+                        <input type="hidden" name="discount" id="discountInput" value="0">
+
                         <% if(addresses && addresses.length> 0){ %>
                             <% addresses.forEach(address=> { %>
                                 <div class="address-card">
@@ -194,16 +196,23 @@
 
                                 <!-- Coupon -->
                                 <div class="mb-3">
-                                    <label>Apply Coupon</label>
+                                    <label>Apply Coupon</label><br>
+
                                     <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Enter coupon code"
-                                            name="coupon">
-                                        <button class="btn btn-outline-secondary">APPLY</button>
+                                        <input type="text" id="couponInput" name="couponCode" class="form-control"
+                                            placeholder="Enter coupon code">
+                                        <button type="button" onclick="applyCoupon()" class="btn btn-outline-secondary">
+                                            APPLY
+                                        </button>
                                     </div>
+
+                                    <a href="/coupons/?cartTotal=<%= subTotal %>"
+                                        class="place-order-btn mt-4 text-center d-block" style="text-decoration: none;">
+                                        VIEW COUPONS
+                                    </a>
                                 </div>
 
                                 <hr>
-
                                 <div class="summary-item">
                                     <span>Subtotal</span>
                                     <span>₹<%= subTotal %></span>
@@ -211,22 +220,13 @@
 
                                 <div class="summary-item text-success">
                                     <span>Coupon Discount</span>
-                                    <span>- ₹<%= 0 %></span>
+                                    <span id="discountAmount">- ₹0</span>
                                 </div>
-
-                                <div class="summary-item">
-                                    <span>Shipping</span>
-                                    <span>₹<%= 0 %></span>
-                                </div>
-
-                                <hr>
 
                                 <div class="summary-item fw-bold">
                                     <span>Total</span>
-                                    <span>₹<%= subTotal %></span>
+                                    <span id="finalTotal">₹<%= subTotal %></span>
                                 </div>
-
-                                <hr>
 
                                 <!-- Payment Method -->
                                 <h6 class="mb-2">Payment Method</h6>
@@ -275,6 +275,8 @@
 
             async function handlePlaceOrder() {
 
+                const couponCode = document.getElementById("couponInput").value.trim() || null;
+                
                 const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
 
                 if (paymentMethod === "cod") {
@@ -283,8 +285,10 @@
                 }
 
                 if (paymentMethod === "online") {
+                    const couponCode = document.getElementById("couponInput").value.trim() || null;
 
-                    const totalAmount = <%= subTotal %>;
+                    //const totalAmount = <%= subTotal %>;
+                    const totalAmount = finalAmount;
                     const selectedAddressBtn = document.querySelector('input[name="selectedAddressId"]:checked');
 
                     if (!selectedAddressBtn) {
@@ -305,13 +309,14 @@
                         },
                         body: JSON.stringify({
                             amount: totalAmount,
-                            selectedAddressId
+                            selectedAddressId,
+                            couponCode,
+                            discount: appliedDiscount
                         })
                     });
 
                     const order = await response.json();
                     console.log("order: ", order);
-
 
                     openRazorpay(order);
                 }
@@ -395,6 +400,72 @@
 
                 });
                 rzp.open();
+            }
+
+            let appliedDiscount = 0;
+            let finalAmount = <%= subTotal %>;
+
+            async function applyCoupon() {
+                const code = document.getElementById("couponInput").value.trim();
+
+                if (!code) {
+                    Swal.fire({
+                        icon: "warning",
+                        text: "Enter a coupon code",
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    return;
+                }
+
+                try {
+                    const response = await fetch("/apply-coupon", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ code })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+
+                        appliedDiscount = result.discount;
+                        finalAmount = result.finalTotal;
+
+                        document.getElementById("discountAmount").innerText = `- ₹${result.discount}`;
+                        document.getElementById("finalTotal").innerText = `₹${result.finalTotal}`;
+
+                        document.getElementById("discountInput").value = appliedDiscount;
+
+                        document.getElementById("couponInput").disabled = true;
+
+                        Swal.fire({
+                            icon: "success",
+                            text: "Coupon Applied!",
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            text: result.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire({
+                        icon: "error",
+                        text: "Error applying coupon",
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
             }
 
         </script>
