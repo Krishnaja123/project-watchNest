@@ -1,0 +1,289 @@
+<!-- views/Coupons.ejs -->
+<%- include("../partials/admin/header") %>
+
+    <head>
+        <link rel="stylesheet" href="/css/admin/sidebar.css">
+        <link rel="stylesheet" href="/css/admin/admin.css">
+    </head>
+
+    <body>
+        <div class="container">
+            <!-- Sidebar -->
+            <%- include("../partials/admin/sidebar") %>
+
+                <!-- Main Content -->
+                <div class="main">
+                    <h1>Coupons</h1>
+
+                    <div class="top-bar">
+                        <button id="add-category">+ Add Offer</button>
+
+                        <div class="search-box">
+                            <input type="text" placeholder="Search" id="search">
+                            <button type="button" id="clear-btn">&times;</button>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-container">
+                        <table id="table">
+                            <thead id="thead">
+                                <tr>
+                                    <th>Offer Name</th>
+                                    <th>Type</th>
+                                    <th>Discount %</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination"></div>
+                </div>
+        </div>
+    </body>
+
+    <%- include("../partials/admin/footer") %>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const message = "<%= message %>";
+                const type = "<%= type %>";
+                if (message) {
+                    Swal.fire({
+                        icon: type,
+                        text: message,
+                        confirmButtonColor: '#007bff'
+                    });
+                }
+
+                const addOffer = document.getElementById("add-category");
+                addOffer.addEventListener("click", function () {
+                    window.location.href = "/admin/offers/create-offer";
+                });
+
+                const searchInput = document.getElementById("search");
+                const clearBtn = document.getElementById("clear-btn");
+
+                searchInput.addEventListener("input", function () {
+                    clearBtn.style.display = searchInput.value ? "inline" : "none";
+                });
+
+                clearBtn.addEventListener("click", function () {
+                    searchInput.value = "";
+                    clearBtn.style.display = "none";
+                    searchInput.focus();
+                    fetchOffer();
+                });
+
+                let page = parseInt("<%= page %>") || 1;
+                console.log("page :", page);
+
+                fetchOffer(page);
+
+                searchInput.addEventListener("input", function (e) {
+                    let searchValue = e.target.value;
+                    fetchOffer(1, searchValue);
+                });
+
+                async function fetchOffer(page = 1, search = "") {
+                    try {
+                        const response = await fetch(`/admin/fetchOffer?page=${page}&search=${search}`);
+                        console.log("response from fetchOffer: ", response);
+
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+                        const data = await response.json();
+                        //console.log("data", data);
+
+                        await renderCoupons(data.offers, data.currentPage);
+                        console.log("1")
+                        renderPagination(data.totalPages, data.currentPage);
+
+                    } catch (error) {
+                        console.log("Error fetching coupons:", error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to load coupons'
+                        });
+                    }
+                }
+
+                function renderCoupons(offers, currentPage) {
+                    const tbody = document.getElementById("tbody");
+                    tbody.innerHTML = "";
+
+                    offers.forEach(offer => {
+                        const tr = document.createElement("tr");
+                        const expiryDate = new Date(offer.expiryDate).toISOString().split('T')[0]
+                        const cells = [
+                            offer.code,
+                            offer.discountType,
+                            offer.discountValue,
+                            offer.minAmount,
+                            offer.maxDiscount,
+                            expiryDate,
+                            `${coupon.usageCount || 0} / ${coupon.usageLimit || 0}`
+
+                        ]
+                        cells.forEach(data => {
+                            const td = document.createElement("td");
+                            td.textContent = data;
+                            tr.appendChild(td);
+                        });
+
+                        const statusTd = document.createElement("td");
+                        const statusSpan = document.createElement("span");
+
+                        if (coupon.isActive) {
+                            const expiryTime = new Date(coupon.expiryDate).getTime();
+                            const now = Date.now();
+
+                            if (expiryTime < now) {
+                                statusSpan.textContent = "Expired";
+                                statusSpan.className = "status-blocked";
+                            } else if (coupon.usageCount >= coupon.usageLimit) {
+                                statusSpan.textContent = "Limit Reached";
+                                statusSpan.className = "status-blocked";
+                            } else {
+                                statusSpan.textContent = "Active";
+                                statusSpan.className = "status-active";
+                            }
+                        } else {
+                            statusSpan.textContent = "Inactive";
+                            statusSpan.className = "status-blocked";
+                        }
+                        // statusSpan.className = coupon.isActive ? "btn btn-listed" : "btn btn-unlisted";
+
+                        statusTd.appendChild(statusSpan);
+                        tr.appendChild(statusTd);
+
+                        const actionTd = document.createElement("td");
+                        const editLink = document.createElement("a");
+                        editLink.href = `/admin/coupons/editCoupon/${coupon._id}?page=${currentPage}`;
+                        editLink.className = "btn btn-edit";
+                        editLink.textContent = "Edit";
+
+                        const deletBtn = document.createElement("button");
+                        deletBtn.className = "btn btn-delete";
+                        deletBtn.textContent = "Delete";
+                        deletBtn.setAttribute("data-id", coupon._id);
+                        deletBtn.setAttribute("data-page", currentPage);
+
+                        actionTd.appendChild(editLink);
+                        actionTd.appendChild(deletBtn);
+
+                        tr.appendChild(actionTd);
+                        tbody.appendChild(tr);
+                    });
+                };
+
+                const tbody = document.getElementById("tbody");
+
+                tbody.addEventListener("click", function (e) {
+                    const button = e.target.closest(".btn-delete");
+
+                    if (button) {
+                        e.preventDefault();
+
+                        const couponId = button.dataset.id;
+                        const page = button.dataset.page;
+
+                        Swal.fire({
+                            title: "Are you sure?",
+                            text: "You won’t be able to recover this coupon!",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonText: "Yes, delete it!",
+                            cancelButtonText: "Cancel",
+                            confirmButtonColor: "#d33",
+                            cancelButtonColor: "#3085d6"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                deleteCoupon(couponId, page);
+                            }
+                        });
+                    }
+                });
+
+                async function deleteCoupon(id, page) {
+                    try {
+                        const response = await fetch(`/admin/coupons/${id}`, {
+                            method: "PUT"
+                        });
+
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            await Swal.fire({
+                                icon: "success",
+                                title: "Deleted!",
+                                text: "Coupon deleted successfully!"
+                            });
+
+                            await fetchCoupon(page, "");
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                text: data.message || "Failed to delete coupon"
+                            });
+                        }
+
+                    } catch (error) {
+                        console.error("Error deleting coupon:", error);
+
+                        Swal.fire({
+                            icon: "error",
+                            text: "Something went wrong!"
+                        });
+                    }
+                }
+                function renderPagination(totalPages, currentPage) {
+                    console.log("get in to renderPagination");
+
+                    const pagination = document.querySelector(".pagination");
+                    pagination.innerHTML = "";
+
+                    if (currentPage > 1) {
+                        const prevBtn = document.createElement("button");
+                        prevBtn.textContent = "<<";
+                        prevBtn.className = "pagination-btn";
+                        const search = searchInput.value;
+                        prevBtn.onclick = () => fetchCoupon(currentPage - 1, search);
+                        pagination.appendChild(prevBtn);
+                    }
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageBtn = document.createElement("button");
+                        pageBtn.textContent = i;
+                        pageBtn.className = "pagination-btn";
+                        if (i === currentPage) {
+                            pageBtn.classList.add("active");
+                        }
+                        const search = searchInput.value;
+                        pageBtn.onclick = () => fetchCoupon(i, search);
+                        pagination.appendChild(pageBtn);
+                    }
+                    console.log("total page:", totalPages);
+                    if (currentPage < totalPages) {
+                        const nextBtn = document.createElement("button");
+                        nextBtn.textContent = ">>";
+                        nextBtn.className = "pagination-btn";
+                        const search = searchInput.value;
+                        nextBtn.onclick = () => fetchCoupon(currentPage + 1, search);
+                        pagination.appendChild(nextBtn);
+                    }
+                };
+
+            })
+
+        </script>

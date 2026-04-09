@@ -14,12 +14,12 @@ const orderSchema = new mongoose.Schema({
   },
 
   shippingAddress: {
-    fullName: String,
-    phone: String,
+    full_name: String,
+    mobile: String,
     street: String,
     city: String,
     state: String,
-    pincode: String
+    postal_code: String
   },
 
   totalAmount: {

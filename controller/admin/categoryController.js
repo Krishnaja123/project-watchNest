@@ -24,7 +24,7 @@ const saveCategory = async (req, res) => {
             return res.redirect("/admin/category");
         }
         const trimedName = name.trim();
-        const existingCategory = await Category.findOne({ name: { $regex: trimedName, $options: "i" } });
+        const existingCategory = await Category.findOne({ name: { $regex: trimedName, $options: "i" }, is_delete: false });
         if (existingCategory) {
             req.session.message = "Category already exist";
             req.session.type = "error";

@@ -60,7 +60,8 @@ const saveProduct = async (req, res) => {
 
         const trimedName = name.trim();
         const existingProduct = await Product.findOne({
-            name: { $regex: `^${trimedName}$`, $options: "i" }
+            name: { $regex: `^${trimedName}$`, $options: "i" },
+            is_delete: false 
         });
 
         if (existingProduct) {

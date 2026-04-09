@@ -11,6 +11,8 @@ const checkoutController = require("../controller/user/checkoutController");
 const paymentController = require("../controller/user/paymentController");
 const orderController = require("../controller/user/orderController");
 const wishlistController = require("../controller/user/wishlistController");
+const walletController = require("../controller/user/walletController");
+
 const upload = require("../config/multerConfig");
 
 
@@ -102,6 +104,7 @@ router.post('/orders/item-cancel/:id', requireLogin, orderController.cancelProdu
 router.post('/orders/cancel/:id', requireLogin, orderController.cancelOrder);
 router.post('/orders/item-return/:id', requireLogin, orderController.productReturnRequest);
 
+router.get('/wallet', requireLogin, walletController.getWalletPage);
 router.get("/coupons", requireLogin, orderController.showCoupons);
 router.post('/apply-coupon',requireLogin, orderController.applyCoupon);
 

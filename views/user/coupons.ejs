@@ -61,6 +61,24 @@
             font-size: 12px;
         }
 
+        .badge-danger {
+            background: #dc3545;
+            /* red */
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .success-badge {
+            background: #28a745;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
         /* Code box */
         .coupon-code-box {
             display: flex;
@@ -131,51 +149,55 @@
 
                 <div class="coupon-grid">
                     <% sortedCoupons.forEach(coupon=> {
-                        const isValid = cartTotal >= coupon.minAmount && coupon.expiryDate > Date.now();
-                        %>
+                        const isValid = cartTotal >= coupon.minAmount && coupon.expiryDate > Date.now() &&
+                        coupon.usageCount < coupon.usageLimit; %>
 
-                        <div class="coupon-card <%= !isValid ? 'disabled' : '' %>">
+                            <div class="coupon-card <%= !isValid ? 'disabled' : '' %>">
 
-                            <div class="coupon-top">
-                                <span class="min-order">Min Order: ₹<%= coupon.minAmount %></span>
-                                <% let discount=0; const cart=Number(cartTotal) || 0; const
-                                    value=Number(coupon.discountValue) || 0; if (coupon.discountType==="percentage" ) {
-                                    discount=(cart * value) / 100; } else { discount=value; } %>
+                                <div class="coupon-top">
+                                    <span class="min-order">Min Order: ₹<%= coupon.minAmount %></span>
+                                    <% let discount=0; const cart=Number(cartTotal) || 0; const
+                                        value=Number(coupon.discountValue) || 0; if (coupon.discountType==="percentage"
+                                        ) { discount=(cart * value) / 100; } else { discount=value; } %>
 
-                                    <span class="coupon-badge">SAVE ₹<%= discount.toFixed(0) %></span>
-                            </div>
+                                        <span class="coupon-badge">SAVE ₹<%= discount.toFixed(0) %></span>
+                                </div>
 
-                            <div class="coupon-code-box">
-                                <span class="code">
-                                    <%= coupon.code %>
-                                </span>
+                                <div class="coupon-code-box">
+                                    <span class="code">
+                                        <%= coupon.code %>
+                                    </span>
 
-                                <button class="copy-btn" onclick="copyCode('<%= coupon.code %>')" <%=!isValid
-                                    ? 'disabled' : '' %>>
-                                    COPY
-                                </button>
-                            </div>
+                                    <button class="copy-btn" onclick="copyCode('<%= coupon.code %>')" <%=!isValid
+                                        ? 'disabled' : '' %>>
+                                        COPY
+                                    </button>
+                                </div>
 
-                            <div class="coupon-actions">
-                                <!-- <button class="apply-btn" <%=!isValid ? 'disabled' : '' %>
+                                <div class="coupon-actions">
+                                    <!-- <button class="apply-btn" <%=!isValid ? 'disabled' : '' %>
                                     onclick="applyCoupon('<%= coupon.code %>')">
                                         APPLY
                                 </button> -->
 
-                                <% if (!isValid) { %>
-                                    <small class="text-danger">
-                                        <% if(cartTotal < coupon.minAmount) { %>
-                                            Add ₹<%= coupon.minAmount - cartTotal %> more
-                                                <% } else if(coupon.expiryDate < Date.now()){ %>
-                                                    <span class="expired-badge"> Expired </span>
-                                                    <% } %>
-                                    </small>
-                                    <% } %>
+                                    <% if (!isValid) { %>
+                                        <small class="text-danger">
+                                            <% if(cartTotal < coupon.minAmount) { %>
+                                                Add ₹<%= coupon.minAmount - cartTotal %> more
+                                                    <% } else if(coupon.expiryDate < Date.now()){ %>
+                                                        <span class="expired-badge"> Expired </span>
+                                                        <% } else if(coupon.usageCount>= coupon.usageLimit) { %>
+                                                            <span class="badge-danger"> Limit Reached </span>
+                                                            <% } else { %>
+                                                                <span class="success-badge">Available</span>
+                                                                <% } %>
+                                        </small>
+                                        <% } %>
+                                </div>
+
                             </div>
 
-                        </div>
-
-                        <% }) %>
+                            <% }) %>
                 </div>
     </div>
     <%- include("../partials/user/footer") %>

@@ -12,6 +12,8 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
     console.log("get in to service");
 
     const address = await Address.findById(selectedAddressId);
+    console.log("address: ", address);
+    
 
     if (!address) {
         throw new Error("Please select or add a shipping address");
@@ -63,6 +65,21 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
     }
 
     const finalAmount = totalAmount - discount;
+
+    let wallet = null;
+
+    if (paymentMethod === "wallet") {
+        wallet = await Wallet.findOne({ user_id: userId });
+
+        if (!wallet) {
+            throw new Error("Wallet not found");
+        }
+
+        if (wallet.balance < finalAmount) {
+            throw new Error("Insufficient wallet balance");
+        }
+    }
+
     const couponDiscount = totalAmount - finalAmount;
 
     const newOrder = await Order.create({
@@ -77,6 +94,8 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
         paymentStatus
     });
 
+    console.log("newOrder: ", newOrder);
+
     for (const item of orderItems) {
         await OrderItem.create({
             order_id: newOrder._id,
@@ -84,17 +103,15 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
         });
     }
 
-    if (paymentMethod === "wallet") {
-            const wallet = await Wallet.findOne({ userId});
-            const reason = `Order Payment against order ${order.orderId}`;
-            debitWallet(userId, newOrder.totalAmount, reason);
-        }
+    if(paymentMethod === "wallet") {
+        const reason = `Order Payment against order ${newOrder.orderId}`;
+        debitWallet(userId, newOrder.totalAmount, reason);
+        newOrder.paymentStatus = "paid";
+        newOrder.save();
+    }
 
-
-    // if (paymentMethod === "cod") {
     cart.is_active = false;
     await cart.save();
-    //}
     return newOrder;
 };
 

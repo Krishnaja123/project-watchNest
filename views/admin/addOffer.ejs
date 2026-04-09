@@ -1,0 +1,204 @@
+<%- include("../partials/admin/header", { title: "Create Offer" }) %>
+
+<head>
+    <link rel="stylesheet" href="/css/admin/sidebar.css">
+    <link rel="stylesheet" href="/css/admin/admin.css">
+</head>
+
+<script src="https://cdn.jsdelivr.net/npm/zod@3.22.4/lib/index.umd.min.js"></script>
+
+<div class="container">
+
+```
+<!-- Sidebar -->
+<%- include("../partials/admin/sidebar") %>
+
+<!-- Main Content -->
+<div class="content">
+    <div class="header">Create Offer</div>
+
+    <div class="form-container">
+        <form id="offerForm" method="POST" action="/admin/create-offer">
+
+            <!-- Offer Name -->
+            <div class="form-group">
+                <label>Offer Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter offer name">
+                <small class="error" id="nameError"></small>
+            </div>
+
+            <!-- Offer Type -->
+            <div class="form-group">
+                <label>Offer Type</label>
+                <select name="type" id="offerType">
+                    <option value="">Select Type</option>
+                    <option value="product">Product Offer</option>
+                    <option value="category">Category Offer</option>
+                </select>
+                <small class="error" id="typeError"></small>
+            </div>
+
+            <!-- Product -->
+            <div class="form-group d-none" id="productDiv">
+                <label>Select Product</label>
+                <select name="productId" id="productId">
+                    <option value="">Select Product</option>
+                    <% products.forEach(product => { %>
+                        <option value="<%= product._id %>">
+                            <%= product.name %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group d-none" id="categoryDiv">
+                <label>Select Category</label>
+                <select name="categoryId" id="categoryId">
+                    <option value="">Select Category</option>
+                    <% categories.forEach(category => { %>
+                        <option value="<%= category._id %>">
+                            <%= category.name %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <!-- Discount -->
+            <div class="form-group">
+                <label>Discount (%)</label>
+                <input type="number" id="discountValue" name="discountValue" min="1" max="90" placeholder="Enter discount %">
+                <small class="error" id="discountValueError"></small>
+            </div>
+
+            <!-- Dates -->
+            <div class="form-group">
+                <label>Start Date</label>
+                <input type="date" id="startDate" name="startDate">
+                <small class="error" id="startDateError"></small>
+            </div>
+
+            <div class="form-group">
+                <label>End Date</label>
+                <input type="date" id="endDate" name="endDate">
+                <small class="error" id="endDateError"></small>
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+                <a href="/admin/offers" class="btn btn-cancel">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create Offer</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+```
+
+</div>
+
+<%- include("../partials/admin/footer") %>
+
+<style>
+.error {
+    color: red;
+    font-size: 12px;
+}
+.error-border {
+    border: 1px solid red;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const { z } = window.Zod;
+    const form = document.getElementById("offerForm");
+
+    const offerType = document.getElementById("offerType");
+    const productDiv = document.getElementById("productDiv");
+    const categoryDiv = document.getElementById("categoryDiv");
+
+    // Toggle product/category
+    offerType.addEventListener("change", () => {
+        if (offerType.value === "product") {
+            productDiv.classList.remove("d-none");
+            categoryDiv.classList.add("d-none");
+        } else if (offerType.value === "category") {
+            categoryDiv.classList.remove("d-none");
+            productDiv.classList.add("d-none");
+        } else {
+            productDiv.classList.add("d-none");
+            categoryDiv.classList.add("d-none");
+        }
+    });
+
+    // Zod schema
+    const offerSchema = z.object({
+        name: z.string().min(3, "Offer name must be at least 3 characters"),
+        type: z.enum(["product", "category"], {
+            errorMap: () => ({ message: "Please select offer type" })
+        }),
+        discountValue: z.number().min(1, "Minimum 1%").max(90, "Maximum 90%"),
+        startDate: z.string().min(1, "Start date required"),
+        endDate: z.string().min(1, "End date required")
+    });
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // Clear errors
+        document.querySelectorAll(".error").forEach(el => el.innerText = "");
+        document.querySelectorAll("input, select").forEach(el => el.classList.remove("error-border"));
+
+        const formData = {
+            name: document.getElementById("name").value.trim(),
+            type: document.getElementById("offerType").value,
+            discountValue: Number(document.getElementById("discountValue").value),
+            startDate: document.getElementById("startDate").value,
+            endDate: document.getElementById("endDate").value,
+            productId: document.getElementById("productId")?.value,
+            categoryId: document.getElementById("categoryId")?.value
+        };
+
+        const result = offerSchema.safeParse(formData);
+
+        if (!result.success) {
+            result.error.errors.forEach(err => {
+                const field = err.path[0];
+                const errorEl = document.getElementById(field + "Error");
+                const inputEl = document.getElementById(field);
+
+                if (errorEl) errorEl.innerText = err.message;
+                if (inputEl) inputEl.classList.add("error-border");
+            });
+            return;
+        }
+
+        // Extra validations
+        if (formData.type === "product" && !formData.productId) {
+            alert("Please select a product");
+            return;
+        }
+
+        if (formData.type === "category" && !formData.categoryId) {
+            alert("Please select a category");
+            return;
+        }
+
+        if (formData.endDate < formData.startDate) {
+            document.getElementById("endDateError").innerText = "End date must be after start date";
+            return;
+        }
+
+        const today = new Date().toISOString().split("T")[0];
+        if (formData.startDate < today) {
+            document.getElementById("startDateError").innerText = "Start date cannot be in the past";
+            return;
+        }
+
+        form.submit();
+    });
+
+});
+</script>

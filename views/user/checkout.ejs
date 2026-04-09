@@ -153,7 +153,7 @@
                                         <input type="radio" name="selectedAddressId" value="<%= address._id %>"
                                             <%=address.is_default ? 'checked' : '' %> >
                                         <strong>
-                                            <%= address.name %>
+                                            <%= address.full_name %>
                                         </strong><br>
                                         <%= address.city %>, <%= address.district %><br>
                                                 <%= address.state %><br>
@@ -211,6 +211,7 @@
                                         VIEW COUPONS
                                     </a>
                                 </div>
+
 
                                 <hr>
                                 <div class="summary-item">
@@ -276,31 +277,58 @@
             async function handlePlaceOrder() {
 
                 const couponCode = document.getElementById("couponInput").value.trim() || null;
-                
-                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+                const totalAmount = finalAmount;
 
-                if (paymentMethod === "cod") {
-                    document.querySelector('form[action="/order/placeOrder"]').submit();
+                const selectedAddressBtn = document.querySelector('input[name="selectedAddressId"]:checked');
+                if (!selectedAddressBtn) {
+                    Swal.fire({
+                        icon: "error",
+                        text: "Please select a shipping address",
+                        confirmButtonColor: '#007bff'
+                    });
                     return;
                 }
 
-                if (paymentMethod === "online") {
-                    const couponCode = document.getElementById("couponInput").value.trim() || null;
+                const selectedAddressId = selectedAddressBtn.value;
 
-                    //const totalAmount = <%= subTotal %>;
-                    const totalAmount = finalAmount;
-                    const selectedAddressBtn = document.querySelector('input[name="selectedAddressId"]:checked');
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
 
-                    if (!selectedAddressBtn) {
-                        Swal.fire({
-                            icon: "error",
-                            text: "Please select a shipping address",
-                            confirmButtonColor: '#007bff'
-                        });
+                if (paymentMethod === "cod" || paymentMethod === "wallet") {
+                    // document.querySelector('form[action="/order/placeOrder"]').submit();
+
+                    const response = await fetch("/order/placeOrder", {
+                        method: "POST",
+                        headers: {
+                            "content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            selectedAddressId,
+                            paymentMethod,
+                            couponCode,
+                            discount: appliedDiscount
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        Swal.fire("Error", error.message, "error");
                         return;
                     }
 
-                    const selectedAddressId = selectedAddressBtn.value;
+                    const result = await response.json();
+
+                    if (result.success) {
+                        window.location.href = `/order/success/${result.orderId}`;
+                    } else {
+                        Swal.fire("Error", result.message, "error");
+                    }
+                }
+
+                if (paymentMethod === "online") {
+                    // const couponCode = document.getElementById("couponInput").value.trim() || null;
+
+                    //const totalAmount = <%= subTotal %>;
+                    // const totalAmount = finalAmount;
 
                     const response = await fetch("/payment/create-order", {
                         method: "POST",
@@ -316,9 +344,13 @@
                     });
 
                     const order = await response.json();
+                    if (order.success) {
+                        openRazorpay(order, couponCode);
+                    } else {
+                        Swal.fire("Error", data.message, "error");
+                    }
                     console.log("order: ", order);
 
-                    openRazorpay(order);
                 }
 
             }
@@ -331,7 +363,7 @@
             // }            
 
 
-            function openRazorpay(order) {
+            function openRazorpay(order, couponCode) {
 
                 var options = {
                     key: "<%= razorpayKey %>",
@@ -350,6 +382,7 @@
                             body: JSON.stringify({
                                 ...response,
                                 orderId: order.order_id,
+                                couponCode
                             })
                         });
 

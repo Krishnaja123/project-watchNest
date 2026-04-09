@@ -1,7 +1,8 @@
 const razorpay = require("../../config/razorpay");
 const Order = require("../../models/orderModel");
-const Cart = require("../../models/cartModel");
-const OrderItem = require("../../models/orderItemsModel");
+const Coupon = require("../../models/cartModel");
+// const Cart = require("../../models/cartModel");
+// const OrderItem = require("../../models/orderItemsModel");
 
 const { createOrderService } = require("../../services/createOrderService");
 
@@ -12,7 +13,7 @@ const createRazorpayOrder = async (req, res) => {
         const userId = req.user._id;
         const { amount, selectedAddressId, couponCode, discount } = req.body;
 
-        amountInPaise  = Math.round(amount * 100);
+        amountInPaise = Math.round(amount * 100);
 
         const order = await createOrderService(
             userId,
@@ -22,6 +23,7 @@ const createRazorpayOrder = async (req, res) => {
             discount,
             couponCode
         );
+        console.log("coupon: ", couponCode);
 
         const options = {
             amount: amountInPaise,
@@ -33,6 +35,7 @@ const createRazorpayOrder = async (req, res) => {
         console.log(razorpayOrder);
 
         res.json({
+            success: true,
             razorpayOrderId: razorpayOrder.id,
             amount: razorpayOrder.amount,
             orderId: order.orderId,
@@ -41,7 +44,11 @@ const createRazorpayOrder = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 
@@ -49,10 +56,10 @@ const verifyPayment = async (req, res) => {
 
     console.log("Hi");
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId, couponCode } = req.body;
 
     console.log("orderId: ", orderId);
-    
+
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
     const expectedSignature = crypto
@@ -61,37 +68,29 @@ const verifyPayment = async (req, res) => {
         .digest("hex");
 
     if (expectedSignature === razorpay_signature) {
-        const userId = req.user._id;
 
-        // if (paymentMethod === "online") {
-        //     const orderItems = await OrderItem.find({ order_id: orderId }).populate("product_id");
-
-        //     for (const item of orderItems) {
-        //         const product = item.product_id;
-
-        //         const variant = product?.variants?.find(
-        //             v => v._id.toString() === item.variant_id.toString()
-        //         );
-        //         variant.stock -= item.quantity;
-        //         await product.save();
-        //     }
-
-        //     const cart = await Cart.findOne({ user_id: userId, is_active: true });
-        //     if (cart) {
-        //         cart.is_active = false;
-        //         await cart.save();
-        //     }
-
-        // }
         const order = await Order.findById(orderId);
 
         console.log("order: ", order);
-        
 
         order.paymentStatus = "paid";
         order.razorpayOrderId = razorpay_order_id;
         order.razorpayPaymentId = razorpay_payment_id;
         order.save();
+
+        
+        if (couponCode) {
+            const coupon = await Coupon.findOne({ code: couponCode.trim() });
+
+            if (!coupon) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid coupon code"
+                });
+            }
+            coupon.usageCount += 1;
+            await coupon.save();
+        }
 
         res.json({
             status: true,

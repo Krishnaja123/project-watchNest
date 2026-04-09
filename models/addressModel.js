@@ -4,7 +4,7 @@ const addressSchema = new mongoose.Schema(
   {
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",   // must match your User model name
+      ref: "User",   
       required: true
     },
 

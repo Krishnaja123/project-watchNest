@@ -18,35 +18,42 @@ const createOrder = async (req, res) => {
         console.log("req.user: ", req.user);
 
         const userId = req.user._id;
-        const user = await User.findById(userId);
 
+        const { selectedAddressId, paymentMethod, couponCode, discount } = req.body;
 
-        const { selectedAddressId, paymentMethod, couponCode } = req.body;
+        console.log("coupon code: ", couponCode);
 
-        let paymentStatus = "pending"
-        console.log("couponCode: ", couponCode);
-
+        let paymentStatus = "pending";
 
         const order = await createOrderService(
             userId,
             selectedAddressId,
             paymentMethod,
             paymentStatus,
+            discount,
             couponCode
         );
 
-        return res.redirect(`/order/success/${order.orderId}`);
+        if (couponCode) {
+            console.log("hi");
 
-        // return res.render('user/order-success', {
-        //     orderId: order.orderId
-        // });
+            const coupon = await Coupon.findOne({ code: couponCode });
+            coupon.usageCount += 1;
+            await coupon.save();
+        }
+
+        return res.json({
+            success: true,
+            orderId: order.orderId
+        });
 
     } catch (error) {
+        console.error(error);
 
-        req.session.message = error.message;
-        req.session.type = "error";
-
-        return res.redirect("/checkout");
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 }
 
@@ -230,7 +237,7 @@ const cancelProduct = async (req, res) => {
             const refundAmount = itemTotal - itemDiscount;
 
             console.log("refund: ", refundAmount);
-            
+
             // const amount = item.price * item.quantity;
             await creditWallet(userId, refundAmount, `Refund for cancelled product`);
             console.log("hi");
@@ -271,7 +278,7 @@ const cancelOrder = async (req, res) => {
         const { reason } = req.body;
 
         console.log("reason: ", reason);
-        
+
 
         if (!reason || !reason.trim()) {
             return res.status(400).json({
@@ -303,7 +310,7 @@ const cancelOrder = async (req, res) => {
             const refundAmount = order.totalAmount;
 
             console.log("refund: ", refundAmount);
-            
+
             await creditWallet(userId, refundAmount, `Refund for cancelled order`);
             console.log("hi");
 
@@ -401,7 +408,7 @@ const showCoupons = async (req, res) => {
     try {
         const cartTotal = Number(req.query.cartTotal) || 0;
 
-        const coupons = await Coupon.find({ is_delete: false, isActive: true });
+        const coupons = await Coupon.find({ is_delete: false, isActive: true,  });
 
         res.render("user/coupons", {
             coupons,
@@ -436,6 +443,10 @@ const applyCoupon = async (req, res) => {
 
         if (coupon.expiryDate < Date.now())
             return res.json({ success: false, message: "Coupon expired!" });
+
+        if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
+            return res.json({ success: false, message: "Coupon usage limit reached" });
+        }
 
         let discount = 0;
         if (coupon.discountType === 'percentage') {

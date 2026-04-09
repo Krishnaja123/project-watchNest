@@ -20,10 +20,11 @@ const couponSchema = new mongoose.Schema({
 
     usageCount: { type: Number, default: 0 },
        
-    usageLimit: { type: Number, default: Infinity },
+    usageLimit: { type: Number, 
+        default: Infinity  // Unlimited usage if not specified
+     },
 
     is_delete: { type: Boolean, default: false}
-
 
 }, { timestamps: true });
 

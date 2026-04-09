@@ -26,7 +26,7 @@ const saveBrand = async (req, res) => {
         }
 
         const trimedName = name.trim();
-        const existingBrand = await Brand.findOne({ name: { $regex: trimedName, $options: "i" } });
+        const existingBrand = await Brand.findOne({ name: { $regex: trimedName, $options: "i" }, is_delete: false });
         if (existingBrand) {
             req.session.message = "Brand already exist";
             req.session.type = "error";
@@ -77,7 +77,7 @@ const fetchBrands = async (req, res) => {
         let brands = await Brand.find({
             name: { $regex: search, $options: "i" },
             is_delete: false
-        }).sort({ created_at: -1 }).skip((page - 1) * limit).limit(limit);
+        }).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
 
 
         console.log(brands);
