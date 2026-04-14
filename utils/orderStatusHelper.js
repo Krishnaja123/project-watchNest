@@ -28,16 +28,16 @@ const calculateOrderStatus = (orderItems) => {
     if (statusCount.shipped === total) return "shipped";
     if (statusCount.processing === total) return "processing";
 
+    if (statusCount.delivered > 0) {
+        return "partially_delivered";
+    }
+    
     if (statusCount.cancelled > 0) {
         return "partially_cancelled";
     }
 
     if (statusCount.returned > 0) {
         return "partially_returned";
-    }
-
-    if (statusCount.delivered > 0) {
-        return "partially_delivered";
     }
 
     if (statusCount.shipped > 0) {

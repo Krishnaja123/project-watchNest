@@ -1,4 +1,4 @@
-<!-- views/Coupons.ejs -->
+<!-- views/Offers.ejs -->
 <%- include("../partials/admin/header") %>
 
     <head>
@@ -13,7 +13,7 @@
 
                 <!-- Main Content -->
                 <div class="main">
-                    <h1>Coupons</h1>
+                    <h1>Offers</h1>
 
                     <div class="top-bar">
                         <button id="add-category">+ Add Offer</button>
@@ -92,7 +92,7 @@
 
                 async function fetchOffer(page = 1, search = "") {
                     try {
-                        const response = await fetch(`/admin/fetchOffer?page=${page}&search=${search}`);
+                        const response = await fetch(`/admin/offers/fetchOffers?page=${page}&search=${search}`);
                         console.log("response from fetchOffer: ", response);
 
                         if (!response.ok) {
@@ -101,36 +101,34 @@
                         const data = await response.json();
                         //console.log("data", data);
 
-                        await renderCoupons(data.offers, data.currentPage);
+                        await renderOffers(data.offers, data.currentPage);
                         console.log("1")
                         renderPagination(data.totalPages, data.currentPage);
 
                     } catch (error) {
-                        console.log("Error fetching coupons:", error);
+                        console.log("Error fetching offers:", error);
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: 'Failed to load coupons'
+                            text: 'Failed to load offers'
                         });
                     }
                 }
 
-                function renderCoupons(offers, currentPage) {
+                function renderOffers(offers, currentPage) {
                     const tbody = document.getElementById("tbody");
                     tbody.innerHTML = "";
 
                     offers.forEach(offer => {
                         const tr = document.createElement("tr");
-                        const expiryDate = new Date(offer.expiryDate).toISOString().split('T')[0]
+                        const startDate = new Date(offer.startDate).toISOString().split('T')[0];
+                        const endDate = new Date(offer.endDate).toISOString().split('T')[0];
                         const cells = [
-                            offer.code,
-                            offer.discountType,
+                            offer.name,
+                            offer.offerType,
                             offer.discountValue,
-                            offer.minAmount,
-                            offer.maxDiscount,
-                            expiryDate,
-                            `${coupon.usageCount || 0} / ${coupon.usageLimit || 0}`
-
+                            startDate,
+                            endDate,
                         ]
                         cells.forEach(data => {
                             const td = document.createElement("td");
@@ -141,39 +139,31 @@
                         const statusTd = document.createElement("td");
                         const statusSpan = document.createElement("span");
 
-                        if (coupon.isActive) {
-                            const expiryTime = new Date(coupon.expiryDate).getTime();
-                            const now = Date.now();
 
-                            if (expiryTime < now) {
-                                statusSpan.textContent = "Expired";
-                                statusSpan.className = "status-blocked";
-                            } else if (coupon.usageCount >= coupon.usageLimit) {
-                                statusSpan.textContent = "Limit Reached";
-                                statusSpan.className = "status-blocked";
-                            } else {
-                                statusSpan.textContent = "Active";
-                                statusSpan.className = "status-active";
-                            }
-                        } else {
-                            statusSpan.textContent = "Inactive";
+                        const expiryTime = new Date(offer.endDate).getTime();
+                        const now = Date.now();
+
+                        if (expiryTime < now) {
+                            statusSpan.textContent = "Expired";
                             statusSpan.className = "status-blocked";
+                        } else {
+                            statusSpan.textContent = "Active";
+                            statusSpan.className = "status-active";
                         }
-                        // statusSpan.className = coupon.isActive ? "btn btn-listed" : "btn btn-unlisted";
 
                         statusTd.appendChild(statusSpan);
                         tr.appendChild(statusTd);
 
                         const actionTd = document.createElement("td");
                         const editLink = document.createElement("a");
-                        editLink.href = `/admin/coupons/editCoupon/${coupon._id}?page=${currentPage}`;
+                        editLink.href = `/admin/offers/editOffer/${offer._id}?page=${currentPage}`;
                         editLink.className = "btn btn-edit";
                         editLink.textContent = "Edit";
 
                         const deletBtn = document.createElement("button");
                         deletBtn.className = "btn btn-delete";
                         deletBtn.textContent = "Delete";
-                        deletBtn.setAttribute("data-id", coupon._id);
+                        deletBtn.setAttribute("data-id", offer._id);
                         deletBtn.setAttribute("data-page", currentPage);
 
                         actionTd.appendChild(editLink);
@@ -192,12 +182,12 @@
                     if (button) {
                         e.preventDefault();
 
-                        const couponId = button.dataset.id;
+                        const offerId = button.dataset.id;
                         const page = button.dataset.page;
 
                         Swal.fire({
                             title: "Are you sure?",
-                            text: "You won’t be able to recover this coupon!",
+                            text: "You won’t be able to recover this offer!",
                             icon: "warning",
                             showCancelButton: true,
                             confirmButtonText: "Yes, delete it!",
@@ -206,15 +196,15 @@
                             cancelButtonColor: "#3085d6"
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                deleteCoupon(couponId, page);
+                                deleteOffer(offerId, page);
                             }
                         });
                     }
                 });
 
-                async function deleteCoupon(id, page) {
+                async function deleteOffer(id, page) {
                     try {
-                        const response = await fetch(`/admin/coupons/${id}`, {
+                        const response = await fetch(`/admin/offers/${id}`, {
                             method: "PUT"
                         });
 
@@ -228,19 +218,19 @@
                             await Swal.fire({
                                 icon: "success",
                                 title: "Deleted!",
-                                text: "Coupon deleted successfully!"
+                                text: "Offer deleted successfully!"
                             });
 
-                            await fetchCoupon(page, "");
+                            await fetchOffer(page, "");
                         } else {
                             Swal.fire({
                                 icon: "error",
-                                text: data.message || "Failed to delete coupon"
+                                text: data.message || "Failed to delete offer"
                             });
                         }
 
                     } catch (error) {
-                        console.error("Error deleting coupon:", error);
+                        console.error("Error deleting offer:", error);
 
                         Swal.fire({
                             icon: "error",
@@ -248,6 +238,7 @@
                         });
                     }
                 }
+
                 function renderPagination(totalPages, currentPage) {
                     console.log("get in to renderPagination");
 
@@ -259,7 +250,7 @@
                         prevBtn.textContent = "<<";
                         prevBtn.className = "pagination-btn";
                         const search = searchInput.value;
-                        prevBtn.onclick = () => fetchCoupon(currentPage - 1, search);
+                        prevBtn.onclick = () => fetchOffer(currentPage - 1, search);
                         pagination.appendChild(prevBtn);
                     }
                     for (let i = 1; i <= totalPages; i++) {
@@ -270,7 +261,7 @@
                             pageBtn.classList.add("active");
                         }
                         const search = searchInput.value;
-                        pageBtn.onclick = () => fetchCoupon(i, search);
+                        pageBtn.onclick = () => fetchOffer(i, search);
                         pagination.appendChild(pageBtn);
                     }
                     console.log("total page:", totalPages);
@@ -279,7 +270,7 @@
                         nextBtn.textContent = ">>";
                         nextBtn.className = "pagination-btn";
                         const search = searchInput.value;
-                        nextBtn.onclick = () => fetchCoupon(currentPage + 1, search);
+                        nextBtn.onclick = () => fetchOffer(currentPage + 1, search);
                         pagination.appendChild(nextBtn);
                     }
                 };

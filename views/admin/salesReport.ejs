@@ -1,0 +1,308 @@
+<%- include("../partials/admin/header") %>
+
+<head>
+    <link rel="stylesheet" href="/css/admin/sidebar.css">
+    <link rel="stylesheet" href="/css/admin/admin.css">
+
+    <style>
+        .report-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .card-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-box h4 {
+            color: gray;
+            font-size: 14px;
+        }
+
+        .card-box h2 {
+            margin-top: 10px;
+            color: #000;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar select,
+        .filter-bar input {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .filter-btn {
+            background: #d4a017;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #111;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .export-btns button {
+            margin-left: 10px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pdf-btn {
+            background: #007bff;
+            color: #fff;
+        }
+
+        .excel-btn {
+            background: #28a745;
+            color: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .pagination {
+            margin-top: 10px;
+        }
+
+        .pagination-btn {
+            margin: 2px;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .pagination-btn.active {
+            background: #111;
+            color: #fff;
+        }
+
+        #customDateRange {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <%- include("../partials/admin/sidebar") %>
+
+    <div class="main">
+
+        <h1>Sales Report</h1>
+
+        <!-- FILTER -->
+        <div class="filter-bar">
+
+            <select id="filterType">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+                <option value="custom">Custom</option>
+            </select>
+
+            <div id="customDateRange">
+                <input type="date" id="startDate">
+                <input type="date" id="endDate">
+            </div>
+
+            <button class="filter-btn" id="applyFilter">Apply Filter</button>
+
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="report-cards">
+
+            <div class="card-box">
+                <h4>Total Orders</h4>
+                <h2 id="totalOrders">0</h2>
+            </div>
+
+            <div class="card-box">
+                <h4>Total Revenue</h4>
+                <h2 id="totalRevenue">₹0</h2>
+            </div>
+
+            <div class="card-box">
+                <h4>Offer Discount</h4>
+                <h2 id="offerDiscount">₹0</h2>
+            </div>
+
+            <div class="card-box">
+                <h4>Coupon Deduction</h4>
+                <h2 id="couponDeduction">₹0</h2>
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-header">
+            <h3>Order History</h3>
+
+            <div class="export-btns">
+                <button onclick="window.location.href='/admin/sales-report/excel?filter=' + document.getElementById('filterType').value" class="pdf-btn">PDF</button>
+                <button onclick="window.location.href='/admin/sales-report/pdf?filter=' + document.getElementById('filterType').value" class="excel-btn">Excel</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order#</th>
+                        <th>Date</th>
+                        <th>Payment Method</th>
+                        <th>Total Amount</th>
+                        <th>Offer Discount</th>
+                        <th>Coupon Deduction</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+
+        <div class="pagination"></div>
+
+    </div>
+</div>
+
+<%- include("../partials/admin/footer") %>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const filterType = document.getElementById("filterType");
+    const customDateRange = document.getElementById("customDateRange");
+    const applyFilter = document.getElementById("applyFilter");
+
+    applyFilter.addEventListener("click", () => {
+        if (filterType.value === "custom") {
+            const start = document.getElementById("startDate").value;
+            const end = document.getElementById("endDate").value;
+
+            if (!start || !end) {
+                alert("Select start and end date");
+                return;
+            }
+        }
+        fetchOrder(1);
+    });
+
+    filterType.addEventListener("change", function () {
+        customDateRange.style.display =
+            this.value === "custom" ? "flex" : "none";
+    });
+
+    fetchOrder(1);
+
+    async function fetchOrder(page = 1) {
+        try {
+
+            const filter = filterType.value;
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+
+            let url = `/admin/sales-report-data?page=${page}&filter=${filter}`;
+
+            if (filter === "custom") {
+                url += `&startDate=${startDate}&endDate=${endDate}`;
+            }
+
+            const res = await fetch(url);
+            const data = await res.json();
+
+            console.log("data: ", data);
+            
+
+            updateSummary(data.summary);
+            renderOrders(data.orderReport);
+            renderPagination(data.totalPages, data.currentPage);
+
+        } catch (err) {
+            console.log(err);
+            alert("Failed to load report");
+        }
+    }
+
+    function updateSummary(s) {
+        document.getElementById("totalOrders").textContent = s.totalOrders;
+        document.getElementById("totalRevenue").textContent = "₹" + s.totalRevenue.toFixed(2);
+        document.getElementById("offerDiscount").textContent = "₹" + s.totalOfferDiscount.toFixed(2);
+        document.getElementById("couponDeduction").textContent = "₹" + s.totalCouponDiscount.toFixed(2);
+    }
+
+    function renderOrders(orders) {
+        const tbody = document.getElementById("tbody");
+        tbody.innerHTML = "";
+
+        orders.forEach(o => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${o.orderId}</td>
+                <td>${o.date}</td>
+                <td>${o.paymentMethod}</td>
+                <td>${o.totalAmount}</td>
+                <td>${o.offerDiscount}</td>
+                <td>${o.couponDiscount}</td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderPagination(totalPages, currentPage) {
+        const pagination = document.querySelector(".pagination");
+        pagination.innerHTML = "";
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i;
+            btn.className = "pagination-btn" + (i === currentPage ? " active" : "");
+            btn.onclick = () => fetchOrder(i);
+            pagination.appendChild(btn);
+        }
+    }
+
+});
+</script>
+
+</body>

@@ -19,7 +19,7 @@ const createOrder = async (req, res) => {
 
         const userId = req.user._id;
 
-        const { selectedAddressId, paymentMethod, couponCode, discount } = req.body;
+        const { selectedAddressId, paymentMethod, couponCode, discount} = req.body;
 
         console.log("coupon code: ", couponCode);
 

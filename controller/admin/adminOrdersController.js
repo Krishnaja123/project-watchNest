@@ -163,6 +163,23 @@ const updateProductStatus = async (req, res) => {
             item.status = status;
             await item.save();
 
+            const items = await OrderItem.find({ order_id: item.order_id });
+
+            const allDelivered = items.every(i => i.status === "delivered");
+
+            if (allDelivered) {
+
+                const order = await Order.findById(item.order_id);
+
+                if (order) {
+
+                    if (order.paymentMethod === "cod") {
+                        order.paymentStatus = "paid";
+                        await order.save();
+                    }
+                }
+            }
+
         } else if (item.status === "delivered") {
             if (item.returnRequested && item.returnAccepted) {
                 item.status = status;

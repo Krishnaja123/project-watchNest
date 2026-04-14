@@ -1,6 +1,6 @@
 const razorpay = require("../../config/razorpay");
 const Order = require("../../models/orderModel");
-const Coupon = require("../../models/cartModel");
+const Coupon = require("../../models/couponSchema");
 // const Cart = require("../../models/cartModel");
 // const OrderItem = require("../../models/orderItemsModel");
 
@@ -53,34 +53,50 @@ const createRazorpayOrder = async (req, res) => {
 };
 
 const verifyPayment = async (req, res) => {
+    try {
+        console.log("Hi");
 
-    console.log("Hi");
+        const {
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature,
+            orderId,
+            couponCode
+        } = req.body;
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId, couponCode } = req.body;
+        console.log("orderId:", orderId);
 
-    console.log("orderId: ", orderId);
+        // 1. VERIFY SIGNATURE FIRST
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_API_SECRET)
+            .update(body.toString())
+            .digest("hex");
 
-    const expectedSignature = crypto
-        .createHmac("sha256", process.env.RAZORPAY_API_SECRET)
-        .update(body.toString())
-        .digest("hex");
+        if (expectedSignature !== razorpay_signature) {
+            return res.json({ status: false });
+        }
 
-    if (expectedSignature === razorpay_signature) {
-
+        // 2. FIND ORDER
         const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
 
-        console.log("order: ", order);
+        // 3. VALIDATE COUPON (ONLY IF SENT)
+        let coupon = null;
 
-        order.paymentStatus = "paid";
-        order.razorpayOrderId = razorpay_order_id;
-        order.razorpayPaymentId = razorpay_payment_id;
-        order.save();
-
-        
         if (couponCode) {
-            const coupon = await Coupon.findOne({ code: couponCode.trim() });
+            coupon = await Coupon.findOne({
+                code: couponCode.trim().toUpperCase()
+            });
+
+            console.log("coupon: ", coupon);
+            
 
             if (!coupon) {
                 return res.status(400).json({
@@ -88,20 +104,34 @@ const verifyPayment = async (req, res) => {
                     message: "Invalid coupon code"
                 });
             }
+
+
+        }
+
+        // 4. UPDATE ORDER
+        order.paymentStatus = "paid";
+        order.razorpayOrderId = razorpay_order_id;
+        order.razorpayPaymentId = razorpay_payment_id;
+        await order.save();
+
+        // 5. UPDATE COUPON USAGE (ONLY IF VALID)
+        if (coupon) {
             coupon.usageCount += 1;
             await coupon.save();
         }
 
-        res.json({
+        return res.json({
             status: true,
             orderId: order.orderId
         });
 
-    } else {
-
-        res.json({ status: false });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
     }
-
 };
 
 const paymentFailed = async (req, res) => {

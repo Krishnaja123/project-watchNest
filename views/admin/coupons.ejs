@@ -8,6 +8,7 @@
 
     </head>
 
+
     <body>
         <div class="container">
             <!-- Sidebar -->
@@ -125,7 +126,9 @@
 
                     coupons.forEach(coupon => {
                         const tr = document.createElement("tr");
-                        const expiryDate = new Date(coupon.expiryDate).toISOString().split('T')[0]
+
+                        const expiryDate = new Date(coupon.expiryDate).toISOString().split('T')[0];
+
                         const cells = [
                             coupon.code,
                             coupon.discountType,
@@ -134,8 +137,8 @@
                             coupon.maxDiscount,
                             expiryDate,
                             `${coupon.usageCount || 0} / ${coupon.usageLimit || 0}`
+                        ];
 
-                        ]
                         cells.forEach(data => {
                             const td = document.createElement("td");
                             td.textContent = data;
@@ -163,12 +166,15 @@
                             statusSpan.textContent = "Inactive";
                             statusSpan.className = "status-blocked";
                         }
-                        // statusSpan.className = coupon.isActive ? "btn btn-listed" : "btn btn-unlisted";
 
                         statusTd.appendChild(statusSpan);
                         tr.appendChild(statusTd);
 
                         const actionTd = document.createElement("td");
+
+                        const actionWrapper = document.createElement("div");
+                        actionWrapper.className = "action-buttons";
+
                         const editLink = document.createElement("a");
                         editLink.href = `/admin/coupons/editCoupon/${coupon._id}?page=${currentPage}`;
                         editLink.className = "btn btn-edit";
@@ -180,13 +186,16 @@
                         deletBtn.setAttribute("data-id", coupon._id);
                         deletBtn.setAttribute("data-page", currentPage);
 
-                        actionTd.appendChild(editLink);
-                        actionTd.appendChild(deletBtn);
+                        actionWrapper.appendChild(editLink);
+                        actionWrapper.appendChild(deletBtn);
+
+                        actionTd.appendChild(actionWrapper);
 
                         tr.appendChild(actionTd);
+
                         tbody.appendChild(tr);
                     });
-                };
+                }
 
                 const tbody = document.getElementById("tbody");
 

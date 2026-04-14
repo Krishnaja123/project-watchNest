@@ -42,6 +42,23 @@ const orderItemSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+
+  offerDiscount: {
+    type: Number,
+    default: 0
+  },
+
+  couponDiscount:
+ {
+    type: Number,
+    default: 0
+ },
+
+  finalPrice: {
+    type: Number,
+    // required: true
+  },
+
   status: {
     type: String,
     enum: [
@@ -69,7 +86,7 @@ const orderItemSchema = new mongoose.Schema({
     default: false
   },
 
-   returnRejected: {
+  returnRejected: {
     type: Boolean,
     default: false
   },

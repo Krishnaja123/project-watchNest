@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const offerSchema = new mongoose.Schema({
     name: String,
 
-    type: {
+    offerType: {
         type: String,
         enum: ["product", "category", "referral"],
         required: true
@@ -11,7 +11,7 @@ const offerSchema = new mongoose.Schema({
 
     discountType: {
         type: String,
-        enum: ["percentage", "fixed"],
+        enum: ["percentage", "flat"],
         default: "percentage"
     },
 
@@ -20,22 +20,27 @@ const offerSchema = new mongoose.Schema({
         required: true
     },
 
-    productId: {
+    product_id: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product"
-    },
+    }],
 
-    categoryId: {
+    category_id: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category"
-    },
+    }],
 
     startDate: Date,
     endDate: Date,
 
-    isActive: {
+    // isActive: {
+    //     type: Boolean,
+    //     default: true
+    // },
+    
+    is_delete: {
         type: Boolean,
-        default: true
+        default: false 
     }
 
 }, { timestamps: true });
