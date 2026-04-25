@@ -54,7 +54,12 @@ const fetchOrders = async (req, res) => {
         let orders = await Order.find({
             orderId: { $regex: search, $options: "i" },
         }).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
-
+  
+        // let orders = await Order.find({
+        //     orderId: { $regex: search, $options: "i"},
+        //     status: "delivered",
+        //     totalAmount: {$}
+        // })
         console.log(orders);
 
         let count = await Order.find({
@@ -150,6 +155,7 @@ const updateProductStatus = async (req, res) => {
                 const variant = product?.variants?.id(item.variant_id);
                 variant.stock += item.quantity;
                 await product.save();
+                
             }
 
         } else if (item.status === "shipped") {

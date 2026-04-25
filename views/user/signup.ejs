@@ -48,6 +48,11 @@
             <div id="error4" class="error-message"></div>
           </div>
 
+          <div class="form-group mb-3">
+            <input type="text" id="referralCode" name="referralCode" placeholder="Referral Code (Optional)"
+              class="form-control">
+          </div>
+
           <button type="submit" class="btn btn-primary w-100">Signup</button>
 
           <div class="d-flex mt-3">
@@ -100,14 +105,26 @@
       passwordInput.addEventListener('input', validatePassword);
       confirmPasswordInput.addEventListener('input', validateConfirmPassword);
 
+      const referralInput = document.getElementById('referralCode');
+
+      function validateReferral() {
+        const value = referralInput.value.trim();
+
+        if (value && value.length < 4) {
+          return false;
+        }
+        return true;
+      }
+
       form.addEventListener('submit', function (event) {
         event.preventDefault();
         const validUsername = validateUsername();
         const validEmail = validateEmail();
         const validPassword = validatePassword();
         const validConfirm = validateConfirmPassword();
+        const validReferral = validateReferral();
 
-        if (validUsername && validEmail && validPassword && validConfirm) {
+        if (validUsername && validEmail && validPassword && validConfirm && validReferral) {
           form.submit();
         }
       });

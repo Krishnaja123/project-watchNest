@@ -56,10 +56,10 @@ const productSchema = new mongoose.Schema({
         type: String
     },
 
-    cat_id: [{
+    cat_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category"
-    }],
+    },
     brand_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Brand"

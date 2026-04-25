@@ -72,7 +72,7 @@ const createOffer = async (req, res) => {
 
         if (!result.success) {
             return res.status(400).json({
-                errors: result.error.errors.map(e => e.message)
+                errors: result.error.issues.map(e => e.message)
             });
         }
 
@@ -216,6 +216,62 @@ const editOfferPage = async (req, res) => {
     }
 };
 
+const updateOffer = async (req, res) => {
+    try {
+        const { _id, name, type, productId, categoryId, discountType, discountValue, startDate, endDate } = req.body;
+
+        const parsedData = {
+            ...req.body,
+            discountValue: Number(req.body.discountValue),
+            productId: req.body.productId || [],
+            categoryId: req.body.categoryId || []
+        };
+
+        const result = offerValidationSchema.safeParse(parsedData);
+
+        if (!result.success) {
+            return res.status(400).json({
+                errors: result.error.errors.map(e => e.message)
+            });
+        }
+
+        const page = parseInt(req.query.page);
+        const existingOffer = await Offer.findById(_id);
+
+        if (!existingOffer) {
+            req.session.message = "No offer found with this ID";
+            req.session.type = "error";
+            return res.redirect("/admin/offers")
+        }
+
+        const updatedOfferExist = await Offer.findOne({
+            _id: { $ne: _id },
+            name: { $regex: name.trim(), $options: "i" }
+        });
+
+        if (updatedOfferExist) {
+            req.session.message = "Offer already exist";
+            req.session.type = "error";
+            return res.redirect(`/admin/offers/editOffer/${_id}`);
+        }
+
+        const upadateOffer = await Offer.findByIdAndUpdate(_id, { name, type, productId, categoryId, discountType, discountValue, startDate, endDate });
+
+        if (!upadateOffer) {
+            req.session.message = "Offer not updated, Please try again.";
+            req.session.type = "error";
+            return res.redirect(`/admin/offers/editOffer/${_id}`);
+        }
+
+        req.session.message = "Updated Offer";
+        req.session.type = "success";
+        res.redirect(`/admin/offers/?page=${page}`);
+    } catch (error) {
+        console.log("server error", error);
+        res.status(500).send("server error")
+    }
+}
+
 module.exports = {
     loadCreateOfferPage,
     createOffer,
@@ -223,5 +279,5 @@ module.exports = {
     fetchOffers,
     deleteOffer,
     editOfferPage,
-    // updateOffer
+    updateOffer
 }

@@ -1,243 +1,251 @@
 <%- include("../partials/admin/header", { title: "Edit Offer" }) %>
 
-<head>
-    <link rel="stylesheet" href="/css/admin/sidebar.css">
-    <link rel="stylesheet" href="/css/admin/admin.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-</head>
+    <head>
+        <link rel="stylesheet" href="/css/admin/sidebar.css">
+        <link rel="stylesheet" href="/css/admin/admin.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    </head>
 
-<script src="https://cdn.jsdelivr.net/npm/zod@3.22.4/lib/index.umd.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/zod@3.22.4/lib/index.umd.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-<div class="container">
+    <div class="container">
 
-    <!-- Sidebar -->
-    <%- include("../partials/admin/sidebar") %>
+        <!-- Sidebar -->
+        <%- include("../partials/admin/sidebar") %>
 
-    <!-- Main Content -->
-    <div class="content">
-        <div class="header">Edit Offer</div>
+            <!-- Main Content -->
+            <div class="content">
+                <div class="header">Edit Offer</div>
 
-        <div class="form-container">
-            <form id="offerForm" method="POST" action="/admin/edit-offer/<%= offer._id %>">
+                <div class="form-container">
+                    <form id="offerForm" method="POST" action="/admin/offers/editOffer/<%= offer._id %>">
 
-                <!-- Offer Name -->
-                <div class="form-group">
-                    <label>Offer Name</label>
-                    <input type="text" id="name" name="name"
-                        value="<%= offer.name || '' %>" style="text-transform: uppercase;">
-                    <small class="error" id="nameError"></small>
+                        <div class="form-group">
+                            <input type="hidden" name="_id" value="<%= offer._id %>">
+                        </div>
+
+                        <!-- Offer Name -->
+                        <div class="form-group">
+                            <label>Offer Name</label>
+                            <input type="text" id="name" name="name" value="<%= offer.name || '' %>"
+                                style="text-transform: uppercase;">
+                            <small class="error" id="nameError"></small>
+                        </div>
+
+                        <!-- Offer Type -->
+                        <div class="form-group">
+                            <label>Offer Type</label>
+                            <select name="type" id="offerType">
+                                <option value="">Select Type</option>
+                                <option value="product" <%=offer.offerType==="product" ? "selected" : "" %>>
+                                    Product Offer
+                                </option>
+                                <option value="category" <%=offer.offerType==="category" ? "selected" : "" %>>
+                                    Category Offer
+                                </option>
+                            </select>
+                            <small class="error" id="offerTypeError"></small>
+                        </div>
+
+                        <% const selectedProductIds=offer.product_id ? offer.product_id.map(p=> p._id.toString()) : [];
+                            %>
+
+                            <!-- Product -->
+                            <div class="form-group d-none" id="productDiv">
+                                <label>Select Product</label>
+                                <select name="productId[]" id="productId" multiple>
+                                    <% products.forEach(product=> { %>
+                                        <option value="<%= product._id %>"
+                                            <%=selectedProductIds.includes(product._id.toString()) ? "selected" : "" %>>
+                                            <%= product.name %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+
+                            <% const selectedCatIds=offer.category_id ? offer.category_id.map(c=> c._id.toString()) :
+                                []; %>
+
+                                <!-- Category -->
+                                <div class="form-group d-none" id="categoryDiv">
+                                    <label>Select Category</label>
+                                    <select name="categoryId[]" id="categoryId" multiple>
+                                        <% categories.forEach(category=> { %>
+                                            <option value="<%= category._id %>"
+                                                <%=selectedCatIds.includes(category._id.toString()) ? "selected" : "" %>
+                                                >
+                                                <%= category.name %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+
+                                <!-- Discount Type -->
+                                <div class="form-group">
+                                    <label>Discount Type</label>
+                                    <select id="discountType" name="discountType">
+                                        <option value="">Select Discount Type</option>
+                                        <option value="percentage" <%=offer.discountType==="percentage" ? "selected"
+                                            : "" %>>
+                                            Percentage (%)
+                                        </option>
+                                        <option value="flat" <%=offer.discountType==="flat" ? "selected" : "" %>>
+                                            Flat Amount
+                                        </option>
+                                    </select>
+                                    <small class="error" id="discountTypeError"></small>
+                                </div>
+
+                                <!-- Discount -->
+                                <div class="form-group">
+                                    <label>Discount</label>
+                                    <input type="number" id="discountValue" name="discountValue"
+                                        value="<%= offer.discountValue || '' %>" min="1">
+                                    <small class="error" id="discountValueError"></small>
+                                </div>
+
+                                <!-- Dates -->
+                                <div class="form-group">
+                                    <label>Start Date</label>
+                                    <input type="date" id="startDate" name="startDate"
+                                        value="<%= offer.startDate ? offer.startDate.toISOString().split('T')[0] : '' %>">
+                                    <small class="error" id="startDateError"></small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>End Date</label>
+                                    <input type="date" id="endDate" name="endDate"
+                                        value="<%= offer.endDate ? offer.endDate.toISOString().split('T')[0] : '' %>">
+                                    <small class="error" id="endDateError"></small>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="button-group">
+                                    <a href="/admin/offers" class="btn btn-cancel">Cancel</a>
+                                    <button type="submit" class="btn btn-primary">Update Offer</button>
+                                </div>
+
+                    </form>
                 </div>
+            </div>
 
-                <!-- Offer Type -->
-                <div class="form-group">
-                    <label>Offer Type</label>
-                    <select name="type" id="offerType">
-                        <option value="">Select Type</option>
-                        <option value="product" <%= offer.offerType === "product" ? "selected" : "" %>>
-                            Product Offer
-                        </option>
-                        <option value="category" <%= offer.offerType === "category" ? "selected" : "" %>>
-                            Category Offer
-                        </option>
-                    </select>
-                    <small class="error" id="offerTypeError"></small>
-                </div>
-
-                <% const selectedProductIds = offer.product_id ? offer.product_id.map(p => p._id.toString()) : []; %>
-
-                <!-- Product -->
-                <div class="form-group d-none" id="productDiv">
-                    <label>Select Product</label>
-                    <select name="productId[]" id="productId" multiple>
-                        <% products.forEach(product => { %>
-                            <option value="<%= product._id %>"
-                                <%= selectedProductIds.includes(product._id.toString()) ? "selected" : "" %>>
-                                <%= product.name %>
-                            </option>
-                        <% }) %>
-                    </select>
-                </div>
-
-                <% const selectedCatIds = offer.category_id ? offer.category_id.map(c => c._id.toString()) : []; %>
-
-                <!-- Category -->
-                <div class="form-group d-none" id="categoryDiv">
-                    <label>Select Category</label>
-                    <select name="categoryId[]" id="categoryId" multiple>
-                        <% categories.forEach(category => { %>
-                            <option value="<%= category._id %>"
-                                <%= selectedCatIds.includes(category._id.toString()) ? "selected" : "" %>>
-                                <%= category.name %>
-                            </option>
-                        <% }) %>
-                    </select>
-                </div>
-
-                <!-- Discount Type -->
-                <div class="form-group">
-                    <label>Discount Type</label>
-                    <select id="discountType" name="discountType">
-                        <option value="">Select Discount Type</option>
-                        <option value="percentage" <%= offer.discountType === "percentage" ? "selected" : "" %>>
-                            Percentage (%)
-                        </option>
-                        <option value="flat" <%= offer.discountType === "flat" ? "selected" : "" %>>
-                            Flat Amount
-                        </option>
-                    </select>
-                    <small class="error" id="discountTypeError"></small>
-                </div>
-
-                <!-- Discount -->
-                <div class="form-group">
-                    <label>Discount</label>
-                    <input type="number" id="discountValue" name="discountValue"
-                        value="<%= offer.discountValue || '' %>" min="1">
-                    <small class="error" id="discountValueError"></small>
-                </div>
-
-                <!-- Dates -->
-                <div class="form-group">
-                    <label>Start Date</label>
-                    <input type="date" id="startDate" name="startDate"
-                        value="<%= offer.startDate ? offer.startDate.toISOString().split('T')[0] : '' %>">
-                    <small class="error" id="startDateError"></small>
-                </div>
-
-                <div class="form-group">
-                    <label>End Date</label>
-                    <input type="date" id="endDate" name="endDate"
-                        value="<%= offer.endDate ? offer.endDate.toISOString().split('T')[0] : '' %>">
-                    <small class="error" id="endDateError"></small>
-                </div>
-
-                <!-- Buttons -->
-                <div class="button-group">
-                    <a href="/admin/offers" class="btn btn-cancel">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Update Offer</button>
-                </div>
-
-            </form>
-        </div>
     </div>
 
-</div>
+    <%- include("../partials/admin/footer") %>
 
-<%- include("../partials/admin/footer") %>
+        <style>
+            .error {
+                color: red;
+                font-size: 12px;
+            }
 
-<style>
-    .error {
-        color: red;
-        font-size: 12px;
-    }
+            .error-border {
+                border: 1px solid red;
+            }
+        </style>
 
-    .error-border {
-        border: 1px solid red;
-    }
-</style>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+                const { z } = window.Zod;
+                const form = document.getElementById("offerForm");
 
-    const { z } = window.Zod;
-    const form = document.getElementById("offerForm");
+                const offerType = document.getElementById("offerType");
+                const productDiv = document.getElementById("productDiv");
+                const categoryDiv = document.getElementById("categoryDiv");
 
-    const offerType = document.getElementById("offerType");
-    const productDiv = document.getElementById("productDiv");
-    const categoryDiv = document.getElementById("categoryDiv");
+                function toggleFields() {
+                    if (offerType.value === "product") {
+                        productDiv.classList.remove("d-none");
+                        categoryDiv.classList.add("d-none");
+                    } else if (offerType.value === "category") {
+                        categoryDiv.classList.remove("d-none");
+                        productDiv.classList.add("d-none");
+                    } else {
+                        productDiv.classList.add("d-none");
+                        categoryDiv.classList.add("d-none");
+                    }
+                }
 
-    function toggleFields() {
-        if (offerType.value === "product") {
-            productDiv.classList.remove("d-none");
-            categoryDiv.classList.add("d-none");
-        } else if (offerType.value === "category") {
-            categoryDiv.classList.remove("d-none");
-            productDiv.classList.add("d-none");
-        } else {
-            productDiv.classList.add("d-none");
-            categoryDiv.classList.add("d-none");
-        }
-    }
+                toggleFields(); // run on load
 
-    toggleFields(); // run on load
+                offerType.addEventListener("change", toggleFields);
 
-    offerType.addEventListener("change", toggleFields);
+                const offerSchema = z.object({
+                    name: z.string().min(3),
+                    offerType: z.enum(["product", "category"]),
+                    discountType: z.enum(["percentage", "flat"]),
+                    discountValue: z.number().min(1),
+                    startDate: z.string().min(1),
+                    endDate: z.string().min(1)
+                });
 
-    const offerSchema = z.object({
-        name: z.string().min(3),
-        offerType: z.enum(["product", "category"]),
-        discountType: z.enum(["percentage", "flat"]),
-        discountValue: z.number().min(1),
-        startDate: z.string().min(1),
-        endDate: z.string().min(1)
-    });
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
 
-    form.addEventListener("submit", function (e) {
-        e.preventDefault();
+                    document.querySelectorAll(".error").forEach(el => el.innerText = "");
+                    document.querySelectorAll("input, select").forEach(el => el.classList.remove("error-border"));
 
-        document.querySelectorAll(".error").forEach(el => el.innerText = "");
-        document.querySelectorAll("input, select").forEach(el => el.classList.remove("error-border"));
+                    const selectedProducts = Array.from(document.getElementById("productId").selectedOptions)
+                        .map(opt => opt.value);
 
-        const selectedProducts = Array.from(document.getElementById("productId").selectedOptions)
-            .map(opt => opt.value);
+                    const formData = {
+                        name: document.getElementById("name").value.trim(),
+                        offerType: offerType.value,
+                        discountType: document.getElementById("discountType").value,
+                        discountValue: Number(document.getElementById("discountValue").value),
+                        startDate: document.getElementById("startDate").value,
+                        endDate: document.getElementById("endDate").value,
+                        productId: selectedProducts,
+                        categoryId: document.getElementById("categoryId")?.value
+                    };
 
-        const formData = {
-            name: document.getElementById("name").value.trim(),
-            offerType: offerType.value,
-            discountType: document.getElementById("discountType").value,
-            discountValue: Number(document.getElementById("discountValue").value),
-            startDate: document.getElementById("startDate").value,
-            endDate: document.getElementById("endDate").value,
-            productId: selectedProducts,
-            categoryId: document.getElementById("categoryId")?.value
-        };
+                    const result = offerSchema.safeParse(formData);
 
-        const result = offerSchema.safeParse(formData);
+                    if (!result.success) {
+                        result.error.errors.forEach(err => {
+                            const field = err.path[0];
+                            const errorEl = document.getElementById(field + "Error");
+                            const inputEl = document.getElementById(field);
 
-        if (!result.success) {
-            result.error.errors.forEach(err => {
-                const field = err.path[0];
-                const errorEl = document.getElementById(field + "Error");
-                const inputEl = document.getElementById(field);
+                            if (errorEl) errorEl.innerText = err.message;
+                            if (inputEl) inputEl.classList.add("error-border");
+                        });
+                        return;
+                    }
 
-                if (errorEl) errorEl.innerText = err.message;
-                if (inputEl) inputEl.classList.add("error-border");
+                    if (formData.offerType === "product" && formData.productId.length === 0) {
+                        alert("Please select at least one product");
+                        return;
+                    }
+
+                    if (formData.offerType === "category" && !formData.categoryId) {
+                        alert("Please select a category");
+                        return;
+                    }
+
+                    if (formData.endDate < formData.startDate) {
+                        document.getElementById("endDateError").innerText = "End date must be after start date";
+                        return;
+                    }
+
+                    form.submit();
+                });
             });
-            return;
-        }
 
-        if (formData.offerType === "product" && formData.productId.length === 0) {
-            alert("Please select at least one product");
-            return;
-        }
+            $(document).ready(function () {
+                $('#productId').select2({
+                    placeholder: "Select products",
+                    closeOnSelect: false,
+                    width: '100%'
+                });
 
-        if (formData.offerType === "category" && !formData.categoryId) {
-            alert("Please select a category");
-            return;
-        }
-
-        if (formData.endDate < formData.startDate) {
-            document.getElementById("endDateError").innerText = "End date must be after start date";
-            return;
-        }
-
-        form.submit();
-    });
-});
-
-$(document).ready(function () {
-    $('#productId').select2({
-        placeholder: "Select products",
-        closeOnSelect: false,
-        width: '100%'
-    });
-
-    $('#categoryId').select2({
-        placeholder: "Select category",
-        width: '100%'
-    });
-});
-</script>
+                $('#categoryId').select2({
+                    placeholder: "Select category",
+                    width: '100%'
+                });
+            });
+        </script>

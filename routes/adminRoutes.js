@@ -84,7 +84,7 @@ router.get("/offers", adminAuth, offerController.loadOfferListingPage);
 router.get("/offers/fetchOffers", adminAuth, offerController.fetchOffers);
 router.put("/offers/:id", adminAuth, offerController.deleteOffer);
 router.get("/offers/editOffer/:id", adminAuth, offerController.editOfferPage);
-// router.post("/editOffers/:id", adminAuth, couponController.updateOffer);
+router.post("/offers/editOffer/:id", adminAuth, offerController.updateOffer);
 
 // Sales Report
 router.get("/sales-report", adminAuth, salesReportController.getSalesReport);

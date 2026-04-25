@@ -59,7 +59,7 @@
                             </small>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" id="maxDiscountGroup">
                             <label for="maxDiscount">Maximum Discount (for % type)</label>
                             <input type="number" id="maxDiscount" name="maxDiscount" placeholder="Max discount value"
                                 value="<%= formData.maxDiscount || '' %>">
@@ -107,7 +107,27 @@
     <%- include("../partials/admin/footer") %>
 
         <script>
+
             document.addEventListener("DOMContentLoaded", function () {
+
+                const discountTypeSelect = document.getElementById("discountType");
+                const maxDiscountGroup = document.getElementById("maxDiscountGroup");
+
+                function toggleMaxDiscount() {
+                    if (discountTypeSelect.value === "percentage") {
+                        maxDiscountGroup.style.display = "block";
+                    } else {
+                        maxDiscountGroup.style.display = "none";
+                        document.getElementById("maxDiscount").value = ""; // optional reset
+                    }
+                }
+
+                // Run on page load
+                toggleMaxDiscount();
+
+                // Run when dropdown changes
+                discountTypeSelect.addEventListener("change", toggleMaxDiscount);
+
                 const { z } = window.Zod;
 
                 const form = document.getElementById("couponForm");

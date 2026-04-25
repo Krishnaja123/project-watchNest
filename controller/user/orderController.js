@@ -19,7 +19,7 @@ const createOrder = async (req, res) => {
 
         const userId = req.user._id;
 
-        const { selectedAddressId, paymentMethod, couponCode, discount} = req.body;
+        const { selectedAddressId, paymentMethod, couponCode, discount } = req.body;
 
         console.log("coupon code: ", couponCode);
 
@@ -39,6 +39,7 @@ const createOrder = async (req, res) => {
 
             const coupon = await Coupon.findOne({ code: couponCode });
             coupon.usageCount += 1;
+            coupon.usedBy.push(userId);
             await coupon.save();
         }
 
@@ -173,7 +174,7 @@ const getOrderInvoice = async (req, res) => {
     try {
         const orderId = req.params.id;
 
-        const order = await Order.findById(orderId);
+        const order = await Order.findOne({ _id: orderId, paymentStatus: { $ne: "failed" } });
 
         if (!order) {
             req.session.message = "This order deatails are not available in db";
@@ -240,6 +241,8 @@ const cancelProduct = async (req, res) => {
 
             // const amount = item.price * item.quantity;
             await creditWallet(userId, refundAmount, `Refund for cancelled product`);
+
+
             console.log("hi");
 
         }
@@ -408,7 +411,7 @@ const showCoupons = async (req, res) => {
     try {
         const cartTotal = Number(req.query.cartTotal) || 0;
 
-        const coupons = await Coupon.find({ is_delete: false, isActive: true,  });
+        const coupons = await Coupon.find({ is_delete: false, isActive: true, });
 
         res.render("user/coupons", {
             coupons,
@@ -448,14 +451,28 @@ const applyCoupon = async (req, res) => {
             return res.json({ success: false, message: "Coupon usage limit reached" });
         }
 
+        const alreadyUsed = coupon.usedBy.some(
+            id => id.toString() === userId.toString()
+        );
+
+        console.log("alreadyUsed: ", alreadyUsed);
+        
+
+        if (alreadyUsed) {
+            return res.json({ success: false, message: "You already used this coupon" });
+        }
+
         let discount = 0;
         if (coupon.discountType === 'percentage') {
-            discount = (cartTotal * coupon.discountValue) / 100;
+            couponDiscount = Math.round((cartTotal * coupon.discountValue) / 100);
+            discount = Math.min(couponDiscount, coupon.maxDiscount);
         } else {
             discount = coupon.discountValue;
         }
 
-        const finalTotal = cartTotal - discount;
+        const shippingCharge = 50;
+        const tax = Math.round(cartTotal * 0.05);
+        const finalTotal = cartTotal - discount + shippingCharge + tax;
 
         req.session.appliedCoupon = {
             code: coupon.code,

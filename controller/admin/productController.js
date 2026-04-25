@@ -61,7 +61,7 @@ const saveProduct = async (req, res) => {
         const trimedName = name.trim();
         const existingProduct = await Product.findOne({
             name: { $regex: `^${trimedName}$`, $options: "i" },
-            is_delete: false 
+            is_delete: false
         });
 
         if (existingProduct) {
@@ -333,18 +333,24 @@ const updateProduct = async (req, res) => {
 
         if (updateProductExist) {
             return res.json({
-        success: false,
-        message: "Product already exists",
-        type: "error"
-    });
+                success: false,
+                message: "Product already exists",
+                type: "error"
+            });
 
         }
         product.name = name;
-        product.cat_id = Array.isArray(category) ? category : [category];
+        product.cat_id = category;
         product.brand_id = brand;
         product.descrip = descrip;
 
         console.log("images:", req.files);
+
+        const existingVariantsMap = new Map();
+
+        product.variants.forEach(v => {
+            existingVariantsMap.set(v._id.toString(), v);
+        });
 
         const updatedVariants = [];
 
@@ -352,6 +358,10 @@ const updateProduct = async (req, res) => {
             const variant = variants[i];
 
             if (!variant) continue;
+
+            const existingVariant = variant._id
+                ? existingVariantsMap.get(variant._id.toString())
+                : null;
 
             const existing_cropped = variant?.existing_cropped_images || [];
             const existing_original = variant?.existing_original_images || [];
@@ -382,6 +392,9 @@ const updateProduct = async (req, res) => {
             }
             console.log("variants: ", variant);
             updatedVariants.push({
+                _id: variant._id
+                    ? new mongoose.Types.ObjectId(variant._id)
+                    : new mongoose.Types.ObjectId(),
                 strap_color: variant.strap_color,
                 dial_color: variant.dial_color,
                 price: variant.price,

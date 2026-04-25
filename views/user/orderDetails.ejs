@@ -71,7 +71,7 @@
 
                 <h1 class="main-title">Order Details</h1>
 
-                <% const status=order.status; let progress=0; if (status==="pending" ) progress=25; else if
+                <% const status=order.status; let progress=0; if (status==="processing" ) progress=25; else if
                     (status==="confirmed" ) progress=50; else if (status==="shipped" ) progress=75; else if
                     (status==="delivered" ) progress=100; %>
 
@@ -119,15 +119,25 @@
                                 </div>
 
                                 <div class="col-md-2">
-                                    <small class="text-muted">TOTAL</small><br>
-                                    <strong>₹<%= order.totalAmount %></strong>
-                                </div>
-
-                                <div class="col-md-3">
                                     <small class="text-muted">ORDER ID</small><br>
                                     <strong>
                                         <%= order.orderId %>
                                     </strong>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <small class="text-muted">PAYMENT</small><br>
+                                    <strong>
+                                        <%= order.paymentMethod %>
+                                    </strong>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <small class="text-muted">PAYMENT STATUS</small><br>
+                                    <span
+                                        class="badge <%= order.paymentStatus === 'success' ? 'bg-success' : 'bg-danger' %>">
+                                        <%= order.paymentStatus %>
+                                    </span>
                                 </div>
 
                                 <div class="col-md-2">
@@ -137,17 +147,19 @@
                                     </span>
                                 </div>
 
-                                <div class="col-md-2 text-end">
-                                    <a href="/order/<%= order._id %>/invoice" class="btn btn-primary btn-sm">
-                                        View Invoice
-                                    </a>
+                                <div class="col-md-1 text-end">
+                                    <% if (order.paymentStatus !=="failed" && !(order.status==="cancelled" &&
+                                        order.paymentStatus==="pending" )) { %>
+                                        <a href="/order/<%= order._id %>/invoice" class="btn btn-primary btn-sm">
+                                            Invoice
+                                        </a>
+                                        <% } %>
                                 </div>
 
                             </div>
 
                         </div>
                     </div>
-
                     <!-- PRODUCT LIST -->
                     <div class="card mb-4">
                         <div class="card-body">
@@ -177,6 +189,53 @@
                                 <hr>
 
                                 <% }) %>
+
+                        </div>
+                    </div>
+
+                    <!-- PRICE DETAILS -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+
+                            <h5 class="mb-3">Price Details</h5>
+
+                            <div class="d-flex justify-content-between">
+                                <span>Original Price</span>
+                                <span>₹<%= order.originalAmount.toFixed(2) %></span>
+                            </div>
+
+                            <% if(order.couponDiscount> 0) { %>
+                                <div class="d-flex justify-content-between text-success">
+                                    <span>Coupon Discount (<%= order.couponCode %>)</span>
+                                    <span>- ₹<%= order.couponDiscount.toFixed(2) %></span>
+                                </div>
+                                <% } %>
+
+                                    <% if(order.shippingCharge> 0) { %>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Shipping Charge</span>
+                                            <span>₹<%= order.shippingCharge.toFixed(2) %></span>
+                                        </div>
+                                        <% } else { %>
+                                            <div class="d-flex justify-content-between text-success">
+                                                <span>Shipping</span>
+                                                <span>FREE</span>
+                                            </div>
+                                            <% } %>
+
+                                                <% if(order.taxAmount> 0) { %>
+                                                    <div class="d-flex justify-content-between">
+                                                        <span>Tax (GST)</span>
+                                                        <span>₹<%= order.taxAmount.toFixed(2) %></span>
+                                                    </div>
+                                                    <% } %>
+
+                                                        <hr>
+
+                                                        <div class="d-flex justify-content-between fw-bold">
+                                                            <span>Total Amount</span>
+                                                            <span>₹<%= order.totalAmount %></span>
+                                                        </div>
 
                         </div>
                     </div>

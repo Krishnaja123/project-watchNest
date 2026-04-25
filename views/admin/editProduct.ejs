@@ -6,13 +6,13 @@
         <link rel="stylesheet" href="/css/admin/sidebar.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <!-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> -->
         <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
         <!-- Select2 JS -->
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> -->
 
     </head>
 
@@ -31,7 +31,7 @@
                         <!-- Product ID -->
                         <!-- <div class="form-group">
                             <label>Product ID</label>
-                            <input type="text" name="_id" value="<%= product._id %>" readonly>
+                            <input type="hidden" name="_id" value="<%= product._id %>" readonly>
                         </div> -->
 
                         <!-- Product Name -->
@@ -45,23 +45,22 @@
                         <!-- Category Dropdown -->
                         <div class="form-group">
                             <label for="category">Category*</label>
-                            <% selectedCatIds=product.cat_id ? product.cat_id.map(cat=> cat._id.toString()) : [];
-                                %>
+                            <!-- <% selectedCatId=product.cat_id ? product.cat_id : []; %> -->
 
-                                <select id="category" name="category[]" class="form-control" multiple>
-                                    <% if (categories && categories.length> 0) { %>
-                                        <% categories.forEach(category=> { %>
-                                            <option value="<%= category._id %>"
-                                                <%=selectedCatIds.includes(category._id.toString()) ? "selected" : "" %>
-                                                >
-                                                <%= category.name %>
-                                            </option>
-                                            <% }) %>
-                                                <% } else { %>
-                                                    <option disabled>No categories available</option>
-                                                    <% } %>
-                                </select>
-                                <div id="categoryError" class="error-message"></div>
+                            <select id="category" name="category" class="form-control">
+                                <% if (categories && categories.length> 0) { %>
+                                    <% categories.forEach(category=> { %>
+                                        <option value="<%= category._id %>" <%=product.cat_id &&
+                                            product.cat_id._id.toString()===category._id.toString() ? "selected" : "" %>
+                                            >
+                                            <%= category.name %>
+                                        </option>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <option disabled>No categories available</option>
+                                                <% } %>
+                            </select>
+                            <div id="categoryError" class="error-message"></div>
                         </div>
 
                         <!-- Brand -->
@@ -107,6 +106,9 @@
                                             </div>
 
                                             <div class="variant-content">
+                                                <input type="hidden" name="variants[<%= index %>][_id]"
+                                                    value="<%= variant._id %>" />
+
                                                 <!-- Strap Color -->
                                                 <div class="form-group">
                                                     <label for="strap_color-<%= index + 1 %>">Strap Color*</label>
@@ -257,7 +259,7 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
-    <script>
+    <!-- <script>
         $(document).ready(function () {
             $('#category').select2({
                 placeholder: "Select categories",
@@ -265,7 +267,7 @@
                 closeOnSelect: false // keeps dropdown open after selecting
             });
         });
-    </script>
+    </script> -->
 
 
 
@@ -279,7 +281,7 @@
                     icon: type,
                     text: message,
                     confirmButtonColor: '#007bff',
-                    timer: 2000, 
+                    timer: 2000,
                 });
             }
             const currentPage = "<%= page %>";
@@ -349,6 +351,9 @@
                     </div>
                     
                     <div class="variant-content">
+
+                        <input type="hidden" name="variants[${variantCount}][_id]" value="">
+                        
                         <!-- Strap Color -->
                         <div class="form-group">
                             <label for="strap_color-${variantCount}">Strap Color*</label>

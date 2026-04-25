@@ -50,7 +50,7 @@ originalAmount: {
   paymentStatus: {
     type: String,
     enum: ["pending", "paid", "failed", "refunded"],
-    default: "Pending"
+    default: "pending"
   },
 
   razorpayOrderId: String,
@@ -76,6 +76,15 @@ originalAmount: {
   cancelReason: {
     type: String,
     default: null
+  },
+
+  shippingCharge: {
+    type: Number,
+    default: 50
+  },
+
+  taxAmount: {
+    type: Number,
   }
 
 }, { timestamps: true });

@@ -1,109 +1,113 @@
 <%- include("../partials/user/header", { title: "Cart" , hideNavBar: true }) %>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    body {
-    background: #f4f5f7;
-}
+    <style>
+        body {
+            background: #f4f5f7;
+        }
 
-/* Container spacing */
-.container {
-    max-width: 1200px;
-}
+        /* Container spacing */
+        .container {
+            max-width: 1200px;
+        }
 
-/* Page Title */
-h3 {
-    font-weight: 600;
-    margin-bottom: 30px;
-}
+        /* Page Title */
+        h3 {
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
 
-/* Table Styling */
-.table {
-    background: #ffffff;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-}
+        /* Table Styling */
+        .table {
+            background: #ffffff;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+        }
 
-.table thead {
-    background: #fafafa;
-    font-weight: 600;
-}
+        .table thead {
+            background: #fafafa;
+            font-weight: 600;
+        }
 
-.table th {
-    border: none;
-    padding: 16px;
-}
+        .table th {
+            border: none;
+            padding: 16px;
+        }
 
-.table td {
-    vertical-align: middle;
-    padding: 16px;
-    border-top: 1px solid #f1f1f1;
-}
+        .table td {
+            vertical-align: middle;
+            padding: 16px;
+            border-top: 1px solid #f1f1f1;
+        }
 
-/* Quantity Buttons */
-.qty-btn {
-    border-radius: 20px;
-    border: 1px solid #c8a27c;
-    color: #c8a27c;
-    background: transparent;
-    font-size: 14px;
-    transition: 0.3s ease;
-}
+        /* Quantity Buttons */
+        .qty-btn {
+            border-radius: 20px;
+            border: 1px solid #c8a27c;
+            color: #c8a27c;
+            background: transparent;
+            font-size: 14px;
+            transition: 0.3s ease;
+        }
 
-.qty-btn:hover {
-    background: #c8a27c;
-    color: #fff;
-}
+        .qty-btn:hover {
+            background: #c8a27c;
+            color: #fff;
+        }
 
-/* Quantity Input */
-.qty-input {
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    width: 50px;
-}
+        /* Quantity Input */
+        .qty-input {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            width: 50px;
+        }
 
-/* Remove Button */
-.btn-remove {
-    border-radius: 20px;
-    border: 1px solid #dc3545;
-    background: transparent;
-    color: #dc3545;
-    transition: 0.3s ease;
-    padding: 6px 14px;
-}
+        /* Remove Button */
+        .btn-remove {
+            border-radius: 20px;
+            border: 1px solid #dc3545;
+            background: transparent;
+            color: #dc3545;
+            transition: 0.3s ease;
+            padding: 6px 14px;
+        }
 
-.btn-remove:hover {
-    background: #dc3545;
-    color: #fff;
-}
+        .btn-remove:hover {
+            background: #dc3545;
+            color: #fff;
+        }
 
-/* Cart Total Card */
-.cart-total-card {
-    background: #ffffff;
-    border-radius: 18px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-    padding: 30px;
-}
+        /* Cart Total Card */
+        .cart-total-card {
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            padding: 30px;
+        }
 
-/* Checkout Button */
-.btn-checkout {
-    width: 100%;
-    padding: 14px;
-    border-radius: 30px;
-    background: linear-gradient(135deg, #c8a27c, #a77b4e);
-    border: none;
-    color: white;
-    font-weight: 500;
-    transition: 0.3s ease;
-    text-decoration: none;
-    display: inline-block;
-}
+        /* Checkout Button */
+        .btn-checkout {
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #c8a27c, #a77b4e);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
 
-.btn-checkout:hover {
-    opacity: 0.9;
-    color: white;
-}
-</style>
+        .btn-checkout:hover {
+            opacity: 0.9;
+            color: white;
+        }
+
+        .invalid-row {
+            background-color: #ffe6e6 !important;
+        }
+    </style>
     <div class="container my-5">
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
@@ -131,13 +135,18 @@ h3 {
                 <tbody>
                     <% if(cartItems && cartItems.length> 0) { %>
                         <% cartItems.forEach(item=> { %>
-                            <tr>
+                            <tr class="<%= item.isInvalid ? 'invalid-row' : '' %>">
                                 <td>
                                     <img src="<%= item.image %>" alt="<%= item.name %>"
                                         style="width:60px; height:auto;">
                                 </td>
                                 <td>
                                     <%= item.name %>
+                                        <% if (item.isInvalid) { %>
+                                            <div class="text-danger small mt-1">
+                                                ⚠ Unavailable / Out of stock
+                                            </div>
+                                            <% } %>
                                 </td>
                                 <td>
                                     <% if(item.discountedPrice && item.discountedPrice < item.price) { %>
@@ -151,10 +160,10 @@ h3 {
                                     <form action="/cart/update/<%= item._id %>" method="POST"
                                         class="d-flex justify-content-center align-items-center">
                                         <button type="submit" name="action" value="decrease"
-                                        class="btn qty-btn btn-sm">-</button>
+                                            class="btn qty-btn btn-sm">-</button>
                                         <input type="text" name="quantity" value="<%= item.quantity %>"
-                                            class="form-control form-control-sm text-center mx-1 qty-input" style="width:50px;"
-                                            readonly>
+                                            class="form-control form-control-sm text-center mx-1 qty-input"
+                                            style="width:50px;" readonly>
                                         <button type="submit" name="action" value="increase"
                                             class="btn qty-btn btn-sm">+</button>
                                     </form>

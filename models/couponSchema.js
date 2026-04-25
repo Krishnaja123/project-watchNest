@@ -24,6 +24,13 @@ const couponSchema = new mongoose.Schema({
         default: Infinity  // Unlimited usage if not specified
      },
 
+     usedBy: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User"
+            }
+    ],
+
     is_delete: { type: Boolean, default: false}
 
 }, { timestamps: true });

@@ -6,8 +6,8 @@
         <link rel="stylesheet" href="/css/admin/products.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> -->
+        <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
     </head>
 
     <!-- jQuery -->
@@ -39,7 +39,7 @@
                             <!-- Category Dropdown -->
                             <div class="form-group">
                                 <label for="category">Category*</label>
-                                <select id="category" name="category[]" class="form-control" multiple>
+                                <select id="category" name="category" class="form-control">
                                     <option value="">Select Category</option>
                                     <% if (categories && categories.length> 0) { %>
                                         <% categories.forEach(category=> { %>
@@ -47,9 +47,7 @@
                                                 <%= category.name %>
                                             </option>
                                             <% }) %>
-                                                <% } else { %>
-                                                    <option disabled>No categories available</option>
-                                                    <% } %>
+                                                <% } %>
                                 </select>
                                 <div id="categoryError" class="error-message"></div>
                             </div>
@@ -268,16 +266,6 @@
             </body>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-
-    <script>
-        $(document).ready(function () {
-            $('#category').select2({
-                placeholder: "Select categories",
-                allowClear: true,
-                closeOnSelect: false // keeps dropdown open after selecting
-            });
-        });
-    </script>
 
 
 

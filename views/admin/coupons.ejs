@@ -134,7 +134,7 @@
                             coupon.discountType,
                             coupon.discountValue,
                             coupon.minAmount,
-                            coupon.maxDiscount,
+                            coupon.maxDiscount || "-",
                             expiryDate,
                             `${coupon.usageCount || 0} / ${coupon.usageLimit || 0}`
                         ];

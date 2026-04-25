@@ -49,10 +49,31 @@
                             <h3 class="product-title">
                                 <%= data.name %>
                             </h3>
+
                             <p class="brand">Brand: <%= data.brand %>
                             </p>
-                            <p class="price">₹<%= data.price %>
-                            </p>
+
+                            <div class="price-section">
+                                <% if(data.discount> 0) { %>
+
+                                    <!-- Original Price -->
+                                    <span class="original-price">₹<%= data.price %></span>
+
+                                    <!-- Discounted Price -->
+                                    <span class="final-price">₹<%= data.finalPrice %></span>
+
+                                    <!-- Discount Badge -->
+                                    <span class="discount-badge">
+                                        ₹<%= data.discount %> OFF
+                                    </span>
+
+                                    <% } else { %>
+
+                                        <!-- Normal Price -->
+                                        <span class="price">₹<%= data.price %></span>
+
+                                        <% } %>
+                            </div>
                         </div>
                     </a>
 

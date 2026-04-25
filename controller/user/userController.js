@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
+const { creditWallet } = require("../../services/walletServices");
 
 const loadRegister = (req, res) => {
     try {
@@ -30,7 +31,20 @@ const loadRegister = (req, res) => {
 const registerUser = async (req, res) => {
     try {
 
-        const { username, email, password, confirmPassword } = req.body;
+        const { username, email, password, confirmPassword, referralCode } = req.body;
+
+        let referrer = null;
+
+        if (referralCode) {
+            referrer = await User.findOne({ referralCode });
+
+            if (!referrer) {
+                req.session.message = "Invalid referral code",
+                    req.session.type = "error";
+                return res.redirect("/signup");
+            };
+            req.session.referrer = referrer;
+        }
 
         if (!username || !email || !password) {
             req.session.message = "Please fill all mandatory fields";
@@ -246,11 +260,14 @@ const verifyOtp = async (req, res) => {
         // Hash password before saving
         const hashedPassword = await bcrypt.hash(userData.password, 10);
 
+        const referralCode = generateReferralCode(userData.username);
+
         // Save User
         const user = await new User({
             username: userData.username,
             email: userData.email,
             password_hash: hashedPassword,
+            referralCode
         });
 
         const savedUser = await user.save();
@@ -259,6 +276,9 @@ const verifyOtp = async (req, res) => {
             user_id: savedUser._id
         });
 
+        const referrer = req.session.referrer;
+        const amount = 100;
+        await creditWallet(referrer._id, amount, `Referrel bonus`);
         console.log(savedUser);
 
         req.session.message = "Account created successfully! Please log in.";
@@ -544,7 +564,7 @@ const loginUser = async (req, res, next) => {
         req.login(existingUser, (err) => {
             if (err) return next(err);
             console.log("LOGIN SUCCESS");
-            return res.redirect("/home"); 
+            return res.redirect("/home");
         });
 
         //return res.redirect("/home");
@@ -567,6 +587,11 @@ const logout = async (req, res) => {
         res.redirect("/login");
     });
 }
+
+const generateReferralCode = (username) => {
+    const random = Math.floor(1000 + Math.random() * 9000);
+    return username.slice(0, 3).toUpperCase() + random;
+};
 module.exports = {
     loadRegister,
     registerUser,

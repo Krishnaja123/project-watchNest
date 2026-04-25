@@ -54,6 +54,11 @@ const userSchema = new mongoose.Schema({
     
     profileImage: String,
 
+    referralCode: {
+        type: String,
+        unique: true
+    },
+
     created_at: {
         type: Date,
         default: Date.now

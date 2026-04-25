@@ -162,6 +162,7 @@ const updateBrand = async (req, res) => {
 
         const updatedBrandExist = await Brand.findOne({
             _id: { $ne: _id },
+            is_delete: false,
             name: { $regex: name.trim(), $options: "i" }
         });
 

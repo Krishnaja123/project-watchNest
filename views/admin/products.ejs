@@ -187,9 +187,9 @@
                         tr.appendChild(imgTd);
 
                         // Category
-                        const categories = product.cat_id?.map(cat => cat.name).join(",") || "";
+                        // const categories = product.cat_id?.map(cat => cat.name).join(",") || "";
                         const categoryTd = document.createElement("td");
-                        categoryTd.textContent = categories;
+                        categoryTd.textContent = product.cat_id?.name || "";
                         tr.appendChild(categoryTd);
 
                         // Brand

@@ -1,107 +1,142 @@
-<%- include("../partials/user/header", { title: "My Profile", hideNavBar: true }) %>
+<%- include("../partials/user/header", { title: "My Profile" , hideNavBar: true }) %>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/css/user/profile.css">
-<link rel="stylesheet" href="/css/user/userSidebar.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/user/profile.css">
+    <link rel="stylesheet" href="/css/user/userSidebar.css">
 
-<!-- Breadcrumb OUTSIDE flex layout -->
-<div class="container mt-3">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="/home">Home</a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                My Profile
-            </li>
-        </ol>
-    </nav>
-</div>
+    <!-- Breadcrumb OUTSIDE flex layout -->
+    <div class="container mt-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/home">Home</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    My Profile
+                </li>
+            </ol>
+        </nav>
+    </div>
 
-<div class="profile-layout">
-    <%- include("../partials/user/userSidebar") %>
+    <div class="profile-layout">
+        <%- include("../partials/user/userSidebar") %>
 
-    <div class="profile-main">
+            <div class="profile-main">
 
-        <h1 class="main-title">My Profile</h1>
+                <h1 class="main-title">My Profile</h1>
 
-        <div class="profile-grid">
+                <div class="profile-grid">
 
-            <!-- LEFT CARD - PERSONAL INFO -->
-            <div class="card">
+                    <!-- LEFT CARD - PERSONAL INFO -->
+                    <div class="card">
 
-                <div class="card-header">
-                    <h2>Personal Information</h2>
-                </div>
-
-                <div class="card-body">
-
-                    <p>
-                        <strong>Name:</strong>
-                        <%= user?.username || "Not available" %>
-                    </p>
-                    
-                    <p>
-                        <strong>Email:</strong>
-                        <%= user?.email || "Not available" %>
-                    </p>
-
-                    <a href="/edit-profile" class="btn btn-primary">
-                        Edit Profile
-                    </a>
-
-                </div>
-            </div>
-
-
-            <!-- RIGHT CARD - ADDRESSES -->
-            <div class="card">
-
-                <div class="card-header">
-                    <h2>Default Address</h2>
-                </div>
-
-                <div class="card-body">
-
-                    <% if(addresses && addresses.length > 0){ %>
-
-                        <% addresses.forEach(address => { %>
-                            <div class="address-box">
-                                <p><strong><%= address.full_name %></strong></p>
-                                <p><%= address.street %>, <%= address.city %></p>
-                                <p><%= address.state %> - <%= address.postal_code %></p>
-                                <p>Phone: <%= address.mobile %></p>
-                            </div>
-                        <% }) %>
-
-                    <% } else { %>
-
-                        <div class="alert-box">
-                            No addresses found.
+                        <div class="card-header">
+                            <h2>Personal Information</h2>
                         </div>
 
-                    <% } %>
+                        <div class="card-body">
+
+                            <p>
+                                <strong>Name:</strong>
+                                <%= user?.username || "Not available" %>
+                            </p>
+
+                            <p>
+                                <strong>Email:</strong>
+                                <%= user?.email || "Not available" %>
+                            </p>
+
+                            <a href="/edit-profile" class="btn btn-primary">
+                                Edit Profile
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- RIGHT CARD - ADDRESSES -->
+                    <div class="card">
+
+                        <div class="card-header">
+                            <h2>Default Address</h2>
+                        </div>
+
+                        <div class="card-body">
+
+                            <% if(addresses && addresses.length> 0){ %>
+
+                                <% addresses.forEach(address=> { %>
+                                    <div class="address-box">
+                                        <p><strong>
+                                                <%= address.full_name %>
+                                            </strong></p>
+                                        <p>
+                                            <%= address.street %>, <%= address.city %>
+                                        </p>
+                                        <p>
+                                            <%= address.state %> - <%= address.postal_code %>
+                                        </p>
+                                        <p>Phone: <%= address.mobile %>
+                                        </p>
+                                    </div>
+                                    <% }) %>
+
+                                        <% } else { %>
+
+                                            <div class="alert-box">
+                                                No addresses found.
+                                            </div>
+
+                                            <% } %>
+
+                                                <p>
+                                                    <strong>Referral Code:</strong>
+                                                </p>
+
+                                                <div class="input-group mb-3" style="max-width: 300px;">
+                                                    <input type="text" id="referralCode" class="form-control"
+                                                        value="<%= user?.referralCode || 'N/A' %>" readonly>
+                                                    <button class="btn btn-outline-primary"
+                                                        onclick="copyReferralCode()">
+                                                        Copy
+                                                    </button>
+                                                </div>
+
+                        </div>
+
+                    </div>
 
                 </div>
+
             </div>
-
-        </div>
-
     </div>
-</div>
 
-<script>
-    const message = "<%= message %>";
-            const type = "<%= type %>";
-            if (message) {
-                Swal.fire({
-                    title: type,
-                    icon: type,
-                    text: message,
-                    confirmButtonColor: '#007bff',
-                    timer: 2000,
-                    timerProgressBar: true,
-                    showConfirmButton: true
-                });
-            }
-</script>
+    <script>
+        const message = "<%= message %>";
+        const type = "<%= type %>";
+        if (message) {
+            Swal.fire({
+                title: type,
+                icon: type,
+                text: message,
+                confirmButtonColor: '#007bff',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: true
+            });
+        }
+
+        function copyReferralCode() {
+            const code = "<%= user?.referralCode %>";
+            navigator.clipboard.writeText(code);
+
+            Swal.fire({
+                icon: "success",
+                title: "Copied!",
+                text: "Referral code copied to clipboard",
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+    </script>

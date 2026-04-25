@@ -1,54 +1,93 @@
-  <!-- views/login.ejs -->
+<!-- views/login.ejs -->
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+  .password-wrapper {
+    position: relative;
+  }
 
-  <head>
-    <link rel="stylesheet" href="/css/admin/login.css">
-  </head>
+  .password-wrapper .form-input {
+    width: 100%;
+    padding-right: 40px;
+    /* space for icon */
+  }
 
-  <div class="auth-container">
-    <div class="auth-card">
-      <h1 class="auth-title">Login</h1>
-      <p class="auth-subtitle">Sign in with your email and password</p>
+  .toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #555;
+    font-size: 16px;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-      <form class="auth-form" action="/admin/login" method="POST">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" class="form-input" >
-        </div>
+<head>
+  <link rel="stylesheet" href="/css/admin/login.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
 
-        <div class="form-group">
-          <label for="password">Password</label>
+<div class="auth-container">
+  <div class="auth-card">
+    <h1 class="auth-title">Login</h1>
+    <p class="auth-subtitle">Sign in with your email and password</p>
+
+    <form class="auth-form" action="/admin/login" method="POST">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+
+        <div class="password-wrapper">
           <input type="password" id="password" name="password" class="form-input">
+          <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
         </div>
+      </div>
 
-        <button type="submit" class="auth-button">Login</button>
-      </form>
-    </div>
+      <button type="submit" class="auth-button">Login</button>
+    </form>
   </div>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const message = '<%= message %>';
-      const type = '<%= type %>';
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const message = '<%= message %>';
+    const type = '<%= type %>';
 
-      if (message && message.trim() !== '') {
-        Swal.fire({
-          icon: type, // "success", "error", "warning", "info", "question"
-          text: message,
-          confirmButtonColor: '#007bff'
-        });
-      }
+    if (message && message.trim() !== '') {
+      Swal.fire({
+        icon: type, // "success", "error", "warning", "info", "question"
+        text: message,
+        confirmButtonColor: '#007bff'
+      });
+    }
 
-      const form = document.getElementsByClassName(".auth-form");
-      const emailInput = document.getElementById("email");
-      const passwordInput = document.getElementById("password");
-      form.addEventListener('submit', function (event) {
-        event.preventDefault();
-      })
-
-      form.submit();
-      
+    const form = document.getElementsByClassName(".auth-form");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
     })
 
+    form.submit();
 
-  </script>
+  })
+  function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+
+    if (input.type === "password") {
+      input.type = "text";
+      icon.classList.remove("fa-eye");
+      icon.classList.add("fa-eye-slash");
+    } else {
+      input.type = "password";
+      icon.classList.remove("fa-eye-slash");
+      icon.classList.add("fa-eye");
+    }
+  }
+
+
+</script>

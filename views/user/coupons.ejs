@@ -158,7 +158,7 @@
                                     <span class="min-order">Min Order: ₹<%= coupon.minAmount %></span>
                                     <% let discount=0; const cart=Number(cartTotal) || 0; const
                                         value=Number(coupon.discountValue) || 0; if (coupon.discountType==="percentage"
-                                        ) { discount=(cart * value) / 100; } else { discount=value; } %>
+                                        ) { discount=Math.min(coupon.maxDiscount, (cart * value) / 100); } else { discount=value; } %>
 
                                         <span class="coupon-badge">SAVE ₹<%= discount.toFixed(0) %></span>
                                 </div>

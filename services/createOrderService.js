@@ -8,6 +8,7 @@ const Wallet = require("../models/walletModel");
 const Coupon = require("../models/couponSchema");
 
 const { debitWallet } = require("../services/walletServices");
+const { ModifiedPathsSnapshot } = require("mongoose");
 
 
 const createOrderService = async (userId, selectedAddressId, paymentMethod, paymentStatus, offerDiscount = 0, couponCode = null) => {
@@ -47,12 +48,14 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
         );
 
         if (variant.stock < item.quantity) {
-            throw new Error("Stock not available for some products");
+            throw new Error("Stock not available for some products. please review cart.");
         }
 
-        variant.stock -= item.quantity;
+        if (paymentMethod === "cod") {
+            variant.stock -= item.quantity;
+            await item.product_id.save();
 
-        await item.product_id.save();
+        }
 
         const subtotal = variant.price * item.quantity;
 
@@ -85,13 +88,16 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
             throw new Error("Invalid coupon");
         }
         if (coupon.discountType === "percentage") {
-            couponDiscount = (totalAfterOffer * coupon.discountValue) / 100;
+            const discount = Math.round((totalAfterOffer * coupon.discountValue) / 100);
+            couponDiscount = Math.min(discount, coupon.maxDiscount);
         } else {
             couponDiscount = coupon.discountValue;
         }
     }
 
-    const finalAmount = totalAfterOffer - couponDiscount;
+    const tax = Math.round(totalAfterOffer * 0.05);
+    const shippingCharge = 50;
+    const finalAmount = totalAfterOffer - couponDiscount + tax + shippingCharge;
 
     let wallet = null;
 
@@ -103,7 +109,7 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
         }
 
         if (wallet.balance < finalAmount) {
-            throw new Error("Insufficient wallet balance");
+            throw new Error("Insufficient wallet balance....");
         }
     }
 
@@ -118,7 +124,8 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
         couponDiscount,
         shippingAddress: address,
         paymentMethod,
-        paymentStatus
+        paymentStatus,
+        taxAmount: tax
     });
 
     console.log("newOrder: ", newOrder);
@@ -153,12 +160,20 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
     if (paymentMethod === "wallet") {
         const reason = `Order Payment against order ${newOrder.orderId}`;
         await debitWallet(userId, newOrder.totalAmount, reason);
+        for (const item of cartItems) {
+            const variant = item.product_id.variants.find(
+                v => v._id.toString() === item.variant_id.toString()
+            );
+            variant.stock -= item.quantity;
+            await item.product_id.save();
+        }
         newOrder.paymentStatus = "paid";
         newOrder.save();
     }
 
     cart.is_active = false;
     await cart.save();
+
     return newOrder;
 };
 

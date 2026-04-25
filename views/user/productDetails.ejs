@@ -275,8 +275,8 @@
                         <p id="stockStatus"></p>
                         <p class="text-muted">
                             <strong>Category:</strong>
-                            <% if (product.cat_id && product.cat_id.length> 0) { %>
-                                <%= product.cat_id.map(cat=> cat.name).join(", ") %>
+                            <% if (product.cat_id) { %>
+                                <%= product.cat_id.name %>
                                     <% } else { %>
                                         ""
                                         <% } %>

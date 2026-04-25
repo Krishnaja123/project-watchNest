@@ -29,40 +29,35 @@ const getCart = async (req, res) => {
             .find({ cart_id: userCart._id })
             .populate("product_id");
 
-        const validCartItems = [];
-        const invalidItemIds = [];
+        // const invalidItemIds = [];
 
-        for (const item of userCartItems) {
+        // for (const item of userCartItems) {
 
-            const product = item.product_id;
-            const variant = product?.variants?.id(item.variant_id);
+        //     const product = item.product_id;
+        //     if (product.is_delete === true){
+        //         invalidItemIds.push(item._id);
+        //         continue;
+        //     }
+        //     // console.log("product: ", product);
+            
+        //     const variant = product?.variants?.id(item.variant_id);
 
-            if (!variant || !variant.view || variant.stock <= 0) {
-                invalidItemIds.push(item._id);
-                continue;
-            }
-
-            validCartItems.push(item);
-        }
-
-        if (invalidItemIds.length > 0) {
-
-            await CartItem.deleteMany({
-                _id: { $in: invalidItemIds }
-            });
-
-            req.session.message = "Some items were removed because they are unavailable";
-            req.session.type = "error";
-        }
-
+        //     if (!variant || !variant.view || variant.stock <= 0) {
+        //         invalidItemIds.push(item._id);
+        //         continue;
+        //     }
+        // }
+        
         let total = 0;
 
-        const items = validCartItems.map(item => {
+        const items = userCartItems.map(item => {
 
             const product = item.product_id;
             const variant = product.variants.id(item.variant_id);
 
             const subTotal = item.price * item.quantity;
+
+            const isInvalid = !product || product.is_delete || !variant || !variant.view || variant.stock <= 0;
 
             total += subTotal;
 
@@ -72,7 +67,8 @@ const getCart = async (req, res) => {
                 image: variant.images?.[0],
                 quantity: item.quantity,
                 price: item.price,
-                subTotal
+                subTotal,
+                isInvalid
             };
 
         });
@@ -82,7 +78,8 @@ const getCart = async (req, res) => {
             type,
             cart: userCart,
             cartItems: items,
-            total
+            total,
+            // invalidItemIds
         });
 
     } catch (error) {

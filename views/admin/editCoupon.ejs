@@ -62,7 +62,7 @@
                         </div>
 
                         <!-- MAX DISCOUNT -->
-                        <div class="form-group">
+                        <div class="form-group" id="maxDiscountGroup">
                             <label for="maxDiscount">Maximum Discount</label>
                             <input type="number" id="maxDiscount" name="maxDiscount"
                                 value="<%= coupon.maxDiscount || '' %>">
@@ -113,14 +113,32 @@
 
     <%- include("../partials/admin/footer") %>
 
-    <script>
-        const message = "<%= message %>";
-                const type = "<%= type %>";
-                if (message) {
-                    Swal.fire({
-                        icon: type,
-                        text: message,
-                        confirmButtonColor: '#007bff'
-                    });
+        <script>
+            const discountTypeSelect = document.getElementById("discountType");
+            const maxDiscountGroup = document.getElementById("maxDiscountGroup");
+
+            function toggleMaxDiscount() {
+                if (discountTypeSelect.value === "percentage") {
+                    maxDiscountGroup.style.display = "block";
+                } else {
+                    maxDiscountGroup.style.display = "none";
+                    document.getElementById("maxDiscount").value = ""; // optional reset
                 }
-    </script>
+            }
+
+            // Run on page load
+            toggleMaxDiscount();
+
+            // Run when dropdown changes
+            discountTypeSelect.addEventListener("change", toggleMaxDiscount);
+
+            const message = "<%= message %>";
+            const type = "<%= type %>";
+            if (message) {
+                Swal.fire({
+                    icon: type,
+                    text: message,
+                    confirmButtonColor: '#007bff'
+                });
+            }
+        </script>

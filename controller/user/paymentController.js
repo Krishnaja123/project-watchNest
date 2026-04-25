@@ -1,8 +1,8 @@
 const razorpay = require("../../config/razorpay");
 const Order = require("../../models/orderModel");
 const Coupon = require("../../models/couponSchema");
-// const Cart = require("../../models/cartModel");
-// const OrderItem = require("../../models/orderItemsModel");
+const Product = require("../../models/productModel");
+const OrderItem = require("../../models/orderItemsModel");
 
 const { createOrderService } = require("../../services/createOrderService");
 
@@ -34,6 +34,8 @@ const createRazorpayOrder = async (req, res) => {
         const razorpayOrder = await razorpay.orders.create(options);
         console.log(razorpayOrder);
 
+
+
         res.json({
             success: true,
             razorpayOrderId: razorpayOrder.id,
@@ -52,9 +54,112 @@ const createRazorpayOrder = async (req, res) => {
     }
 };
 
+// const verifyPayment = async (req, res) => {
+//     try {
+//         console.log("Hi");
+
+//         const {
+//             razorpay_order_id,
+//             razorpay_payment_id,
+//             razorpay_signature,
+//             orderId,
+//             couponCode
+//         } = req.body;
+
+//         console.log("orderId:", orderId);
+
+//         // 1. VERIFY SIGNATURE FIRST
+//         const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+//         const expectedSignature = crypto
+//             .createHmac("sha256", process.env.RAZORPAY_API_SECRET)
+//             .update(body.toString())
+//             .digest("hex");
+
+//         if (expectedSignature !== razorpay_signature) {
+//             return res.json({ status: false });
+//         }
+
+//         // 2. FIND ORDER
+//         const order = await Order.findById(orderId);
+//         if (!order) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Order not found"
+//             });
+//         }
+
+//         // 3. VALIDATE COUPON (ONLY IF SENT)
+//         let coupon = null;
+
+//         if (couponCode) {
+//             coupon = await Coupon.findOne({
+//                 code: couponCode.trim().toUpperCase()
+//             });
+
+//             console.log("coupon: ", coupon);
+
+
+//             if (!coupon) {
+//                 return res.status(400).json({
+//                     success: false,
+//                     message: "Invalid coupon code"
+//                 });
+//             }
+
+
+//         }
+
+//         const orderItems = await OrderItem.find({ order_id: order._id })
+//         .populate("product_id");
+
+//         for (const item of orderItems) {
+
+//             const variant = item.product_id.variants.find(v =>
+//                 v._id.toString() === item.variant_id.toString()
+//             );
+//             if (!variant || variant.stock < item.quantity) {
+//                 return res.status(400).json({
+//                     success: false,
+//                     message: "Stock not available"
+//                 });
+//             }
+
+//             variant.stock -= item.quantity;
+//             await item.product_id.save();
+//         }
+
+//         // 4. UPDATE ORDER
+//         order.paymentStatus = "paid";
+//         order.razorpayOrderId = razorpay_order_id;
+//         order.razorpayPaymentId = razorpay_payment_id;
+//         await order.save();
+
+//         // 5. UPDATE COUPON USAGE (ONLY IF VALID)
+//         if (coupon) {
+//             coupon.usageCount += 1;
+//             await coupon.save();
+//         }
+
+//         return res.json({
+//             status: true,
+//             orderId: order.orderId
+//         });
+
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Server error"
+//         });
+//     }
+// };
+
 const verifyPayment = async (req, res) => {
     try {
         console.log("Hi");
+
+        const userId = req.user._id;
 
         const {
             razorpay_order_id,
@@ -66,19 +171,17 @@ const verifyPayment = async (req, res) => {
 
         console.log("orderId:", orderId);
 
-        // 1. VERIFY SIGNATURE FIRST
         const body = razorpay_order_id + "|" + razorpay_payment_id;
 
         const expectedSignature = crypto
             .createHmac("sha256", process.env.RAZORPAY_API_SECRET)
-            .update(body.toString())
+            .update(body)
             .digest("hex");
 
         if (expectedSignature !== razorpay_signature) {
             return res.json({ status: false });
         }
 
-        // 2. FIND ORDER
         const order = await Order.findById(orderId);
         if (!order) {
             return res.status(404).json({
@@ -87,16 +190,19 @@ const verifyPayment = async (req, res) => {
             });
         }
 
-        // 3. VALIDATE COUPON (ONLY IF SENT)
+        if (order.paymentStatus === "paid") {
+            return res.json({
+                status: true,
+                orderId: order.orderId
+            });
+        }
+
         let coupon = null;
 
         if (couponCode) {
-            coupon = await Coupon.findOne({
-                code: couponCode.trim().toUpperCase()
-            });
+            const formattedCode = couponCode.trim().toUpperCase();
 
-            console.log("coupon: ", coupon);
-            
+            coupon = await Coupon.findOne({ code: formattedCode });
 
             if (!coupon) {
                 return res.status(400).json({
@@ -104,19 +210,39 @@ const verifyPayment = async (req, res) => {
                     message: "Invalid coupon code"
                 });
             }
-
-
         }
 
-        // 4. UPDATE ORDER
+        const orderItems = await OrderItem.find({ order_id: order._id });
+
+        for (const item of orderItems) {
+
+            const updated = await Product.updateOne(
+                {
+                    _id: item.product_id,
+                    "variants._id": item.variant_id,
+                    "variants.stock": { $gte: item.quantity }
+                },
+                {
+                    $inc: { "variants.$.stock": -item.quantity }
+                }
+            );
+
+            if (updated.modifiedCount === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Stock not available"
+                });
+            }
+        }
+
         order.paymentStatus = "paid";
         order.razorpayOrderId = razorpay_order_id;
         order.razorpayPaymentId = razorpay_payment_id;
         await order.save();
 
-        // 5. UPDATE COUPON USAGE (ONLY IF VALID)
         if (coupon) {
             coupon.usageCount += 1;
+            coupon.usedBy.push(userId);
             await coupon.save();
         }
 

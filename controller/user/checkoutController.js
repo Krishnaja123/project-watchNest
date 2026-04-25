@@ -2,6 +2,7 @@ const Cart = require("../../models/cartModel");
 const CartItem = require("../../models/cartItemsModel");
 const Address = require("../../models/addressModel");
 
+const { indiaStates } = require("../../utils/states");
 const { getSessionMessage } = require("../../utils/sessionHelper");
 
 
@@ -31,11 +32,11 @@ const getCheckout = async (req, res) => {
                 const product = item.product_id;
                 const variant = product?.variants?.id(item.variant_id);
 
-                return variant && variant.view === true && variant.stock > 0
+                return product && product.is_delete === false && variant && variant.view === true && variant.stock > 0 
             });
 
             if(validCartItems.length !== cartItems.length) {
-                req.session.message = "Some items in your cart are unavailable. Please review your cart.";
+                req.session.message = "Some items in your cart are not available right now. Please remove them from cart to proceed to checkout.";
                 req.session.type = "error";
                 return res.redirect('/cart');
             }
@@ -46,13 +47,19 @@ const getCheckout = async (req, res) => {
             return sum += item.quantity * item.price;
         }, 0);
 
+        const tax = Math.round(subTotal * 0.05);
+        const shippingCharge = 50;
+
         res.render("user/checkout", {
             cartItems: validCartItems,
             addresses,
             subTotal,
+            tax,
+            shippingCharge,
             message,
             type,
-            razorpayKey: process.env.RAZORPAY_API_KEY
+            razorpayKey: process.env.RAZORPAY_API_KEY,
+            states: indiaStates
         });
 
     } catch (error) {
