@@ -11,6 +11,8 @@ const { getSessionMessage } = require("../../utils/sessionHelper");
 const { calculateOrderStatus } = require("../../utils/orderStatusHelper");
 const { createOrderService } = require("../../services/createOrderService");
 const { creditWallet } = require("../../services/walletServices");
+const { getOffer } = require("../../services/offerService");
+
 
 const createOrder = async (req, res) => {
     try {
@@ -439,7 +441,24 @@ const applyCoupon = async (req, res) => {
         const coupon = await Coupon.findOne({ code: code.toUpperCase() });
         if (!coupon) return res.json({ success: false, message: "Invalid Coupon!" });
 
-        const cartTotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        //const cartTotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+        let cartTotal = 0;
+
+        for (const item of cartItems) {
+            const product = await item.populate("product_id");
+
+            const variant = product.product_id.variants.find(
+                v => v._id.toString() === item.variant_id.toString()
+            );
+
+            if (!variant) continue;
+
+            const bestDiscount = await getOffer(product.product_id, variant.price);
+            const finalPrice = variant.price - bestDiscount;
+
+            cartTotal += finalPrice * item.quantity;
+        }
 
         if (cartTotal < coupon.minAmount)
             return res.json({ success: false, message: `Add ₹${coupon.minAmount - cartTotal} more to use this coupon.` });
@@ -456,7 +475,7 @@ const applyCoupon = async (req, res) => {
         );
 
         console.log("alreadyUsed: ", alreadyUsed);
-        
+
 
         if (alreadyUsed) {
             return res.json({ success: false, message: "You already used this coupon" });
@@ -464,7 +483,7 @@ const applyCoupon = async (req, res) => {
 
         let discount = 0;
         if (coupon.discountType === 'percentage') {
-            couponDiscount = Math.round((cartTotal * coupon.discountValue) / 100);
+            let couponDiscount = Math.round((cartTotal * coupon.discountValue) / 100);
             discount = Math.min(couponDiscount, coupon.maxDiscount);
         } else {
             discount = coupon.discountValue;
@@ -491,6 +510,7 @@ const applyCoupon = async (req, res) => {
         return res.json({ success: false, message: "Server error!" });
     }
 }
+
 
 module.exports = {
     createOrder,

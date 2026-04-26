@@ -204,6 +204,13 @@
                                 <span>₹<%= order.originalAmount.toFixed(2) %></span>
                             </div>
 
+                            <% if(order.offerDiscount> 0) { %>
+                                <div class="d-flex justify-content-between text-success">
+                                    <span>Offer Discount</span>
+                                    <span>- ₹<%= order.offerDiscount.toFixed(2) %></span>
+                                </div>
+                                <% } %>
+
                             <% if(order.couponDiscount> 0) { %>
                                 <div class="d-flex justify-content-between text-success">
                                     <span>Coupon Discount (<%= order.couponCode %>)</span>

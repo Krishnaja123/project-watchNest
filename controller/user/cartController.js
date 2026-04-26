@@ -1,7 +1,9 @@
 const Cart = require("../../models/cartModel");
 const CartItem = require("../../models/cartItemsModel");
 const Product = require("../../models/productModel");
+
 const { getSessionMessage } = require("../../utils/sessionHelper");
+const { getOffer } = require("../../services/offerService");
 
 const getCart = async (req, res) => {
     try {
@@ -39,7 +41,7 @@ const getCart = async (req, res) => {
         //         continue;
         //     }
         //     // console.log("product: ", product);
-            
+
         //     const variant = product?.variants?.id(item.variant_id);
 
         //     if (!variant || !variant.view || variant.stock <= 0) {
@@ -47,32 +49,39 @@ const getCart = async (req, res) => {
         //         continue;
         //     }
         // }
-        
+
         let total = 0;
 
-        const items = userCartItems.map(item => {
+        const items = await Promise.all(
+            userCartItems.map(async (item) => {
 
-            const product = item.product_id;
-            const variant = product.variants.id(item.variant_id);
+                const product = item.product_id;
+                const variant = product.variants.id(item.variant_id);
 
-            const subTotal = item.price * item.quantity;
+                const bestDiscount = await getOffer(product, variant.price);
+                const price = item.price - bestDiscount;
+                const subTotal = price * item.quantity;
 
-            const isInvalid = !product || product.is_delete || !variant || !variant.view || variant.stock <= 0;
+                const isInvalid =
+                    !product ||
+                    product.is_delete ||
+                    !variant ||
+                    !variant.view ||
+                    variant.stock <= 0;
 
-            total += subTotal;
+                total += subTotal;
 
-            return {
-                _id: item._id,
-                name: product.name,
-                image: variant.images?.[0],
-                quantity: item.quantity,
-                price: item.price,
-                subTotal,
-                isInvalid
-            };
-
-        });
-
+                return {
+                    _id: item._id,
+                    name: product.name,
+                    image: variant.images?.[0],
+                    quantity: item.quantity,
+                    price,
+                    subTotal,
+                    isInvalid
+                };
+            })
+        );
         res.render("user/cart", {
             message,
             type,

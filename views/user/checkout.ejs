@@ -5,7 +5,7 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
         <script>
-            const addresses = <% - JSON.stringify(addresses) %>;
+            const addresses = <%- JSON.stringify(addresses) %>;
         </script>
 
         <script src="/js/address.js"></script>
@@ -352,8 +352,7 @@
                                         <div class="input-group">
                                             <input type="text" id="couponInput" name="couponCode" class="form-control"
                                                 placeholder="Enter coupon code">
-                                            <button type="button" id="couponBtn" onclick="handleCouponAction()"
-                                                class="btn btn-outline-secondary">
+                                            <button type="button" id="couponBtn" class="btn btn-outline-secondary">
                                                 APPLY
                                             </button>
                                         </div>
@@ -388,8 +387,8 @@
                                     </div>
 
                                     <div class="summary-item fw-bold">
-                                        <span>Total</span>
-                                        <span id="finalTotal">₹<%= subTotal + shippingCharge + tax %></span>
+                                        <span>Total123</span>
+                                        <span id="finalTotal">₹<%= (Number(subTotal || 0) + Number(shippingCharge || 0) + Number(tax || 0)).toFixed(2) %></span>
                                     </div>
 
                                     <!-- Payment Method -->
@@ -438,8 +437,14 @@
                     }
                 });
 
+                const btn = document.getElementById("couponBtn");
+
+                if(btn) {
+                    btn.addEventListener("click", handleCouponAction);
+                }
+
                 let appliedDiscount = 0;
-                let finalAmount = <%= subTotal + tax + shippingCharge %>;
+                let finalAmount = <%= Number(subTotal || 0) + Number(tax || 0) + Number(shippingCharge || 0) %>;
 
                 let couponApplied = false;
 
@@ -675,7 +680,7 @@
                     }
                 }
 
-                let originalTotal = <%= subTotal + shippingCharge + tax %>;
+                let originalTotal = <%= Number(subTotal || 0) + Number(shippingCharge || 0) + Number(tax || 0) %>;
 
                 async function removeCoupon() {
                     couponApplied = false;

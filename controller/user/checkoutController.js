@@ -4,6 +4,8 @@ const Address = require("../../models/addressModel");
 
 const { indiaStates } = require("../../utils/states");
 const { getSessionMessage } = require("../../utils/sessionHelper");
+const { getOffer } = require("../../services/offerService");
+
 
 
 const getCheckout = async (req, res) => {
@@ -22,32 +24,41 @@ const getCheckout = async (req, res) => {
         const cartItems = await CartItem.find({ cart_id: userCart._id })
             .populate("product_id");
 
-            if(cartItems.length === 0) {
-                req.session.message = "Cart is empty, please add products to cart.";
-                req.session.type = "error";
-                return res.redirect('/products');
-            }
+        if (cartItems.length === 0) {
+            req.session.message = "Cart is empty, please add products to cart.";
+            req.session.type = "error";
+            return res.redirect('/products');
+        }
 
-            const validCartItems = cartItems.filter(item => {
-                const product = item.product_id;
-                const variant = product?.variants?.id(item.variant_id);
+        let validCartItems = cartItems.filter(item => {
+            const product = item.product_id;
+            const variant = product?.variants?.id(item.variant_id);
 
-                return product && product.is_delete === false && variant && variant.view === true && variant.stock > 0 
-            });
+            return product && product.is_delete === false && variant && variant.view === true && variant.stock > 0
+        });
 
-            if(validCartItems.length !== cartItems.length) {
-                req.session.message = "Some items in your cart are not available right now. Please remove them from cart to proceed to checkout.";
-                req.session.type = "error";
-                return res.redirect('/cart');
-            }
+        for (const item of validCartItems) {
+            const product = item.product_id;
+            const variant = product?.variants?.id(item.variant_id);
+            const bestDiscount = await getOffer(product, variant.price);
+
+            item.price = item.price - bestDiscount;
+        }
+
+        if (validCartItems.length !== cartItems.length) {
+            req.session.message = "Some items in your cart are not available right now. Please remove them from cart to proceed to checkout.";
+            req.session.type = "error";
+            return res.redirect('/cart');
+        }
 
         const addresses = await Address.find({ user_id: userId }).sort({ is_default: -1 });
-        
+
         const subTotal = validCartItems.reduce((sum, item) => {
+
             return sum += item.quantity * item.price;
         }, 0);
 
-        const tax = Math.round(subTotal * 0.05);
+        const tax = (subTotal * 0.05).toFixed(2);
         const shippingCharge = 50;
 
         res.render("user/checkout", {

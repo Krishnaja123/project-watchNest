@@ -37,6 +37,11 @@ couponDiscount: {
     default: 0
 },
 
+offerDiscount: {
+    type: Number,
+    default: 0
+  },
+
 originalAmount: {
     type: Number,
     required: true

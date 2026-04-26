@@ -9,6 +9,7 @@ const Coupon = require("../models/couponSchema");
 
 const { debitWallet } = require("../services/walletServices");
 const { ModifiedPathsSnapshot } = require("mongoose");
+const { getOffer } = require("../services/offerService");
 
 
 const createOrderService = async (userId, selectedAddressId, paymentMethod, paymentStatus, offerDiscount = 0, couponCode = null) => {
@@ -39,6 +40,7 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
 
     let totalAmount = 0;
     let totalAfterOffer = 0;
+    let totalOfferAmount = 0;
 
     const orderItems = [];
 
@@ -57,19 +59,26 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
 
         }
 
+        // const subtotal = variant.price * item.quantity;
+
+        // const itemOfferDiscount = 0;
+
+        // const priceAfterOffer = subtotal - itemOfferDiscount;
+
+        const product = item.product_id;
+        const bestDiscount = await getOffer(product, variant.price);
+        const finalUnitPrice = variant.price - bestDiscount;
+        const priceAfterOffer = finalUnitPrice * item.quantity;
+        const itemOfferDiscount = bestDiscount * item.quantity;
         const subtotal = variant.price * item.quantity;
 
-        const itemOfferDiscount = 0;
-
-        const priceAfterOffer = subtotal - itemOfferDiscount;
-
         totalAmount += subtotal;
-
+        totalOfferAmount += itemOfferDiscount;
         totalAfterOffer += priceAfterOffer;
 
         orderItems.push({
-            product_id: item.product_id._id,
-            productName: item.product_id.name,
+            product_id: product._id,
+            productName: product.name,
             variant_id: item.variant_id,
             price: variant.price,
             image: variant.images[0],
@@ -125,7 +134,8 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
         shippingAddress: address,
         paymentMethod,
         paymentStatus,
-        taxAmount: tax
+        taxAmount: tax,
+        offerDiscount: totalOfferAmount
     });
 
     console.log("newOrder: ", newOrder);

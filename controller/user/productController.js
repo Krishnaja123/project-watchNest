@@ -3,11 +3,11 @@ const Product = require("../../models/productModel");
 const Category = require("../../models/categoryModel");
 const Brand = require("../../models/brandModel");
 const Wishlist = require("../../models/wishlistModel");
-const Offer = require("../../models/offerModel");
 
 const { getPaginatedProducts } = require("../../services/productService");
-const { find } = require("../../models/orderModel");
-const { maxLength } = require("zod");
+const { getOffer } = require("../../services/offerService");
+// const { find } = require("../../models/orderModel");
+// const { maxLength } = require("zod");
 
 
 const getHomePage = async (req, res) => {
@@ -37,6 +37,83 @@ const getHomePage = async (req, res) => {
         });
         const today = new Date();
 
+        // const showData = await Promise.all(products.map(async (product) => {
+
+        //     const viewedProducts = product.variants.filter(
+        //         v => v.view === true && v.stock > 0
+        //     );
+
+        //     const firstVariant = viewedProducts?.[0];
+        //     if (!firstVariant) return null;
+
+        //     const price = Number(firstVariant.price);
+
+        //     //  Get valid offers only
+        //     const offers = await Offer.find({
+        //         is_delete: false,
+        //         startDate: { $lte: today },
+        //         endDate: { $gte: today }
+        //     });
+
+        //     let bestDiscount = 0;
+
+        //     offers.forEach(data => {
+        //         let isApplicable = false;
+
+        //         if (
+        //             data.offerType === "product" &&
+        //             data.product_id.includes(product._id)
+        //         ) {
+        //             isApplicable = true;
+        //         }
+
+        //         if (
+        //             data.offerType === "category" &&
+        //             data.category_id.includes(product.cat_id)
+        //         ) {
+        //             isApplicable = true;
+        //         }
+
+        //         if (isApplicable) {
+        //             let discount = 0;
+
+        //             if (data.discountType === "percentage") {
+        //                 discount = (price * data.discountValue) / 100;
+        //             } else {
+        //                 discount = data.discountValue;
+        //             }
+
+        //             if (discount > bestDiscount) {
+        //                 bestDiscount = discount;
+        //             }
+        //         }
+        //     });
+
+        //     //  include variant offer also
+        //     // if (firstVariant.offer) {
+        //     //     const variantOffer = Number(firstVariant.offer);
+        //     //     if (variantOffer > bestDiscount) {
+        //     //         bestDiscount = variantOffer;
+        //     //     }
+        //     // }
+
+        //     const finalPrice = price - bestDiscount;
+
+        //     return {
+        //         productId: product._id,
+        //         name: product.name,
+        //         brand: product.brand_id?.name,
+        //         price: price,
+        //         finalPrice: finalPrice,
+        //         discount: bestDiscount,
+        //         image: firstVariant?.images?.[0],
+        //         variantId: firstVariant?._id
+        //     };
+        // }));
+
+        // remove nulls
+        //const filteredData = showData.filter(p => p !== null);
+
         const showData = await Promise.all(products.map(async (product) => {
 
             const viewedProducts = product.variants.filter(
@@ -48,54 +125,8 @@ const getHomePage = async (req, res) => {
 
             const price = Number(firstVariant.price);
 
-            //  Get valid offers only
-            const offers = await Offer.find({
-                is_delete: false,
-                startDate: { $lte: today },
-                endDate: { $gte: today }
-            });
-
-            let bestDiscount = 0;
-
-            offers.forEach(data => {
-                let isApplicable = false;
-
-                if (
-                    data.offerType === "product" &&
-                    data.product_id.includes(product._id)
-                ) {
-                    isApplicable = true;
-                }
-
-                if (
-                    data.offerType === "category" &&
-                    data.category_id.includes(product.cat_id)
-                ) {
-                    isApplicable = true;
-                }
-
-                if (isApplicable) {
-                    let discount = 0;
-
-                    if (data.discountType === "percentage") {
-                        discount = (price * data.discountValue) / 100;
-                    } else {
-                        discount = data.discountValue;
-                    }
-
-                    if (discount > bestDiscount) {
-                        bestDiscount = discount;
-                    }
-                }
-            });
-
-            //  include variant offer also
-            // if (firstVariant.offer) {
-            //     const variantOffer = Number(firstVariant.offer);
-            //     if (variantOffer > bestDiscount) {
-            //         bestDiscount = variantOffer;
-            //     }
-            // }
+            // 👇 use service here
+            const bestDiscount = await getOffer(product, price);
 
             const finalPrice = price - bestDiscount;
 
@@ -110,9 +141,6 @@ const getHomePage = async (req, res) => {
                 variantId: firstVariant?._id
             };
         }));
-
-        // remove nulls
-        //const filteredData = showData.filter(p => p !== null);
 
         return res.render("user/home", {
             message,
