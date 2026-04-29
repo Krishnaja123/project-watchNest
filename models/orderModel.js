@@ -47,6 +47,12 @@ originalAmount: {
     required: true
 },
 
+refundAmont: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+
   paymentMethod: {
     type: String,
     required: true

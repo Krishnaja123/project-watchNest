@@ -183,7 +183,7 @@
                                     <% if (!isValid) { %>
                                         <small class="text-danger">
                                             <% if(cartTotal < coupon.minAmount) { %>
-                                                Add ₹<%= coupon.minAmount - cartTotal %> more
+                                                Add ₹<%= Math.round(coupon.minAmount - cartTotal) %> more
                                                     <% } else if(coupon.expiryDate < Date.now()){ %>
                                                         <span class="expired-badge"> Expired </span>
                                                         <% } else if(coupon.usageCount>= coupon.usageLimit) { %>

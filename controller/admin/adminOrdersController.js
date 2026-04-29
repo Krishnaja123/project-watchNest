@@ -206,6 +206,8 @@ const updateProductStatus = async (req, res) => {
 
                 const userId = req.user._id;
                 await creditWallet(userId, refundAmount, `Refund for returned product`);
+                order.refundAmount = (order.refundAmount || 0) + refundAmount;
+await order.save();
             } else {
                 req.session.message = `can not change the product status to ${status} until you accept the return request from user.`
                 req.session.type = "error";
