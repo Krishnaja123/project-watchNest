@@ -186,8 +186,8 @@ const getOrderInvoice = async (req, res) => {
 
         const orderItems = await OrderItem.find({
             order_id: orderId,
-            status: { $in: ["delivered", "cancelled", "returned"] },
-            paymentStatus: "paid"
+            status: { $in: ["delivered", "cancelled", "returned", "processing"] },
+            paymentStatus: {$in: ["paid", "pending"]}
         });
 
         return res.render("user/orderInvoice", {
@@ -240,7 +240,7 @@ const cancelProduct = async (req, res) => {
 
             const discountRatio = order.couponDiscount / order.originalAmount;
 
-            const itemTotal = item.price * item.quantity;
+            const itemTotal = item.finalPrice * item.quantity;
             const itemDiscount = itemTotal * discountRatio;
 
             const refundAmount = itemTotal - itemDiscount;
