@@ -20,7 +20,6 @@ const createRazorpayOrder = async (req, res) => {
             selectedAddressId,
             "online",
             "pending",
-            discount,
             couponCode
         );
         console.log("coupon: ", couponCode);
@@ -240,6 +239,13 @@ const verifyPayment = async (req, res) => {
         order.razorpayPaymentId = razorpay_payment_id;
         await order.save();
 
+        await OrderItem.updateMany(
+            { order_id: order._id },
+            {
+                $set: { paymentStatus: "paid" }
+            }
+        );
+
         if (coupon) {
             coupon.usageCount += 1;
             coupon.usedBy.push(userId);
@@ -270,6 +276,13 @@ const paymentFailed = async (req, res) => {
         paymentStatus: "failed"
     });
 
+     await OrderItem.updateMany(
+            { order_id: order._id },
+            {
+                $set: { paymentStatus: "paid" }
+            }
+        );
+        
     res.json({ success: true });
 
 };

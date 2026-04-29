@@ -33,9 +33,7 @@ const getOffer = async (product, price, today = new Date()) => {
 
             if (data.discountType === "percentage") {
                 discount = (price * data.discountValue) / 100;
-            } else {
-                discount = data.discountValue;
-            }
+            } 
 
             if (discount > bestDiscount) {
                 bestDiscount = discount;

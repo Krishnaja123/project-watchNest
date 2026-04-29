@@ -23,10 +23,28 @@
                 <p class="brand">
                     Brand: <%= variant.brand?.name %>
                 </p>
-                <p class="price">
-                    ₹<%= variant.variants.price %>
-                </p>
             </div>
+            <div class="price-section">
+                                <% if(variant.discount> 0) { %>
+
+                                    <!-- Original Price -->
+                                    <span class="original-price">₹<%= variant.price %></span>
+
+                                    <!-- Discounted Price -->
+                                    <span class="final-price">₹<%= variant.finalPrice %></span>
+
+                                    <!-- Discount Badge -->
+                                    <span class="discount-badge">
+                                        ₹<%= variant.discount %> OFF
+                                    </span>
+
+                                    <% } else { %>
+
+                                        <!-- Normal Price -->
+                                        <span class="price">₹<%= variant.price %></span>
+
+                                        <% } %>
+                            </div>
         </a>
 
         <button class="add-cart-btn" data-variant-id="<%= variant.variants._id %>" data-product-id="<%= variant._id %>"

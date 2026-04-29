@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Product = require("../models/productModel");
+const { getOffer } = require("../services/offerService");
 
 async function getPaginatedProducts(query) {
     const page = parseInt(query.page) || 1;
@@ -68,6 +69,25 @@ if (brandIds.length > 0) {
 );
 const variants = await Product.aggregate(pipeline);
 
+const processedVariants = await Promise.all(
+    variants.map(async (item) => {
+
+        const price = Number(item.variants.price);
+
+        // pass full product OR required fields
+        const bestDiscount = await getOffer(item, price);
+
+        const finalPrice = price - bestDiscount;
+
+        return {
+            ...item,
+            price,
+            finalPrice,
+            discount: bestDiscount
+        };
+    })
+)
+
 const totalDocs = await Product.aggregate([
     ...countPipeline,
     { $count: "total" }
@@ -77,7 +97,7 @@ const totalVariants = totalDocs.length > 0 ? totalDocs[0].total : 0;
 const totalPages = Math.ceil(totalVariants / limit);
 
 return { 
-    variants, 
+    variants: processedVariants, 
     currentPage: page,
     totalPages
 };

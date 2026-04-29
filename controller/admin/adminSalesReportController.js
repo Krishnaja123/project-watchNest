@@ -160,6 +160,17 @@ const exportSalesExcel = async (req, res) => {
             createdAt: { $gte: startDate, $lte: endDate }
         }).lean();
 
+        const totalSalesAmount = orders.reduce((sum, order) => {
+            return sum + (
+                (order.totalAmount || 0)
+                - (order.couponDiscount || 0)
+                - (order.offerDiscount || 0)
+            );
+        }, 0);
+
+        console.log("orders: ", orders);
+
+
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet("Sales Report");
 
@@ -197,6 +208,15 @@ const exportSalesExcel = async (req, res) => {
             });
         });
 
+        sheet.addRow({});
+
+        const totalRow = sheet.addRow({
+            orderId: "TOTAL",
+            totalAmount: totalSalesAmount
+        });
+
+        totalRow.font = { bold: true };
+
         res.setHeader(
             "Content-Type",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -226,6 +246,14 @@ const exportSalesPDF = async (req, res) => {
         const orders = await Order.find({
             createdAt: { $gte: startDate, $lte: endDate }
         }).lean();
+
+        const totalSalesAmount = orders.reduce((sum, order) => {
+            return sum + (
+                (order.totalAmount || 0)
+                - (order.couponDiscount || 0)
+                - (order.offerDiscount || 0)
+            );
+        }, 0);
 
         const doc = new PDFDocument({ margin: 30, size: "A4" });
 
@@ -287,6 +315,19 @@ const exportSalesPDF = async (req, res) => {
             }
         });
 
+        doc.moveTo(30, y).lineTo(560, y).stroke();
+
+        y += 10;
+
+        doc.font("Helvetica-Bold")
+            .fontSize(12)
+            .text(
+                `Total Sales Amount: ₹${totalSalesAmount.toFixed(2)}`,
+                30,
+                y,
+                { align: "right" }
+            );
+            
         doc.end();
 
     } catch (error) {
@@ -300,5 +341,5 @@ module.exports = {
     getSalesReport,
     getSalesReportData,
     exportSalesExcel,
-    exportSalesPDF 
+    exportSalesPDF
 }

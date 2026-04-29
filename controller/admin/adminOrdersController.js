@@ -145,6 +145,13 @@ const updateProductStatus = async (req, res) => {
             return res.status(404).json({ error: "Item not found" });
         }
 
+        if(item.paymentStatus === "failed"){
+            if (status !== "cancelled") {
+                req.session.message = `Cannot change the status to shipped because the payment failed. Only cancellation is allowed.`;
+                req.session.type = "error";
+                return res.redirect(`/admin/orderDetails/${item.order_id}`);
+            }
+        }
         if (item.status === "processing") {
 
             item.status = status;

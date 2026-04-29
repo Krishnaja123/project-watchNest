@@ -200,6 +200,46 @@
                 cursor: not-allowed;
                 opacity: 0.6;
             }
+
+            .price-box {
+    margin: 20px 0;
+}
+
+.price-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.final-price {
+    font-size: 30px;
+    font-weight: 700;
+    color: #111;
+}
+
+.original-price {
+    font-size: 16px;
+    text-decoration: line-through;
+    color: #999;
+}
+
+.discount-badge {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.save-text {
+    font-size: 14px;
+    color: #28a745;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
         </style>
 
     </head>
@@ -244,7 +284,7 @@
                             <h6 class="fw-bold">Available Variants</h6>
 
                             <% viewedVariants.forEach((variant, index)=> { %>
-                                <button class="variant-btn <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>"
+                                <button class="variant-btn <%= variant._id.toString() === defaultVariant._id.toString() ? 'active' : '' %>" data-index="<%= index %>"
                                     onclick="changeVariant(this)">
                                     <img src="<%= variant.images[0] %>" class="variant-img">
 
@@ -266,11 +306,19 @@
                             ⭐ <%= product.reviews_count %> reviews
                         </p>
 
-                        <h3 class="text-danger fw-bold" id="price">
-                            ₹ <span id="priceValue">
-                                <%= defaultVariant.price %>
-                            </span>
-                        </h3>
+                        <div class="price-box">
+    <div class="price-row">
+        <span class="final-price">
+            ₹ <%= defaultVariant.finalPrice ?? defaultVariant.price %>
+        </span>
+
+        <% if (defaultVariant.discountAmount > 0) { %>
+            <span class="original-price">
+                ₹ <%= defaultVariant.price %>
+            </span>
+        <% } %>
+    </div>
+</div>
 
                         <p id="stockStatus"></p>
                         <p class="text-muted">
@@ -372,7 +420,7 @@
 
                 updateStock(<%= defaultVariant.stock %>);
 
-                const allVariants = <%- JSON.stringify(viewedVariants) %>;
+                const allVariants = <%- JSON.stringify(updatedVariants) %>;
 
                 function changeVariant(button) {
                     const index = button.dataset.index;
@@ -411,40 +459,56 @@
                         stockElement.style.color = "red";
                     }
                 }
+updateUI(<%- JSON.stringify(defaultVariant) %>);     
+function updateUI(variant) {
+    document.getElementById('name').innerText =
+        `<%= product.name %> with ${variant.dial_color} dial and ${variant.strap_color} strap`;
 
-                function updateUI(variant) {
-                    document.getElementById('name').innerText =
-                        `<%= product.name %> with ${variant.dial_color} dial and ${variant.strap_color} strap`;
+    const priceBox = document.querySelector(".price-box");
 
-                    document.getElementById('priceValue').innerText = variant.price.$numberDecimal;
+    if (variant.discountAmount > 0) {
+        priceBox.innerHTML = `
+            <div class="price-row">
+                <span class="final-price">₹ ${Math.round(variant.finalPrice)}</span>
+                <span class="original-price">₹ ${variant.price}</span>
+                <span class="discount-badge">${Math.round((variant.discountAmount / variant.price) * 100)}% OFF</span>
+            </div>
+            <div class="save-text">
+                You save ₹ ${Math.round(variant.discountAmount)}
+            </div>
+        `;
+    } else {
+        priceBox.innerHTML = `
+            <div class="price-row">
+                <span class="final-price">₹ ${variant.price}</span>
+            </div>
+        `;
+    }
 
-                    document.getElementById('strap_color').innerHTML =
-                        `<strong>Strap color:</strong> ${variant.strap_color}`;
+    document.getElementById('strap_color').innerHTML =
+        `<strong>Strap color:</strong> ${variant.strap_color}`;
 
-                    document.getElementById('dial_color').innerHTML =
-                        `<strong>Dial color:</strong> ${variant.dial_color}`;
+    document.getElementById('dial_color').innerHTML =
+        `<strong>Dial color:</strong> ${variant.dial_color}`;
 
-                    updateStock(variant.stock);
+    updateStock(variant.stock);
 
-                    const addBtn = document.getElementById("addToCartBtn");
-                    const buyBtn = document.getElementById("buyNowBtn");
+    const addBtn = document.getElementById("addToCartBtn");
+    const buyBtn = document.getElementById("buyNowBtn");
 
-                    if (variant.stock <= 0) {
-                        addBtn.disabled = true;
-                        buyBtn.disabled = true;
-                    } else {
-                        addBtn.disabled = false;
-                        buyBtn.disabled = false;
-                    }
+    addBtn.disabled = variant.stock <= 0;
+    buyBtn.disabled = variant.stock <= 0;
 
-                    // Update variantId dynamically
-                    addBtn.dataset.variantId = variant._id;
+    addBtn.dataset.variantId = variant._id;
 
-                    document.getElementById("mainImage").src = variant.images[0];
+    document.getElementById("mainImage").src = variant.images[0];
 
-                    updateThumbnails(variant.images);
-                }
-                function updateThumbnails(images) {
+    updateThumbnails(variant.images);
+
+    history.replaceState(null, "", `/product/${"<%= product._id %>"}/${variant._id}`);
+}
+
+function updateThumbnails(images) {
 
                     const thumbContainer = document.querySelector(".thumbnail-container");
                     thumbContainer.innerHTML = "";

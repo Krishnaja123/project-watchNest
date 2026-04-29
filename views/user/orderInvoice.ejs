@@ -1,4 +1,3 @@
-
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -11,7 +10,7 @@
         margin: 20px auto;
         background: #fff;
         padding: 25mm;
-        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
     }
 
     .invoice-header {
@@ -53,6 +52,11 @@
 
     .text-right {
         text-align: right;
+    }
+
+    .address-section {
+        display: flex;
+        justify-content: space-between;
     }
 
     .summary {
@@ -108,7 +112,8 @@
                 123 Business Street <br>
                 City, State, 670001 <br>
                 Email: support@watchnest.com <br>
-                Phone: +91 9876543210
+                Phone: +91 9876543210 <br>
+                GSTIN: 22AAAAA0000A1Z5
             </p>
         </div>
 
@@ -116,22 +121,44 @@
             <h3>INVOICE</h3>
             <p>
                 <strong>Invoice No:</strong> INV-<%= order.orderId %><br>
-                <strong>Order ID:</strong> <%= order.orderId %><br>
-                <strong>Date:</strong> <%= new Date(order.createdAt).toLocaleDateString() %><br>
-                <strong>Status:</strong> <%= order.status.toUpperCase() %>
+                    <strong>Order ID:</strong>
+                    <%= order.orderId %><br>
+                        <strong>Date:</strong>
+                        <%= new Date(order.createdAt).toLocaleDateString() %><br>
+                            <strong>Status:</strong>
+                            <%= order.status.toUpperCase() %>
             </p>
         </div>
     </div>
 
-    <!-- SHIPPING ADDRESS -->
-    <div class="section-title">Shipping Address</div>
-    <p>
-        <strong><%= order.shippingAddress.fullName %></strong><br>
-        <%= order.shippingAddress.street %><br>
-        <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %><br>
-        Pin: <%= order.shippingAddress.pincode %><br>
-        Phone: <%= order.shippingAddress.phone %>
-    </p>
+    <!-- ADDRESSES -->
+    <div class="address-section">
+        <div>
+            <div class="section-title">Billing Address</div>
+            <p>
+                <strong>
+                    <%= order.shippingAddress.fullName %>
+                </strong><br>
+                <%= order.shippingAddress.street %><br>
+                    <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %><br>
+                            Pin: <%= order.shippingAddress.pincode %><br>
+                                Phone: <%= order.shippingAddress.phone %>
+            </p>
+        </div>
+
+        <div>
+            <div class="section-title">Shipping Address</div>
+            <p>
+                <strong>
+                    <%= order.shippingAddress.fullName %>
+                </strong><br>
+                <%= order.shippingAddress.street %><br>
+                    <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %><br>
+                            Pin: <%= order.shippingAddress.pincode %><br>
+                                Phone: <%= order.shippingAddress.phone %>
+            </p>
+        </div>
+    </div>
 
     <!-- PRODUCT TABLE -->
     <div class="section-title">Order Details</div>
@@ -141,23 +168,45 @@
             <tr>
                 <th>Product</th>
                 <th class="text-right">Price</th>
-                <th class="text-right">Quantity</th>
+                <th class="text-right">Discount</th>
+                <th class="text-right">Final Price</th>
+                <th class="text-right">Qty</th>
                 <th class="text-right">Total</th>
             </tr>
         </thead>
         <tbody>
-            <% let subtotal = 0; %>
-            <% orderItems.forEach(item => { 
-                let total = item.price * item.quantity;
-                subtotal += total;
-            %>
-                <tr>
-                    <td><%= item.productName %></td>
-                    <td class="text-right">₹<%= item.price %></td>
-                    <td class="text-right"><%= item.quantity %></td>
-                    <td class="text-right">₹<%= total %></td>
-                </tr>
-            <% }) %>
+            <% let subtotal=0; let refundAmount=0; %>
+
+                <% orderItems.forEach(item=> {
+                    let total = item.finalPrice * item.quantity;
+                    subtotal += total;
+
+                    if (
+                    (item.status === "cancelled" || item.status === "returned") &&
+                    order.paymentStatus === "paid"
+                    ) {
+                    refundAmount += total;
+                    }
+                    %>
+
+                    <tr>
+                        <td>
+                            <%= item.productName %>
+                        </td>
+                        <td class="text-right">₹<%= item.price %>
+                        </td>
+                        <td class="text-right">₹<%= item.offerDiscount %>
+                        </td>
+                        <td class="text-right">₹<%= item.finalPrice %>
+                        </td>
+                        <td class="text-right">
+                            <%= item.quantity %>
+                        </td>
+                        <td class="text-right">₹<%= total %>
+                        </td>
+                    </tr>
+
+                    <% }) %>
         </tbody>
     </table>
 
@@ -166,18 +215,50 @@
         <table>
             <tr>
                 <td>Subtotal</td>
-                <td class="text-right">₹<%= subtotal %></td>
+                <td class="text-right">₹<%= subtotal %>
+                </td>
             </tr>
             <tr>
                 <td>Discount</td>
-                <td class="text-right">₹<%= order.discount || 0 %></td>
+                <td class="text-right">₹<%= order.couponDiscount || 0 %>
+                </td>
             </tr>
-            <tr class="total-row">
-                <td>Total</td>
-                <td class="text-right">₹<%= order.totalAmount %></td>
+            <tr>
+                <td>Tax (GST 18%)</td>
+                <td class="text-right">₹<%= order.taxAmount || 0 %>
+                </td>
             </tr>
+
+            <% if(refundAmount> 0) { %>
+                <tr>
+                    <td>Refund Amount</td>
+                    <td class="text-right">₹<%= refundAmount %>
+                    </td>
+                </tr>
+                <% } %>
+                    <tr>
+                        <td>Shipping</td>
+                        <td class="text-right">₹<%= order.shippingCharge || 0 %>
+                        </td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>Grand Total</td>
+                        <td class="text-right">₹<%= order.totalAmount %>
+                        </td>
+                    </tr>
         </table>
     </div>
+
+    <!-- PAYMENT INFO -->
+    <div class="section-title">Payment Details</div>
+    <p>
+        <strong>Method:</strong>
+        <%= order.paymentMethod %><br>
+            <strong>Status:</strong>
+            <%= order.paymentStatus %><br>
+                <strong>Transaction ID:</strong>
+                <%= order.paymentId || "N/A" %>
+    </p>
 
     <!-- FOOTER -->
     <div class="footer-note">
@@ -193,4 +274,3 @@
     </div>
 
 </div>
-

@@ -85,7 +85,8 @@
 
                                 <!-- Discount Type -->
                                 <div class="form-group">
-                                    <label>Discount Type</label>
+                                    <input type="hidden" id="discountType" name="discountType" value="percentage">
+                                    <!-- <label>Discount Type</label>
                                     <select id="discountType" name="discountType">
                                         <option value="">Select Discount Type</option>
                                         <option value="percentage" <%=offer.discountType==="percentage" ? "selected"
@@ -95,7 +96,7 @@
                                         <option value="flat" <%=offer.discountType==="flat" ? "selected" : "" %>>
                                             Flat Amount
                                         </option>
-                                    </select>
+                                    </select> -->
                                     <small class="error" id="discountTypeError"></small>
                                 </div>
 

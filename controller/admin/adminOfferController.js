@@ -11,7 +11,7 @@ const offerValidationSchema = z.object({
         errorMap: () => ({ message: "Invalid offer type" })
     }),
 
-    discountType: z.enum(["percentage", "flat"]),
+    discountType: z.enum(["percentage",]),
 
     discountValue: z.number().min(1, "Discount must be at least 1"),
 
@@ -220,6 +220,8 @@ const updateOffer = async (req, res) => {
     try {
         const { _id, name, type, productId, categoryId, discountType, discountValue, startDate, endDate } = req.body;
 
+        console.log("category", categoryId);
+        
         const parsedData = {
             ...req.body,
             discountValue: Number(req.body.discountValue),
@@ -255,7 +257,15 @@ const updateOffer = async (req, res) => {
             return res.redirect(`/admin/offers/editOffer/${_id}`);
         }
 
-        const upadateOffer = await Offer.findByIdAndUpdate(_id, { name, type, productId, categoryId, discountType, discountValue, startDate, endDate });
+        const upadateOffer = await Offer.findByIdAndUpdate(_id, { 
+            name, 
+            type, 
+            product_id: productId, 
+            category_id: categoryId, 
+            discountType, 
+            discountValue, 
+            startDate, 
+            endDate });
 
         if (!upadateOffer) {
             req.session.message = "Offer not updated, Please try again.";

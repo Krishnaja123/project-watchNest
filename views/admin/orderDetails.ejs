@@ -69,6 +69,25 @@
                                         </span>
                                     </div>
 
+                                    <% if(order.offerDiscount) { %>
+                                        <div class="col-md-2">
+                                            <small class="text-muted">OFFER DISCOUNT</small><br>
+                                            <strong>
+                                                <%= order.offerDiscount %>
+                                            </strong>
+                                        </div>
+                                        <% } %>
+
+                                            <% if(order.couponDiscount) { %>
+                                                <div class="col-md-2">
+                                                    <small class="text-muted">COUPON DISCOUNT</small><br>
+                                                    <strong>
+                                                        <%= order.couponDiscount %>
+                                                    </strong>
+                                                </div>
+                                                <% } %>
+
+
                                 </div>
 
                             </div>
@@ -143,7 +162,12 @@
                                                         <%= item.productName %>
                                                     </strong><br>
                                                     Quantity: <%= item.quantity %><br>
-                                                        Price: ₹<%= item.price %>
+                                                        Original Price:
+                                                         ₹<%= item.price %> <br>
+                                                    Offer Price: 
+                                                    <strong>₹<%= item.finalPrice %></strong><br>
+<strong>Total: <%= item.quantity * item.finalPrice %></strong>
+
                                                 </div>
 
                                                 <div class="col-md-2">
@@ -317,22 +341,22 @@
                             denyButtonColor: "#dc3545"
                         }).then((result) => {
 
-                                if (result.isConfirmed || result.isDenied) {
+                            if (result.isConfirmed || result.isDenied) {
 
-                                    const form = document.createElement("form");
-                                    form.method = "POST";
-                                    form.action = `/admin/order-item-return/${itemId}`;
+                                const form = document.createElement("form");
+                                form.method = "POST";
+                                form.action = `/admin/order-item-return/${itemId}`;
 
-                                    const actionInput = document.createElement("input");
-                                    actionInput.type = "hidden";
-                                    actionInput.name = "action";
-                                    actionInput.value = result.isConfirmed ? "acceptReturn" : "rejectReturn";
+                                const actionInput = document.createElement("input");
+                                actionInput.type = "hidden";
+                                actionInput.name = "action";
+                                actionInput.value = result.isConfirmed ? "acceptReturn" : "rejectReturn";
 
-                                    form.appendChild(actionInput);
+                                form.appendChild(actionInput);
 
-                                    document.body.appendChild(form);
-                                    form.submit();
-                                }
+                                document.body.appendChild(form);
+                                form.submit();
+                            }
 
                         });
                     })

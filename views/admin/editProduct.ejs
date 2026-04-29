@@ -851,64 +851,130 @@
             });
 
 
+            // form.addEventListener("submit", async function (e) {
+            //     e.preventDefault();
+            //     try {
+
+            //         if (!validateForm()) {
+            //             return;
+            //         }
+
+            //         const id = "<%= product._id %>";
+
+            //         const formData = new FormData(form);
+
+            //         Object.keys(originalImages).forEach(variantIndex => {
+            //             originalImages[variantIndex].forEach(file => {
+            //                 formData.append(
+            //                     `variants[${variantIndex - 1}][original_images][]`,
+            //                     file
+            //                 );
+            //             });
+            //         });
+
+            //         const response = await fetch(`/admin/editProduct/${id}`, {
+            //             method: "POST",
+            //             body: formData
+            //         });
+            //         console.log(response);
+
+            //         if (!response.ok) {
+            //             throw new Error("Network response was not ok");
+            //         }
+            //         const data = await response.json();
+            //         // console.log("Upload success: ", data);
+
+            //         if (data.success) {
+            //             Swal.fire({
+            //                 icon: data.type || "success",
+            //                 text: data.message || "Product updated successfully!",
+            //                 confirmButtonColor: '#007bff',
+            //                 timer: 2000,
+            //                 timerProgressBar: true,
+            //                 showConfirmButton: false
+            //             }).then(() => {
+            //                 // Redirect only after alert closes
+            //                 window.location.href = `/admin/products?page=${currentPage}`;
+            //             });
+            //         } else {
+            //             Swal.fire({
+            //                 icon: data.type || "error",
+            //                 text: data.message || "Something went wrong",
+            //                 confirmButtonColor: '#007bff'
+            //             });
+            //         }
+
+            //     } catch (error) {
+            //         console.error("Form submit error:", error);
+            //     }
+            // })
+
             form.addEventListener("submit", async function (e) {
-                e.preventDefault();
-                try {
+    e.preventDefault();
 
-                    if (!validateForm()) {
-                        return;
-                    }
+    try {
+        if (!validateForm()) return;
 
-                    const id = "<%= product._id %>";
+        const id = "<%= product._id %>";
 
-                    const formData = new FormData(form);
+        /* ✅ STEP 1: FIX VARIANT INDEXING (IMPORTANT FIX) */
+        const variants = document.querySelectorAll(".variant");
 
-                    Object.keys(originalImages).forEach(variantIndex => {
-                        originalImages[variantIndex].forEach(file => {
-                            formData.append(
-                                `variants[${variantIndex - 1}][original_images][]`,
-                                file
-                            );
-                        });
-                    });
-
-                    const response = await fetch(`/admin/editProduct/${id}`, {
-                        method: "POST",
-                        body: formData
-                    });
-                    console.log(response);
-
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok");
-                    }
-                    const data = await response.json();
-                    // console.log("Upload success: ", data);
-
-                    if (data.success) {
-                        Swal.fire({
-                            icon: data.type || "success",
-                            text: data.message || "Product updated successfully!",
-                            confirmButtonColor: '#007bff',
-                            timer: 2000,
-                            timerProgressBar: true,
-                            showConfirmButton: false
-                        }).then(() => {
-                            // Redirect only after alert closes
-                            window.location.href = `/admin/products?page=${currentPage}`;
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: data.type || "error",
-                            text: data.message || "Something went wrong",
-                            confirmButtonColor: '#007bff'
-                        });
-                    }
-
-                } catch (error) {
-                    console.error("Form submit error:", error);
+        variants.forEach((variant, index) => {
+            variant.querySelectorAll("input, select, textarea").forEach(input => {
+                if (input.name) {
+                    input.name = input.name.replace(
+                        /variants\[\d+\]/,
+                        `variants[${index}]`
+                    );
                 }
-            })
+            });
+        });
 
+        /* ✅ STEP 2: CREATE FORM DATA AFTER FIX */
+        const formData = new FormData(form);
+
+        /* (optional) add original images */
+        Object.keys(originalImages).forEach(variantIndex => {
+            originalImages[variantIndex].forEach(file => {
+                formData.append(
+                    `variants[${variantIndex - 1}][original_images][]`,
+                    file
+                );
+            });
+        });
+
+        /* ✅ STEP 3: SEND REQUEST */
+        const response = await fetch(`/admin/editProduct/${id}`, {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            Swal.fire({
+                icon: data.type || "success",
+                text: data.message || "Product updated successfully!",
+                confirmButtonColor: '#007bff',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = `/admin/products?page=<%= page %>`;
+            });
+        } else {
+            Swal.fire({
+                icon: data.type || "error",
+                text: data.message || "Something went wrong",
+                confirmButtonColor: '#007bff'
+            });
+        }
+
+    } catch (error) {
+        console.error("Form submit error:", error);
+    }
+});
         })
 
 

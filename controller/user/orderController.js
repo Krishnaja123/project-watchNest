@@ -32,7 +32,6 @@ const createOrder = async (req, res) => {
             selectedAddressId,
             paymentMethod,
             paymentStatus,
-            discount,
             couponCode
         );
 
@@ -183,7 +182,14 @@ const getOrderInvoice = async (req, res) => {
             req.session.type = "error";
             return res.redirect("/orders");
         };
-        const orderItems = await OrderItem.find({ order_id: orderId });
+        // const orderItems = await OrderItem.find({ order_id: orderId,  });
+
+        const orderItems = await OrderItem.find({
+            order_id: orderId,
+            status: { $in: ["delivered", "cancelled", "returned"] },
+            paymentStatus: "paid"
+        });
+
         return res.render("user/orderInvoice", {
             order,
             orderItems,

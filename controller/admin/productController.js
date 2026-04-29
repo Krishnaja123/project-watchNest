@@ -300,6 +300,9 @@ const updateProduct = async (req, res) => {
 
         let { name, category, brand, descrip, variants } = req.body;
 
+        console.log("variants.stock: ", variants[0].stock);
+        
+
         if (!name || !brand || !category) {
             return res.json({ type: "error", message: "Please fill all the mandatory fields" });
         }
@@ -391,6 +394,8 @@ const updateProduct = async (req, res) => {
                 originalUrls.push(url);
             }
             console.log("variants: ", variant);
+            console.log(" stock :", variant.stock);
+
             updatedVariants.push({
                 _id: variant._id
                     ? new mongoose.Types.ObjectId(variant._id)
@@ -398,7 +403,9 @@ const updateProduct = async (req, res) => {
                 strap_color: variant.strap_color,
                 dial_color: variant.dial_color,
                 price: variant.price,
-                stock: variant.stock,
+                stock: variant.stock !== undefined
+                    ? Number(variant.stock)
+                    : existingVariant?.stock || 0,
                 images: [...existing_cropped, ...croppedUrls],
                 original_images: [...existing_original, ...originalUrls]
             })

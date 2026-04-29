@@ -12,12 +12,12 @@ const { ModifiedPathsSnapshot } = require("mongoose");
 const { getOffer } = require("../services/offerService");
 
 
-const createOrderService = async (userId, selectedAddressId, paymentMethod, paymentStatus, offerDiscount = 0, couponCode = null) => {
+const createOrderService = async (userId, selectedAddressId, paymentMethod, paymentStatus, couponCode = null) => {
     console.log("get in to service");
+console.log("couponcode", couponCode);
 
     const address = await Address.findById(selectedAddressId);
     console.log("address: ", address);
-
 
     if (!address) {
         throw new Error("Please select or add a shipping address");
@@ -90,23 +90,41 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
     }
 
     let couponDiscount = 0;
-    if (couponCode) {
-        const coupon = await Coupon.findOne({ code: couponCode });
 
-        if (!coupon) {
-            throw new Error("Invalid coupon");
-        }
-        if (coupon.discountType === "percentage") {
-            const discount = Math.round((totalAfterOffer * coupon.discountValue) / 100);
-            couponDiscount = Math.min(discount, coupon.maxDiscount);
-        } else {
-            couponDiscount = coupon.discountValue;
+    if (couponCode) {
+
+        const code = String(couponCode).trim().toUpperCase();
+
+        if (code !== "") {
+
+            const coupon = await Coupon.findOne({ code });
+
+            if (!coupon) {
+                throw new Error("Invalid coupon");
+            }
+
+            const now = new Date();
+
+            if (coupon.expiryDate && coupon.expiryDate < now) {
+                throw new Error("Coupon expired");
+            }
+
+            if (coupon.isActive === false) {
+                throw new Error("Coupon not active");
+            }
+
+            if (coupon.discountType === "percentage") {
+                const discount = Math.round((totalAfterOffer * coupon.discountValue) / 100);
+                couponDiscount = Math.min(discount, coupon.maxDiscount);
+            } else {
+                couponDiscount = coupon.discountValue;
+            }
         }
     }
 
     const tax = Math.round(totalAfterOffer * 0.05);
     const shippingCharge = 50;
-    const finalAmount = totalAfterOffer - couponDiscount + tax + shippingCharge;
+    const finalAmount = Math.round(totalAfterOffer - couponDiscount + tax + shippingCharge);
 
     let wallet = null;
 
@@ -140,6 +158,8 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
 
     console.log("newOrder: ", newOrder);
 
+    const createdOrderItems = [];
+
     for (const item of orderItems) {
 
         let couponShare = 0;
@@ -149,10 +169,9 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
                 (item.priceAfterOffer / totalAfterOffer) * couponDiscount
             );
         }
-
         const finalPrice = Math.round(item.priceAfterOffer - couponShare);
 
-        await OrderItem.create({
+        const orderItem = await OrderItem.create({
             order_id: newOrder._id,
             product_id: item.product_id,
             productName: item.productName,
@@ -163,8 +182,10 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
             subtotal: item.subtotal,
             offerDiscount: item.offerDiscount,
             couponDiscount: couponShare,
-            finalPrice
+            finalPrice,
+            paymentStatus
         });
+        createdOrderItems.push(orderItem);
     }
 
     if (paymentMethod === "wallet") {
@@ -178,7 +199,11 @@ const createOrderService = async (userId, selectedAddressId, paymentMethod, paym
             await item.product_id.save();
         }
         newOrder.paymentStatus = "paid";
-        newOrder.save();
+        await newOrder.save();
+        for (const item of createdOrderItems) {
+            item.paymentStatus = "paid";
+            await item.save();
+        }
     }
 
     cart.is_active = false;

@@ -37,83 +37,6 @@ const getHomePage = async (req, res) => {
         });
         const today = new Date();
 
-        // const showData = await Promise.all(products.map(async (product) => {
-
-        //     const viewedProducts = product.variants.filter(
-        //         v => v.view === true && v.stock > 0
-        //     );
-
-        //     const firstVariant = viewedProducts?.[0];
-        //     if (!firstVariant) return null;
-
-        //     const price = Number(firstVariant.price);
-
-        //     //  Get valid offers only
-        //     const offers = await Offer.find({
-        //         is_delete: false,
-        //         startDate: { $lte: today },
-        //         endDate: { $gte: today }
-        //     });
-
-        //     let bestDiscount = 0;
-
-        //     offers.forEach(data => {
-        //         let isApplicable = false;
-
-        //         if (
-        //             data.offerType === "product" &&
-        //             data.product_id.includes(product._id)
-        //         ) {
-        //             isApplicable = true;
-        //         }
-
-        //         if (
-        //             data.offerType === "category" &&
-        //             data.category_id.includes(product.cat_id)
-        //         ) {
-        //             isApplicable = true;
-        //         }
-
-        //         if (isApplicable) {
-        //             let discount = 0;
-
-        //             if (data.discountType === "percentage") {
-        //                 discount = (price * data.discountValue) / 100;
-        //             } else {
-        //                 discount = data.discountValue;
-        //             }
-
-        //             if (discount > bestDiscount) {
-        //                 bestDiscount = discount;
-        //             }
-        //         }
-        //     });
-
-        //     //  include variant offer also
-        //     // if (firstVariant.offer) {
-        //     //     const variantOffer = Number(firstVariant.offer);
-        //     //     if (variantOffer > bestDiscount) {
-        //     //         bestDiscount = variantOffer;
-        //     //     }
-        //     // }
-
-        //     const finalPrice = price - bestDiscount;
-
-        //     return {
-        //         productId: product._id,
-        //         name: product.name,
-        //         brand: product.brand_id?.name,
-        //         price: price,
-        //         finalPrice: finalPrice,
-        //         discount: bestDiscount,
-        //         image: firstVariant?.images?.[0],
-        //         variantId: firstVariant?._id
-        //     };
-        // }));
-
-        // remove nulls
-        //const filteredData = showData.filter(p => p !== null);
-
         const showData = await Promise.all(products.map(async (product) => {
 
             const viewedProducts = product.variants.filter(
@@ -125,7 +48,6 @@ const getHomePage = async (req, res) => {
 
             const price = Number(firstVariant.price);
 
-            // 👇 use service here
             const bestDiscount = await getOffer(product, price);
 
             const finalPrice = price - bestDiscount;
@@ -253,14 +175,32 @@ const getProductDetails = async (req, res) => {
             });
         }
 
-        let defaultVariant = viewedVariants.find(
+ const today = new Date();
+
+const updatedVariants = await Promise.all(
+    viewedVariants.map(async (variant) => {
+
+        const price = Number(variant.price);
+
+        const bestDiscount = await getOffer(product, price);
+
+        return {
+            ...variant.toObject(),
+            price,
+            discountAmount: bestDiscount,
+            finalPrice: price - bestDiscount
+        };
+    })
+);
+
+        let defaultVariant = updatedVariants.find(
             v => v._id.toString() === variantId
         );
 
         console.log("default variant: ", defaultVariant)
 
         if (!defaultVariant) {
-            defaultVariant = viewedVariants[0];
+            defaultVariant = updatedVariants[0];
         }
 
         const isOutOfStock = defaultVariant.stock <= 0;
@@ -286,14 +226,21 @@ const getProductDetails = async (req, res) => {
 
         console.log("similar products: ", similarProducts);
 
+            const bestDiscount = await getOffer(product, price);
+
+            const finalPrice = price - bestDiscount;
+
         res.render('user/productDetails', {
             product,
             defaultVariant,
-            viewedVariants,
+            viewedVariants: updatedVariants,
+updatedVariants: updatedVariants,
             images: defaultVariant.images,
             title: "Shop",
             similarProducts,
             hideNavBar: false,
+            // discount: bestDiscount,
+            // finalPrice
         })
     } catch (error) {
         console.log(error);
