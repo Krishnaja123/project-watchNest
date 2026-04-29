@@ -183,6 +183,22 @@
                                                     Price: ₹<%= item.finalPrice %> <br>
                                             </a>
                                         </div>
+
+                                        <div class="d-flex align-items-center gap-3">
+
+                                            <!-- STATUS -->
+                                            <span class="badge 
+            <%= item.status === 'processing' ? 'bg-warning text-dark' :
+                item.status === 'shipped' ? 'bg-primary' :
+                item.status === 'delivered' ? 'bg-success' :
+                item.status === 'cancelled' ? 'bg-danger' :
+                item.status === 'returned' ? 'bg-dark' :
+                'bg-secondary' %>">
+                                                <%= item.status %>
+                                            </span>
+
+
+                                        </div>
                                     </div>
                                 </div>
 
@@ -211,38 +227,38 @@
                                 </div>
                                 <% } %>
 
-                            <% if(order.couponDiscount> 0) { %>
-                                <div class="d-flex justify-content-between text-success">
-                                    <span>Coupon Discount (<%= order.couponCode %>)</span>
-                                    <span>- ₹<%= order.couponDiscount.toFixed(2) %></span>
-                                </div>
-                                <% } %>
-
-                                    <% if(order.shippingCharge> 0) { %>
-                                        <div class="d-flex justify-content-between">
-                                            <span>Shipping Charge</span>
-                                            <span>₹<%= order.shippingCharge.toFixed(2) %></span>
+                                    <% if(order.couponDiscount> 0) { %>
+                                        <div class="d-flex justify-content-between text-success">
+                                            <span>Coupon Discount (<%= order.couponCode %>)</span>
+                                            <span>- ₹<%= order.couponDiscount.toFixed(2) %></span>
                                         </div>
-                                        <% } else { %>
-                                            <div class="d-flex justify-content-between text-success">
-                                                <span>Shipping</span>
-                                                <span>FREE</span>
-                                            </div>
-                                            <% } %>
+                                        <% } %>
 
-                                                <% if(order.taxAmount> 0) { %>
-                                                    <div class="d-flex justify-content-between">
-                                                        <span>Tax (GST)</span>
-                                                        <span>₹<%= order.taxAmount.toFixed(2) %></span>
+                                            <% if(order.shippingCharge> 0) { %>
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Shipping Charge</span>
+                                                    <span>₹<%= order.shippingCharge.toFixed(2) %></span>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="d-flex justify-content-between text-success">
+                                                        <span>Shipping</span>
+                                                        <span>FREE</span>
                                                     </div>
                                                     <% } %>
 
-                                                        <hr>
+                                                        <% if(order.taxAmount> 0) { %>
+                                                            <div class="d-flex justify-content-between">
+                                                                <span>Tax (GST)</span>
+                                                                <span>₹<%= order.taxAmount.toFixed(2) %></span>
+                                                            </div>
+                                                            <% } %>
 
-                                                        <div class="d-flex justify-content-between fw-bold">
-                                                            <span>Total Amount</span>
-                                                            <span>₹<%= order.totalAmount %></span>
-                                                        </div>
+                                                                <hr>
+
+                                                                <div class="d-flex justify-content-between fw-bold">
+                                                                    <span>Total Amount</span>
+                                                                    <span>₹<%= order.totalAmount %></span>
+                                                                </div>
 
                         </div>
                     </div>
