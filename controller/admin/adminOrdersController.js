@@ -54,7 +54,7 @@ const fetchOrders = async (req, res) => {
         let orders = await Order.find({
             orderId: { $regex: search, $options: "i" },
         }).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
-  
+
         // let orders = await Order.find({
         //     orderId: { $regex: search, $options: "i"},
         //     status: "delivered",
@@ -145,7 +145,8 @@ const updateProductStatus = async (req, res) => {
             return res.status(404).json({ error: "Item not found" });
         }
 
-        if(item.paymentStatus === "failed"){
+        const order = await Order.findById(item.order_id);
+        if (order.paymentStatus === "failed") {
             if (status !== "cancelled") {
                 req.session.message = `Cannot change the status to shipped because the payment failed. Only cancellation is allowed.`;
                 req.session.type = "error";
@@ -162,7 +163,21 @@ const updateProductStatus = async (req, res) => {
                 const variant = product?.variants?.id(item.variant_id);
                 variant.stock += item.quantity;
                 await product.save();
-                
+                if(order.paymentStatus === "paid") {
+                //const discountRatio = order.couponDiscount / order.originalAmount;
+                // const taxRatio = (itemTotal / orderSubTotal) * (order.tax || 0);
+                const itemTotal = item.finalPrice * item.quantity;
+                // const itemDiscount = itemTotal * discountRatio;
+                const tax = item.finalPrice * 0.05;
+                const refundAmount = itemTotal - item.couponDiscount + tax;
+
+                console.log("refund: ", refundAmount);
+
+                const userId = req.user._id;
+                await creditWallet(userId, refundAmount, `Refund for returned product`);
+                order.refundAmount = (order.refundAmount || 0) + refundAmount;
+                await order.save();
+                }
             }
 
         } else if (item.status === "shipped") {
@@ -204,17 +219,18 @@ const updateProductStatus = async (req, res) => {
                 await product.save();
 
                 const order = await Order.findOne({ _id: item.order_id });
-                const discountRatio = order.couponDiscount / order.originalAmount;
-                const itemTotal = item.price * item.quantity;
-                const itemDiscount = itemTotal * discountRatio;
-                const refundAmount = itemTotal - itemDiscount;
+                // const discountRatio = order.couponDiscount / order.originalAmount;
+                const itemTotal = item.finalPrice * item.quantity;
+                // const itemDiscount = itemTotal * discountRatio;
+                const tax = item.finalPrice * 0.05
+                const refundAmount = itemTotal - item.couponDiscount + tax;
 
                 console.log("refund: ", refundAmount);
 
                 const userId = req.user._id;
                 await creditWallet(userId, refundAmount, `Refund for returned product`);
                 order.refundAmount = (order.refundAmount || 0) + refundAmount;
-await order.save();
+                await order.save();
             } else {
                 req.session.message = `can not change the product status to ${status} until you accept the return request from user.`
                 req.session.type = "error";

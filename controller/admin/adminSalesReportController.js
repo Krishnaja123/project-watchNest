@@ -117,15 +117,17 @@ const getSalesReportData = async (req, res) => {
             totalRevenue: 0,
             totalOfferDiscount: 0,
             totalCouponDiscount: 0,
+            totalRefund: 0
         };
 
         for (const order of allOrders) {
             summary.totalOrders++;
             summary.totalRevenue += order.totalAmount || 0;
-            summary.totalOfferDiscount += order.offerDiscount || 0; // may be 0 if not stored
+            summary.totalOfferDiscount += order.offerDiscount || 0; 
             summary.totalCouponDiscount += order.couponDiscount || 0;
+            summary.totalRefund += order.refundAmount || 0;
         }
-
+console.log("totalRevenue: ", summary.totalRevenue);
         const orderReport = orders.map(order => {
             return {
                 orderId: order.orderId,
@@ -163,8 +165,6 @@ const exportSalesExcel = async (req, res) => {
         const totalSalesAmount = orders.reduce((sum, order) => {
             return sum + (
                 (order.totalAmount || 0)
-                - (order.couponDiscount || 0)
-                - (order.offerDiscount || 0)
             );
         }, 0);
 
@@ -250,8 +250,7 @@ const exportSalesPDF = async (req, res) => {
         const totalSalesAmount = orders.reduce((sum, order) => {
             return sum + (
                 (order.totalAmount || 0)
-                - (order.couponDiscount || 0)
-                - (order.offerDiscount || 0)
+                
             );
         }, 0);
 

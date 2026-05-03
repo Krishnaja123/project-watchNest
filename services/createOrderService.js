@@ -14,7 +14,7 @@ const { getOffer } = require("../services/offerService");
 
 const createOrderService = async (userId, selectedAddressId, paymentMethod, paymentStatus, couponCode = null) => {
     console.log("get in to service");
-console.log("couponcode", couponCode);
+    console.log("couponcode", couponCode);
 
     const address = await Address.findById(selectedAddressId);
     console.log("address: ", address);
@@ -59,12 +59,6 @@ console.log("couponcode", couponCode);
 
         }
 
-        // const subtotal = variant.price * item.quantity;
-
-        // const itemOfferDiscount = 0;
-
-        // const priceAfterOffer = subtotal - itemOfferDiscount;
-
         const product = item.product_id;
         const bestDiscount = await getOffer(product, variant.price);
         const finalUnitPrice = variant.price - bestDiscount;
@@ -89,6 +83,11 @@ console.log("couponcode", couponCode);
         });
     }
 
+    const COD_LIMIT = 2000;
+
+    if (paymentMethod === "cod" && totalAfterOffer > COD_LIMIT) {
+        throw new Error(`COD not allowed for orders above ${COD_LIMIT}`);
+    }
     let couponDiscount = 0;
 
     if (couponCode) {
@@ -156,6 +155,7 @@ console.log("couponcode", couponCode);
         offerDiscount: totalOfferAmount
     });
 
+
     console.log("newOrder: ", newOrder);
 
     const createdOrderItems = [];
@@ -165,11 +165,10 @@ console.log("couponcode", couponCode);
         let couponShare = 0;
 
         if (totalAfterOffer > 0) {
-            couponShare = Math.round(
-                (item.priceAfterOffer / totalAfterOffer) * couponDiscount
-            );
+            const ratio = item.priceAfterOffer / totalAfterOffer;
+            couponShare = Number((ratio * couponDiscount).toFixed(2));
         }
-        const finalPrice = Math.round(item.priceAfterOffer - couponShare);
+        const finalPrice = Number((item.priceAfterOffer - couponShare).toFixed(2));
 
         const orderItem = await OrderItem.create({
             order_id: newOrder._id,

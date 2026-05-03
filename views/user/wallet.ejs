@@ -85,11 +85,11 @@
                                                     <td>
                                                         <% if (txn.type==='credit' ) { %>
                                                             <span class="text-success fw-semibold">
-                                                                + ₹<%= txn.amount %>
+                                                                + ₹<%= (txn.amount).toFixed(2) %>
                                                             </span>
                                                             <% } else { %>
                                                                 <span class="text-danger fw-semibold">
-                                                                    - ₹<%= txn.amount %>
+                                                                    - ₹<%= (txn.amount).toFixed(2) %>
                                                                 </span>
                                                                 <% } %>
                                                     </td>

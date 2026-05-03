@@ -1,0 +1,178 @@
+<%- include("../partials/admin/header") %>
+
+<head>
+    <link rel="stylesheet" href="/css/admin/sidebar.css">
+    <link rel="stylesheet" href="/css/admin/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .dashboard-container {
+            padding: 20px;
+        }
+
+        .filters {
+            margin-bottom: 20px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .tables {
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<div class="dashboard-container">
+
+    <!-- FILTER -->
+    <div class="filters">
+        <form method="GET" action="/admin/dashboard">
+            <select name="filter">
+                <option value="daily">Daily</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+            </select>
+            <button type="submit">Apply</button>
+        </form>
+    </div>
+
+    <!-- CHART -->
+    <div class="card">
+        <canvas id="salesChart"></canvas>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="cards">
+        <div class="card">Total Sales: ₹ <%= totalSales %></div>
+        <div class="card">Total Orders: <%= totalOrders %></div>
+        <div class="card">Total Users: <%= totalUsers %></div>
+        <div class="card">Total Revenue: ₹ <%= totalRevenue %></div>
+    </div>
+
+    <!-- TABLES -->
+    <div class="tables">
+
+        <!-- BEST PRODUCTS -->
+        <h3>Top 10 Best Selling Products</h3>
+        <table>
+            <tr>
+                <th>Product</th>
+                <th>Quantity Sold</th>
+            </tr>
+            <% bestProducts.forEach(product => { %>
+                <tr>
+                    <td><%= product.name %></td>
+                    <td><%= product.totalSold %></td>
+                </tr>
+            <% }) %>
+        </table>
+
+        <!-- BEST CATEGORIES -->
+        <h3>Top 10 Categories</h3>
+        <table>
+            <tr>
+                <th>Category</th>
+                <th>Sales</th>
+            </tr>
+            <% bestCategories.forEach(cat => { %>
+                <tr>
+                    <td><%= cat.name %></td>
+                    <td><%= cat.totalSold %></td>
+                </tr>
+            <% }) %>
+        </table>
+
+        <!-- BEST BRANDS -->
+        <h3>Top 10 Brands</h3>
+        <table>
+            <tr>
+                <th>Brand</th>
+                <th>Sales</th>
+            </tr>
+            <% bestBrands.forEach(brand => { %>
+                <tr>
+                    <td><%= brand.name %></td>
+                    <td><%= brand.totalSold %></td>
+                </tr>
+            <% }) %>
+        </table>
+
+        <!-- LEDGER (OPTIONAL) -->
+        <h3>Ledger Book</h3>
+        <table>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Credit</th>
+                <th>Debit</th>
+            </tr>
+            <% if(ledger && ledger.length){ %>
+                <% ledger.forEach(entry => { %>
+                    <tr>
+                        <td><%= entry.date %></td>
+                        <td><%= entry.description %></td>
+                        <td><%= entry.credit %></td>
+                        <td><%= entry.debit %></td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="4">No ledger data available</td>
+                </tr>
+            <% } %>
+        </table>
+
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    const salesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: <%- JSON.stringify(chartLabels) %>,
+            datasets: [{
+                label: 'Sales',
+                data: <%- JSON.stringify(chartData) %>,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+<%- include("../partials/admin/footer") %>

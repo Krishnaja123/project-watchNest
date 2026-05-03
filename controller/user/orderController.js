@@ -238,18 +238,22 @@ const cancelProduct = async (req, res) => {
         if (order.paymentMethod !== "COD" && order.paymentStatus === "paid") {
             const userId = req.user._id;
 
-            const discountRatio = order.couponDiscount / order.originalAmount;
+            // const discountRatio = order.couponDiscount / order.originalAmount;
 
             const itemTotal = item.finalPrice * item.quantity;
-            const itemDiscount = itemTotal * discountRatio;
-
-            const refundAmount = itemTotal - itemDiscount;
+            console.log(item.finalPrice);
+            
+            // const itemDiscount = itemTotal * discountRatio;
+            const tax = item.finalPrice * 0.05
+            const refundAmount = itemTotal - item.couponDiscount + tax;
 
             console.log("refund: ", refundAmount);
 
             // const amount = item.price * item.quantity;
             await creditWallet(userId, refundAmount, `Refund for cancelled product`);
 
+            order.refundAmount = (order.refundAmount || 0) + refundAmount;
+                await order.save();
 
             console.log("hi");
 

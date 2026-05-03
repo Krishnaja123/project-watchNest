@@ -47,7 +47,7 @@ originalAmount: {
     required: true
 },
 
-refundAmont: {
+refundAmount: {
     type: Number,
     required: true,
     default: 0
