@@ -179,7 +179,7 @@ const fetchProducts = async (req, res) => {
         let products = await Product.find(query)
             .populate("cat_id", "name")
             .populate("brand_id", "name")
-            .sort({ name: 1 })
+            .sort({ created_at: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
 
