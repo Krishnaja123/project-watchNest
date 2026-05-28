@@ -131,8 +131,30 @@
 
       function validateUsername() {
         const username = usernameInput.value.trim();
-        if (username.length < 3) { usernameError.textContent = 'Username must be at least 3 characters'; return false; }
-        usernameError.textContent = ''; return true;
+        if (username.length < 4) {
+          usernameError.textContent = 'Username must be at least 3 characters';
+          return false;
+        }
+
+        // if (username.length > 30) { 
+        //   usernameError.textContent = 'Username cannot exceed 30 characters'; 
+        //   return false; 
+        // }
+
+        const regex = /^[A-Za-z\s'-]+$/;
+
+        if (!regex.test(username)) {
+          usernameError.textContent =  "Invalid name format";
+          return false; 
+        }
+
+        if (/\s{2,}/.test(username)) {
+          usernameError.textContent = "Multiple spaces not allowed";
+          return false;
+        }
+
+        usernameError.textContent = '';
+        return true;
       }
       function validateEmail() {
         const email = emailInput.value.trim();

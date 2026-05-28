@@ -33,6 +33,9 @@ const registerUser = async (req, res) => {
 
         const { username, email, password, confirmPassword, referralCode } = req.body;
 
+        console.log(`username: ${username}, password: ${password}`);
+
+
         let referrer = null;
 
         if (referralCode) {
@@ -55,6 +58,26 @@ const registerUser = async (req, res) => {
         //username = username.trim();
         if (username.length < 4) {
             req.session.message = 'Username must be at least 4 characters';
+            req.session.type = "error";
+            return res.redirect("/signup");
+        }
+
+        if (username.length > 30) {
+            req.session.message = 'Username cannot exceed 30 characters';
+            req.session.type = "error";
+            return res.redirect("/signup");
+        }
+
+        const nameRegex = /^[A-Za-z\s'-]+$/;
+
+        if (!nameRegex.test(username)) {
+            req.session.message = "Invalid name format";
+            req.session.type = "error";
+            return res.redirect("/signup");
+        }
+
+        if (/\s{2,}/.test(username)) {
+            req.session.message = "Multiple spaces not allowed";
             req.session.type = "error";
             return res.redirect("/signup");
         }
@@ -120,6 +143,8 @@ const generateOtp = () => {
 }
 
 const sentVerificationMail = async (email, otp) => {
+    console.log("email: ", email);
+
     try {
         const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -277,9 +302,11 @@ const verifyOtp = async (req, res) => {
         });
 
         const referrer = req.session.referrer;
-        const amount = 100;
-        await creditWallet(referrer._id, amount, `Referrel bonus`);
-        console.log(savedUser);
+        if (referrer) {
+            const amount = 100;
+            await creditWallet(referrer._id, amount, `Referrel bonus`);
+            // console.log(savedUser);
+        }
 
         req.session.message = "Account created successfully! Please log in.";
         req.session.type = "success";
@@ -590,8 +617,14 @@ const logout = async (req, res) => {
 
 const generateReferralCode = (username) => {
     const random = Math.floor(1000 + Math.random() * 9000);
-    return username.slice(0, 3).toUpperCase() + random;
+
+    const name = username.trim();
+    const namePart = name ? name.substring(0,3).toUpperCase(): "USR";
+    return `${namePart}${random}`;
 };
+
+
+
 module.exports = {
     loadRegister,
     registerUser,
