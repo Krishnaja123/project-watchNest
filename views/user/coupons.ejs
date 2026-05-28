@@ -209,7 +209,6 @@
                 });
             }
 
-            /* Toast instead of alert */
             function showToast(message) {
                 const toast = document.createElement("div");
                 toast.innerText = message;
@@ -226,7 +225,7 @@
 
                 setTimeout(() => {
                     toast.remove();
-                }, 2000);
+                }, 6000);
             }
 
             async function applyCoupon(code) {
