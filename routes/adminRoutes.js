@@ -11,6 +11,7 @@ const orderController = require("../controller/admin/adminOrdersController");
 const couponController = require("../controller/admin/adminCouponController");
 const offerController = require("../controller/admin/adminOfferController");
 const salesReportController = require("../controller/admin/adminSalesReportController");
+const dashboardController = require("../controller/admin/adminDashboardController");
 
 const upload = require("../config/multerConfig");
 
@@ -91,4 +92,7 @@ router.get("/sales-report", adminAuth, salesReportController.getSalesReport);
 router.get("/sales-report-data", adminAuth, salesReportController.getSalesReportData);
 router.get("/sales-report/excel", adminAuth, salesReportController.exportSalesPDF);
 router.get("/sales-report/pdf", adminAuth, salesReportController.exportSalesExcel);
+
+router.get("/dashboard", adminAuth, dashboardController.loadDashboard);
+router.get("/dashboard-data", adminAuth, dashboardController.getDashboardData);
 module.exports = router;

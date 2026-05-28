@@ -51,7 +51,7 @@ const login = async (req, res) => {
             id: user._id,
             email: user.email
         };
-        return res.redirect("/admin/products");
+        return res.redirect("/admin/dashboard");
 
     } catch (error) {
         console.error("Login error:", error);

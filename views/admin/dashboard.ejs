@@ -3,176 +3,250 @@
 <head>
     <link rel="stylesheet" href="/css/admin/sidebar.css">
     <link rel="stylesheet" href="/css/admin/admin.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        .dashboard-container {
-            padding: 20px;
-        }
-
-        .filters {
-            margin-bottom: 20px;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-
-        .card {
-            background: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .tables {
-            margin-top: 30px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-    </style>
 </head>
 
-<div class="dashboard-container">
+<style>
+    :root {
+        --gold: #28a745;
+        --gold-dark: #28a745;
+        --dark: #1a1a1a;
+        --light-bg: #f9fafb;
+        --card-bg: #ffffff;
+        --text: #1e293b;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --radius: 16px;
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
 
-    <!-- FILTER -->
-    <div class="filters">
-        <form method="GET" action="/admin/dashboard">
-            <select name="filter">
+    .main {
+        padding: 30px;
+        background: var(--light-bg);
+        min-height: 100vh;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        color: var(--dark);
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .filter-bar {
+        background: var(--card-bg);
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .main-chart-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        color: var(--dark);
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--gold);
+        display: inline-block;
+    }
+
+    .top-list {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+    }
+
+    .top-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .rank {
+        font-weight: bold;
+        color: var(--gold);
+        width: 30px;
+    }
+
+    .item-name {
+        flex: 1;
+        font-weight: 500;
+    }
+
+    .item-sales {
+        color: var(--muted);
+    }
+
+    .btn-gold {
+        background: var(--gold);
+        color: white;
+        border: none;
+        padding: 6px 16px;
+        border-radius: 6px;
+    }
+</style>
+
+<body>
+<div class="container">
+
+    <!-- Sidebar -->
+    <%- include("../partials/admin/sidebar") %>
+
+    <!-- Main Content -->
+    <div class="main">
+
+        <h2 class="page-title">Admin Dashboard</h2>
+
+        <!-- FILTER -->
+        <div class="filter-bar">
+            <select id="filterType">
                 <option value="daily">Daily</option>
                 <option value="monthly">Monthly</option>
                 <option value="yearly">Yearly</option>
             </select>
-            <button type="submit">Apply</button>
-        </form>
-    </div>
 
-    <!-- CHART -->
-    <div class="card">
-        <canvas id="salesChart"></canvas>
-    </div>
+            <button class="btn-gold" id="applyFilter">Apply Filter</button>
+        </div>
 
-    <!-- SUMMARY CARDS -->
-    <div class="cards">
-        <div class="card">Total Sales: ₹ <%= totalSales %></div>
-        <div class="card">Total Orders: <%= totalOrders %></div>
-        <div class="card">Total Users: <%= totalUsers %></div>
-        <div class="card">Total Revenue: ₹ <%= totalRevenue %></div>
-    </div>
+        <!-- CHART -->
+        <div class="main-chart-card">
+            <h5 class="section-title">Sales Overview</h5>
+            <canvas id="salesChart"></canvas>
+        </div>
 
-    <!-- TABLES -->
-    <div class="tables">
+        <!-- TOP LISTS -->
+        <div class="row">
 
-        <!-- BEST PRODUCTS -->
-        <h3>Top 10 Best Selling Products</h3>
-        <table>
-            <tr>
-                <th>Product</th>
-                <th>Quantity Sold</th>
-            </tr>
-            <% bestProducts.forEach(product => { %>
-                <tr>
-                    <td><%= product.name %></td>
-                    <td><%= product.totalSold %></td>
-                </tr>
-            <% }) %>
-        </table>
+            <div class="col-md-4">
+                <div class="top-list">
+                    <h5 class="section-title">Top Products</h5>
+                    <div id="topProducts"></div>
+                </div>
+            </div>
 
-        <!-- BEST CATEGORIES -->
-        <h3>Top 10 Categories</h3>
-        <table>
-            <tr>
-                <th>Category</th>
-                <th>Sales</th>
-            </tr>
-            <% bestCategories.forEach(cat => { %>
-                <tr>
-                    <td><%= cat.name %></td>
-                    <td><%= cat.totalSold %></td>
-                </tr>
-            <% }) %>
-        </table>
+            <div class="col-md-4">
+                <div class="top-list">
+                    <h5 class="section-title">Top Categories</h5>
+                    <div id="topCategories"></div>
+                </div>
+            </div>
 
-        <!-- BEST BRANDS -->
-        <h3>Top 10 Brands</h3>
-        <table>
-            <tr>
-                <th>Brand</th>
-                <th>Sales</th>
-            </tr>
-            <% bestBrands.forEach(brand => { %>
-                <tr>
-                    <td><%= brand.name %></td>
-                    <td><%= brand.totalSold %></td>
-                </tr>
-            <% }) %>
-        </table>
+            <div class="col-md-4">
+                <div class="top-list">
+                    <h5 class="section-title">Top Brands</h5>
+                    <div id="topBrands"></div>
+                </div>
+            </div>
 
-        <!-- LEDGER (OPTIONAL) -->
-        <h3>Ledger Book</h3>
-        <table>
-            <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Credit</th>
-                <th>Debit</th>
-            </tr>
-            <% if(ledger && ledger.length){ %>
-                <% ledger.forEach(entry => { %>
-                    <tr>
-                        <td><%= entry.date %></td>
-                        <td><%= entry.description %></td>
-                        <td><%= entry.credit %></td>
-                        <td><%= entry.debit %></td>
-                    </tr>
-                <% }) %>
-            <% } else { %>
-                <tr>
-                    <td colspan="4">No ledger data available</td>
-                </tr>
-            <% } %>
-        </table>
+        </div>
 
     </div>
 </div>
 
-<script>
-    const ctx = document.getElementById('salesChart').getContext('2d');
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    const salesChart = new Chart(ctx, {
-        type: 'bar',
+<script>
+let salesChart;
+
+document.addEventListener("DOMContentLoaded", () => {
+    fetchDashboard();
+    document.getElementById("applyFilter").addEventListener("click", fetchDashboard);
+});
+
+async function fetchDashboard() {
+    const filter = document.getElementById("filterType").value;
+    // console.log("filter:", filter);
+
+    const res = await fetch(`/admin/dashboard-data?filter=${filter}`);
+    const data = await res.json();
+
+    console.log("data.salesChart: ", data.salesData);
+    
+    renderChart(data.salesData);
+    renderTopProducts(data.topProducts);
+    renderTopCategories(data.topCategories);
+    renderTopBrands(data.topBrands);
+}
+
+function renderChart(data) {
+    const ctx = document.getElementById("salesChart").getContext("2d");
+
+    const labels = data.map(d => {
+    if (typeof d._id === "object") {
+        return `${d._id.month || 0}-${d._id.year || ""}`;
+    }
+    return d._id;
+});
+
+    const values = data.map(d => d.total);
+console.log("values: ", values);
+
+    if (salesChart) salesChart.destroy();
+
+    salesChart = new Chart(ctx, {
+        type: "line",
         data: {
-            labels: <%- JSON.stringify(chartLabels) %>,
+            labels,
             datasets: [{
-                label: 'Sales',
-                data: <%- JSON.stringify(chartData) %>,
-                borderWidth: 1
+                label: "Revenue",
+                data: values,
+                borderColor: "#d4af37",
+                backgroundColor: "rgba(212,175,55,0.1)",
+                tension: 0.4
             }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
         }
     });
+}
+function renderTopProducts(products) {
+    const container = document.getElementById("topProducts");
+    container.innerHTML = "";
+    products.forEach((p, i) => {
+        container.innerHTML += `
+            <div class="top-item">
+                <span class="rank">${i + 1}</span>
+                <span class="item-name">${p.productName}</span>
+                <span class="item-sales">${p.totalSold}</span>
+            </div>`;
+    });
+}
+
+function renderTopCategories(categories) {
+    const container = document.getElementById("topCategories");
+    container.innerHTML = "";
+    categories.forEach((c, i) => {
+        container.innerHTML += `
+            <div class="top-item">
+                <span class="rank">${i + 1}</span>
+                <span class="item-name">${c.categoryName}</span>
+                <span class="item-sales">${c.totalSold}</span>
+            </div>`;
+    });
+}
+
+function renderTopBrands(brands) {
+    const container = document.getElementById("topBrands");
+    container.innerHTML = "";
+    brands.forEach((b, i) => {
+        container.innerHTML += `
+            <div class="top-item">
+                <span class="rank">${i + 1}</span>
+                <span class="item-name">${b.brandName}</span>
+                <span class="item-sales">${b.totalSold}</span>
+            </div>`;
+    });
+}
 </script>
 
 <%- include("../partials/admin/footer") %>
