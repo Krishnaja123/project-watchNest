@@ -1,207 +1,264 @@
 <%- include("../partials/user/header", { title: "My Profile" , hideNavBar: true }) %>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/css/user/editProfile.css">
-<link rel="stylesheet" href="/css/user/userSidebar.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/user/editProfile.css">
+    <link rel="stylesheet" href="/css/user/userSidebar.css">
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<div class="container mt-3">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/home">Home</a></li>
-            <li class="breadcrumb-item active">My Profile</li>
-        </ol>
-    </nav>
-</div>
+    <div class="container mt-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/home">Home</a></li>
+                <li class="breadcrumb-item active">My Profile</li>
+            </ol>
+        </nav>
+    </div>
 
-<div class="profile-layout">
+    <div class="profile-layout">
 
-    <%- include("../partials/user/userSidebar") %>
+        <%- include("../partials/user/userSidebar") %>
 
-    <div class="profile-main">
+            <div class="profile-main">
 
-        <h1 class="main-title">My Profile</h1>
+                <h1 class="main-title">My Profile</h1>
 
-        <div class="card">
-            <div class="card-header">
-                <h2>Profile Details</h2>
-            </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Profile Details</h2>
+                    </div>
 
-            <div class="card-body">
+                    <div class="card-body">
 
-                <!-- Avatar -->
-                <div class="mb-4 text-center">
-                    <% if (user.profileImage) { %>
-                        <img id="profilePreview" src="<%= user.profileImage %>" 
-                             class="rounded-circle" width="100" height="100">
-                    <% } else { %>
-                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto"
-                             style="width: 100px; height: 100px; font-size: 32px;">
-                            <%= user.username ? user.username.charAt(0).toUpperCase() : "U" %>
+                        <!-- Avatar -->
+                        <div class="mb-4 text-center">
+                            <% if (user.profileImage) { %>
+                                <img id="profilePreview" src="<%= user.profileImage %>" class="rounded-circle"
+                                    width="100" height="100">
+                                <% } else { %>
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto"
+                                        style="width: 100px; height: 100px; font-size: 32px;">
+                                        <%= user.username ? user.username.charAt(0).toUpperCase() : "U" %>
+                                    </div>
+                                    <% } %>
                         </div>
-                    <% } %>
+
+                        <!-- Info -->
+                        <div class="mb-3">
+                            <form action="/profile/change-username" method="POST" id="username-form">
+                                <label class="form-label">Name</label>
+                                <!-- <p class="form-control"><%= user.username || "Not available" %></p> -->
+                                <div class="d-flex gap-2 align-items-start">
+                                    <div class="flex-grow-1">
+                                        <input type="text" class="form-control" id="username" name="username"
+                                            value="<%= user?.username || '' %>" placeholder="Enter your name" required>
+                                        <div id="error-name" class="error-message"></div>
+                                    </div>
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            Update Name
+                                        </button>
+                                </div>
+                            </form>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <form action="/profile/change-email" method="POST" id="username-form">
+                                <label class="form-label">Email</label>
+                                <!-- <p class="form-control"><%= user.email || "Not available" %></p> -->
+                                <div class="d-flex gap-2 align-items-start">
+                                    <div class="flex-grow-1">
+                                        <input type="text" class="form-control" id="email" name="email"
+                                            value="<%= user?.email || '' %>" placeholder="Enter your email" required>
+                                        <div id="error-email" class="error-message"></div>
+                                    </div>
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            Update Email
+                                        </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <p class="form-control">
+                                <%= user.email || "Not available" %>
+                            </p>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex gap-2">
+                            <!-- <a href="/profile/change-username" class="btn btn-outline-primary">Change Name</a> -->
+                            <!-- <a href="/profile/change-email" class="btn btn-outline-primary">Change Email</a> -->
+                            <a href="/profile/change-password" class="btn btn-danger">Change Password</a>
+                        </div>
+
+                        <hr>
+
+                        <!-- Upload -->
+                        <label class="form-label">Update Profile Picture</label>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="file" id="profileImage" class="form-control">
+                            <small class="text-danger" id="imageError"></small>
+                        </div>
+
+                    </div>
                 </div>
 
-                <!-- Info -->
-                <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <p class="form-control"><%= user.username || "Not available" %></p>
+            </div>
+    </div>
+
+    <!-- Crop Modal -->
+    <div class="modal fade" id="cropModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Crop Image</h5>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <p class="form-control"><%= user.email || "Not available" %></p>
+                <div class="modal-body">
+                    <img id="cropImage" style="max-width: 100%;">
                 </div>
-
-                <!-- Actions -->
-                <div class="d-flex gap-2">
-                    <a href="/profile/change-username" class="btn btn-outline-primary">Change Name</a>
-                    <a href="/profile/change-email" class="btn btn-outline-primary">Change Email</a>
-                    <a href="/profile/change-password" class="btn btn-danger">Change Password</a>
+                <div class="modal-footer">
+                    <button type="button" id="cropBtn" class="btn btn-success">
+                        Crop & Upload
+                    </button>
                 </div>
-
-                <hr>
-
-                <!-- Upload -->
-                <label class="form-label">Update Profile Picture</label>
-
-                <div class="d-flex align-items-center gap-2">
-                    <input type="file" id="profileImage" class="form-control">
-                    <small class="text-danger" id="imageError"></small>
-                </div>
-
             </div>
         </div>
-
     </div>
-</div>
 
-<!-- Crop Modal -->
-<div class="modal fade" id="cropModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Crop Image</h5>
-            </div>
-            <div class="modal-body">
-                <img id="cropImage" style="max-width: 100%;">
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="cropBtn" class="btn btn-success">
-                    Crop & Upload
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+    <script>
 
-<script>
-let cropper;
-const input = document.getElementById("profileImage");
-const error = document.getElementById("imageError");
-const cropImage = document.getElementById("cropImage");
-const modalEl = document.getElementById("cropModal");
+        const form = document.getElementById("username-form");
+        const username = document.getElementById("username");
+        const errorName = document.getElementById("error-name");
 
-const modal = new bootstrap.Modal(modalEl);
+        form.addEventListener("submit", function (e) {
+            const name = username.value.trim();
 
-// File select
-input.addEventListener("change", function () {
-
-    const file = this.files[0];
-    if (!file) return;
-
-    // Validation
-    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-    const maxSize = 2 * 1024 * 1024;
-
-    if (!allowedTypes.includes(file.type)) {
-        error.textContent = "Only JPG, JPEG, PNG allowed";
-        this.value = "";
-        return;
-    }
-
-    if (file.size > maxSize) {
-        error.textContent = "Max size 2MB";
-        this.value = "";
-        return;
-    }
-
-    error.textContent = "";
-
-    // Load image
-    const reader = new FileReader();
-    reader.onload = function (e) {
-
-        cropImage.src = e.target.result;
-        modal.show();
-
-        if (cropper) cropper.destroy();
-
-        cropper = new Cropper(cropImage, {
-            aspectRatio: 1,
-            viewMode: 1,
-            responsive: true,
-            autoCropArea: 1
-        });
-    };
-
-    reader.readAsDataURL(file);
-});
-
-
-// Crop & Upload
-document.getElementById("cropBtn").addEventListener("click", function () {
-
-    if (!cropper) return;
-
-    const canvas = cropper.getCroppedCanvas({
-        width: 300,
-        height: 300
-    });
-
-    canvas.toBlob(async function (blob) {
-
-        const formData = new FormData();
-        formData.append("profilePicture", blob, "profile.jpg");
-
-        try {
-            const res = await fetch("/profile/upload", {
-                method: "POST",
-                body: formData
-            });
-
-            if (res.ok) {
-
-                // Preview instantly
-                const preview = document.getElementById("profilePreview");
-                if (preview) {
-                    preview.src = URL.createObjectURL(blob);
-                }
-
-                modal.hide();
-                cropper.destroy();
-                cropper = null;
-
-                // Optional reload (can remove if using preview)
-                setTimeout(() => location.reload(), 500);
+            if (name === "") {
+                e.preventDefault();
+                errorName.textContent = "Name is required";
+                return;
             }
 
-        } catch (err) {
-            console.error(err);
-        }
+            const regex = /^[A-Za-z\s]+$/;
 
-    }, "image/jpeg");
-});
+            if (!regex.test(name)) {
+                e.preventDefault();
+                errorName.textContent =
+                    "Name can contain only letters and spaces";
+                return;
+            }
+            errorName.textContent = "";
+        });
+
+        let cropper;
+        const input = document.getElementById("profileImage");
+        const error = document.getElementById("imageError");
+        const cropImage = document.getElementById("cropImage");
+        const modalEl = document.getElementById("cropModal");
+
+        const modal = new bootstrap.Modal(modalEl);
+
+        // File select
+        input.addEventListener("change", function () {
+
+            const file = this.files[0];
+            if (!file) return;
+
+            // Validation
+            const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+            const maxSize = 2 * 1024 * 1024;
+
+            if (!allowedTypes.includes(file.type)) {
+                error.textContent = "Only JPG, JPEG, PNG allowed";
+                this.value = "";
+                return;
+            }
+
+            if (file.size > maxSize) {
+                error.textContent = "Max size 2MB";
+                this.value = "";
+                return;
+            }
+
+            error.textContent = "";
+
+            // Load image
+            const reader = new FileReader();
+            reader.onload = function (e) {
+
+                cropImage.src = e.target.result;
+                modal.show();
+
+                if (cropper) cropper.destroy();
+
+                cropper = new Cropper(cropImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    responsive: true,
+                    autoCropArea: 1
+                });
+            };
+
+            reader.readAsDataURL(file);
+        });
 
 
-// Cleanup when modal closes
-modalEl.addEventListener("hidden.bs.modal", () => {
-    if (cropper) {
-        cropper.destroy();
-        cropper = null;
-    }
-});
-</script>
+        // Crop & Upload
+        document.getElementById("cropBtn").addEventListener("click", function () {
+
+            if (!cropper) return;
+
+            const canvas = cropper.getCroppedCanvas({
+                width: 300,
+                height: 300
+            });
+
+            canvas.toBlob(async function (blob) {
+
+                const formData = new FormData();
+                formData.append("profilePicture", blob, "profile.jpg");
+
+                try {
+                    const res = await fetch("/profile/upload", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (res.ok) {
+
+                        // Preview instantly
+                        const preview = document.getElementById("profilePreview");
+                        if (preview) {
+                            preview.src = URL.createObjectURL(blob);
+                        }
+
+                        modal.hide();
+                        cropper.destroy();
+                        cropper = null;
+
+                        // Optional reload (can remove if using preview)
+                        setTimeout(() => location.reload(), 500);
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                }
+
+            }, "image/jpeg");
+        });
+
+
+        // Cleanup when modal closes
+        modalEl.addEventListener("hidden.bs.modal", () => {
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        });
+    </script>

@@ -60,30 +60,31 @@ const getEditProfile = async (req, res) => {
     }
 }
 
-const getChangeUserName = async (req, res) => {
-    try {
-        const { message, type } = getSessionMessage(req);
+// const getChangeUserName = async (req, res) => {
+//     try {
+//         const { message, type } = getSessionMessage(req);
 
-        const userId = req.user._id;
-        const user = await User.findById(userId);
+//         const userId = req.user._id;
+//         const user = await User.findById(userId);
 
-        res.render("user/changeName", {
-            user,
-            message,
-            type,
-        })
+//         res.render("user/changeName", {
+//             user,
+//             message,
+//             type,
+//         })
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error");
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send("Internal Server Error");
 
-    }
-}
+//     }
+// }
 const changeUserName = async (req, res) => {
     try {
-        const newName = req.body.name;
-        const userId = req.user._id;
+        const newName = req.body.username;
+        const trimmedName = newName.trim();
 
+        const userId = req.user._id;
         const user = await User.findById(userId);
 
         if (!user) {
@@ -92,13 +93,21 @@ const changeUserName = async (req, res) => {
             return res.redirect("/login");
         }
 
-        if (!newName || newName.length < 4) {
+        if (!trimmedName || trimmedName.length < 4) {
             req.session.message = 'Nmae must be at least 4 characters';
             req.session.type = "error";
             return res.redirect("/profile");
         }
 
-        user.username = newName;
+        const regex = /^[A-Za-z\s]+$/;
+
+        if (!regex.test(trimmedName)) {
+            req.session.message = res.redirect("/profile");
+            req.session.type = "error";
+            return res.redirect("/profile");
+        }
+
+        user.username = trimmedName;
         await user.save();
 
         req.session.message = 'Username has successfully changed';
@@ -112,26 +121,26 @@ const changeUserName = async (req, res) => {
     }
 }
 
-const getChangeEmail = async (req, res) => {
-    try {
-        const { message, type } = getSessionMessage(req);
+// const getChangeEmail = async (req, res) => {
+//     try {
+//         const { message, type } = getSessionMessage(req);
 
-        const userId = req.user._id;
-        const user = await User.findById(userId);
+//         const userId = req.user._id;
+//         const user = await User.findById(userId);
 
-        res.render("user/changeEmail", {
-            user,
-            message,
-            type,
-        })
+//         res.render("user/changeEmail", {
+//             user,
+//             message,
+//             type,
+//         })
 
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error");
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send("Internal Server Error");
 
-    }
-}
+//     }
+// }
 
 const changeEmail = async (req, res) => {
     try {
@@ -354,9 +363,9 @@ const updateProfileImage = async (req, res) => {
 module.exports = {
     loadProfile,
     getEditProfile,
-    getChangeUserName,
+    // getChangeUserName,
     changeUserName,
-    getChangeEmail,
+    // getChangeEmail,
     changeEmail,
     getChangePasswordPage,
     changePassword,

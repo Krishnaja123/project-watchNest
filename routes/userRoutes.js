@@ -54,10 +54,10 @@ router.get('/product/:productId/:variantId', requireLogin, productController.get
 router.get('/profile', requireLogin, profileController.loadProfile);
 router.get('/edit-profile', requireLogin, profileController.getEditProfile);
 
-router.get('/profile/change-username', requireLogin, profileController.getChangeUserName);
+// router.get('/profile/change-username', requireLogin, profileController.getChangeUserName);
 router.post('/profile/change-username', requireLogin, profileController.changeUserName);
 
-router.get('/profile/change-email', requireLogin, profileController.getChangeEmail);
+// router.get('/profile/change-email', requireLogin, profileController.getChangeEmail);
 router.post('/profile/change-email', requireLogin, profileController.changeEmail); 
 
 router.get('/profile/change-password', requireLogin, profileController.getChangePasswordPage);
