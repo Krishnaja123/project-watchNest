@@ -230,6 +230,14 @@ const updatedVariants = await Promise.all(
 
             const finalPrice = price - bestDiscount;
 
+            const wishlist = await Wishlist.findOne({ user_id: req.user?._id });
+
+        let wishlistVariantIds = [];
+
+        wishlistVariantIds = wishlist?.products?.map(item => {
+            return item.variant_id.toString();
+        });
+
         res.render('user/productDetails', {
             product,
             defaultVariant,
@@ -239,8 +247,9 @@ updatedVariants: updatedVariants,
             title: "Shop",
             similarProducts,
             hideNavBar: false,
-            // discount: bestDiscount,
-            // finalPrice
+            wishlistVariantIds,
+            discount: bestDiscount,
+            finalPrice
         })
     } catch (error) {
         console.log(error);
