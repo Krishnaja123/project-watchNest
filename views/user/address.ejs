@@ -216,8 +216,19 @@
 
             function validateName() {
                 const name = nameInput.value.trim();
-                if (name.length < 3) {
-                    nameError.textContent = "Username must be at least 3 characters";
+
+                if (!name) {
+                    nameError.textContent = "Full name is required";
+                    return false;
+                }
+
+                if (!/^[A-Za-z ]+$/.test(name)) {
+                    nameError.textContent = "Only letters and spaces are allowed";
+                    return false;
+                }
+
+                if (name.length < 3 || name.length > 50) {
+                    nameError.textContent = "Name must be between 3 and 50 characters";
                     return false;
                 }
                 nameError.textContent = "";
@@ -226,20 +237,28 @@
 
             function validateLocality() {
                 const locality = localityInput.value.trim();
-                if (locality.length === 0) {
-                    localityError.textContent = "Please enter a locality";
+                if (!locality) {
+                    localityError.textContent = "Locality is required";
                     return false;
                 }
+
+                if (locality.length < 3 || locality.length > 100) {
+                    localityError.textContent = "Locality must be between 3 and 100 characters";
+                    return false;
+                }
+
                 localityError.textContent = "";
                 return true;
             }
 
             function validateCity() {
                 const city = cityInput.value.trim();
+
                 if (city.length === 0) {
                     cityError.textContent = "Please enter a city name";
                     return false;
                 }
+
                 cityError.textContent = "";
                 return true;
             }
@@ -256,26 +275,36 @@
 
             function validatePincode() {
                 const pincode = pincodeInput.value.trim();
+
                 if (!/^[0-9]{6}$/.test(pincode)) {
                     pincodeError.textContent = "Please enter valid pincode";
                     return false;
                 }
+
                 pincodeError.textContent = "";
                 return true;
             }
 
             function validateMobileNumber() {
                 const mobileNumber = mobileInput.value.trim();
+
+                if (!mobileNumber) {
+                    mobileError.textContent = "Mobile number is required";
+                    return false;
+                }
+
                 if (!/^(?:\+91|91)?[6-9]\d{9}$/.test(mobileNumber)) {
                     mobileError.textContent = "Please enter valid mobile number";
                     return false;
                 }
+
                 mobileError.textContent = "";
                 return true;
             }
 
             function validateAlternateNumber() {
                 const alternateNumber = alternateNumberInput.value.trim();
+
                 if (alternateNumber && !/^(?:\+91|91)?[6-9]\d{9}$/.test(alternateNumber)) {
                     alternateNumberError.textContent = "Please enter valid mobile number";
                     return false;

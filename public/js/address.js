@@ -60,12 +60,12 @@ document.addEventListener("DOMContentLoaded", function () {
         e.preventDefault();
 
         const isValid =
-            validateName() &
-            validateLocality() &
-            validateCity() &
-            validateState() &
-            validatePincode() &
-            validateMobileNumber() &
+            validateName() &&
+            validateLocality() &&
+            validateCity() &&
+            validateState() &&
+            validatePincode() &&
+            validateMobileNumber() &&
             validateAlternateNumber();
 
         if (isValid) {
@@ -79,20 +79,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function validateName() {
         const val = nameInput.value.trim();
-        if (val.length < 3) {
-            nameError.textContent = "Minimum 3 characters required";
+
+        if (!val) {
+            nameError.textContent = "Full name is required";
             return false;
         }
+
+        if (!/^[A-Za-z ]+$/.test(val)) {
+            nameError.textContent = "Only letters and spaces are allowed";
+            return false;
+        }
+
+        if (val.length < 3 || val.length > 50) {
+            nameError.textContent =
+                "Name must be between 3 and 50 characters";
+            return false;
+        }
+
         nameError.textContent = "";
         return true;
     }
 
     function validateLocality() {
         const val = localityInput.value.trim();
+
         if (!val) {
-            localityError.textContent = "Enter locality";
+            localityError.textContent = "Locality is required";
             return false;
         }
+
+        if (val.length < 3 || val.length > 100) {
+            localityError.textContent =
+                "Locality must be between 3 and 100 characters";
+            return false;
+        }
+
         localityError.textContent = "";
         return true;
     }
@@ -129,6 +150,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function validateMobileNumber() {
         const val = mobileInput.value.trim();
+
+        if (!val) {
+            mobileError.textContent = "Mobile number is required";
+            return false;
+        }
+
         if (!/^(?:\+91|91)?[6-9]\d{9}$/.test(val)) {
             mobileError.textContent = "Invalid mobile number";
             return false;
