@@ -83,8 +83,10 @@
         data.status === 'cancelled' ? 'bg-danger' :
         data.status === 'returned' ? 'bg-dark' :
         'bg-secondary' %>">
-                                                <%= data.status %>
-                                            </span>
+    <%= data.paymentStatus === "failed" && data.status !== "cancelled"
+        ? "Pending"
+        : data.status %>
+</span>
                                         </div>
 
                                         <div class="col-md-2">
@@ -259,7 +261,7 @@
                         </div>
 
                         <input type="hidden" name="reason" id="finalReason">
-
+                        <input type="hidden" name="from" value="/orders">
                     </div>
 
                     <div class="modal-footer">

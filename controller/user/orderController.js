@@ -187,7 +187,7 @@ const getOrderInvoice = async (req, res) => {
         const orderItems = await OrderItem.find({
             order_id: orderId,
             status: { $in: ["delivered", "cancelled", "returned", "processing"] },
-            paymentStatus: {$in: ["paid", "pending"]}
+            paymentStatus: { $in: ["paid", "pending"] }
         });
 
         return res.render("user/orderInvoice", {
@@ -242,7 +242,7 @@ const cancelProduct = async (req, res) => {
 
             const itemTotal = item.finalPrice * item.quantity;
             console.log(item.finalPrice);
-            
+
             // const itemDiscount = itemTotal * discountRatio;
             const tax = item.finalPrice * 0.05
             const refundAmount = itemTotal - item.couponDiscount + tax;
@@ -253,7 +253,7 @@ const cancelProduct = async (req, res) => {
             await creditWallet(userId, refundAmount, `Refund for cancelled product`);
 
             order.refundAmount = (order.refundAmount || 0) + refundAmount;
-                await order.save();
+            await order.save();
 
             console.log("hi");
 
@@ -290,7 +290,7 @@ const cancelOrder = async (req, res) => {
         const order_id = req.params.id;
         console.log("orderId: ", order_id)
 
-        const { reason } = req.body;
+        const { from, reason } = req.body;
 
         console.log("reason: ", reason);
 
@@ -351,7 +351,13 @@ const cancelOrder = async (req, res) => {
         req.session.message = "Order cancelled successfully";
         req.session.type = "success";
 
-        res.redirect('/orders');
+        if (from === "/orders") {
+            res.redirect('/orders');
+        }
+
+        if (from === "/order-details") {
+            res.redirect(`/orders/${order_id}`);
+        }
 
     } catch (error) {
         console.error(error);
@@ -423,7 +429,8 @@ const showCoupons = async (req, res) => {
     try {
         const cartTotal = Number(req.query.cartTotal) || 0;
 
-        const coupons = await Coupon.find({ is_delete: false, isActive: true, });
+        const coupons = await Coupon.find({ is_delete: false, isActive: true, })
+            .sort({ createdAt: -1 });
 
         res.render("user/coupons", {
             coupons,
