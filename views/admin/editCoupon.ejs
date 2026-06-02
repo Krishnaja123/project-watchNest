@@ -11,11 +11,11 @@
 
             <!-- Main Content -->
             <div class="content">
-                
+
                 <div class="header">Edit Coupon</div>
 
                 <div class="form-container">
-                    <form action="/admin/editCoupon/<%= coupon._id %>?page=<%= page %>" method="POST">
+                    <form id="couponForm" action="/admin/editCoupon/<%= coupon._id %>?page=<%= page %>" method="POST">
 
                         <!-- CODE -->
                         <div class="form-group">
@@ -38,7 +38,7 @@
                                     Fixed
                                 </option>
                             </select>
-                            <small class="error">
+                            <small class="error" id="discountTypeError">
                                 <%= errors?.discountType || '' %>
                             </small>
                         </div>
@@ -48,7 +48,7 @@
                             <label for="discountValue">Discount Value</label>
                             <input type="number" id="discountValue" name="discountValue"
                                 value="<%= coupon.discountValue || '' %>" required>
-                            <small class="error">
+                            <small class="error" id="discountValueError">
                                 <%= errors?.discountValue || '' %>
                             </small>
                         </div>
@@ -57,7 +57,7 @@
                         <div class="form-group">
                             <label for="minAmount">Minimum Purchase Amount</label>
                             <input type="number" id="minAmount" name="minAmount" value="<%= coupon.minAmount || '' %>">
-                            <small class="error">
+                            <small class="error" id="minAmountError">
                                 <%= errors?.minAmount || '' %>
                             </small>
                         </div>
@@ -67,7 +67,7 @@
                             <label for="maxDiscount">Maximum Discount</label>
                             <input type="number" id="maxDiscount" name="maxDiscount"
                                 value="<%= coupon.maxDiscount || '' %>">
-                            <small class="error">
+                            <small class="error" id="maxAmountError">
                                 <%= errors?.maxDiscount || '' %>
                             </small>
                         </div>
@@ -77,7 +77,7 @@
                             <label for="usageLimit">Usage Limit</label>
                             <input type="number" id="usageLimit" name="usageLimit"
                                 value="<%= coupon.usageLimit || '' %>">
-                            <small class="error">
+                            <small class="error" id="usageLimitError">
                                 <%= errors?.usageLimit || '' %>
                             </small>
                         </div>
@@ -88,7 +88,7 @@
                             <input type="date" id="expiryDate" name="expiryDate"
                                 value="<%= coupon.expiryDate ? coupon.expiryDate.toISOString().split('T')[0] : '' %>"
                                 required>
-                            <small class="error">
+                            <small class="error" id="expiryDateError">
                                 <%= errors?.expiryDate || '' %>
                             </small>
                         </div>
@@ -127,11 +127,67 @@
                 }
             }
 
-            // Run on page load
             toggleMaxDiscount();
 
-            // Run when dropdown changes
             discountTypeSelect.addEventListener("change", toggleMaxDiscount);
+
+            const form = document.getElementById("couponForm");
+
+            form.addEventListener("submit", function (e) {
+
+                document.querySelectorAll(".error").forEach(el => el.innerText = "");
+                document.querySelectorAll("input, select").forEach(el =>
+                    el.classList.remove("error-border")
+                );
+
+                const discountType = document.getElementById("discountType").value;
+                const discountValue = Number(document.getElementById("discountValue").value);
+                const minAmount = Number(document.getElementById("minAmount").value);
+                const expiryDate = document.getElementById("expiryDate").value;
+
+                if (discountType === "percentage" && discountValue > 100) {
+                    e.preventDefault();
+
+                    document.getElementById("discountValueError").innerText =
+                        "Percentage cannot exceed 100";
+
+                    document.getElementById("discountValue")
+                        .classList.add("error-border");
+
+                    return;
+                }
+
+                if (
+                    discountType === "fixed" &&
+                    minAmount &&
+                    discountValue >= minAmount
+                ) {
+                    e.preventDefault();
+
+                    document.getElementById("discountValueError").innerText =
+                        "Discount amount must be less than minimum purchase amount";
+
+                    document.getElementById("discountValue")
+                        .classList.add("error-border");
+
+                    return;
+                }
+
+                if (
+                    expiryDate <
+                    new Date().toISOString().split("T")[0]
+                ) {
+                    e.preventDefault();
+
+                    document.getElementById("expiryDateError").innerText =
+                        "Expiry date must be in the future";
+
+                    document.getElementById("expiryDate")
+                        .classList.add("error-border");
+
+                    return;
+                }
+            });
 
             const message = "<%= message %>";
             const type = "<%= type %>";

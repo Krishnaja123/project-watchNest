@@ -54,6 +54,13 @@ const saveCoupon = async (req, res) => {
             });
         }
 
+         if (formData.discountType === "fixed" && formData.discountValue >= formData.minAmount) {
+            return res.json({
+                success: false,
+                errors: { discountValue: "Discount amount must be less than the minimum purchase amount" }
+            });
+        }
+
         if (new Date(formData.expiryDate) < new Date()) {
             return res.json({
                 success: false,
@@ -243,6 +250,12 @@ const updateCoupon = async (req, res) => {
 
         if (formData.discountType === "percentage" && formData.discountValue > 100) {
             req.session.message = "Percentage cannot exceed 100";
+            req.session.type = "error";
+            return res.redirect(`/admin/coupons/editCoupon/${id}?page=${page}`);
+        }
+
+        if (formData.discountType === "fixed" && formData.discountValue >= formData.minAmount) {
+            req.session.message = "Discount amount must be less than the minimum purchase amount";
             req.session.type = "error";
             return res.redirect(`/admin/coupons/editCoupon/${id}?page=${page}`);
         }

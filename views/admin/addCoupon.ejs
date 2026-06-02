@@ -182,6 +182,12 @@
                         return;
                     }
 
+                    if(formData.discountType === "fixed" && formData.discountValue >= formData.minAmount) {
+                        document.getElementById("discountValueError").innerText = "Discount amount must be less than the minimum purchase amount";
+                        document.getElementById("discountValue").classList.add("error-border");
+                        return;
+                    }
+
                     if (formData.expiryDate < new Date().toISOString().split("T")[0]) {
                         document.getElementById("expiryDateError").innerText = "Expiry date must be in the future";
                         document.getElementById("expiryDate").classList.add("error-border");
