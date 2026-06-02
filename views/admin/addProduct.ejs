@@ -442,6 +442,16 @@
                     return;
                 }
 
+                // const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+
+                // if (file.size > MAX_SIZE) {
+                //     imageError.textContent =
+                //         "Image size must be less than 5MB";
+
+                //     input.value = "";
+                //     return;
+                // }
+
                 // Store original file
                 if (!originalImages[variant])
                     originalImages[variant] = {};
@@ -542,10 +552,8 @@
                 const variant = wrapper.dataset.variant;
                 const imageIndex = wrapper.dataset.image;
 
-                // 1️⃣ Remove gallery image
                 wrapper.remove();
 
-                // 2️⃣ Get elements
                 const fileInput = document.querySelector(
                     `.variant-images[data-variant="${variant}"][data-image="${imageIndex}"]`
                 );
@@ -556,20 +564,17 @@
                 );
                 const cancelBtn = document.getElementById(`closeBtn-${variant}-${imageIndex}`);
 
-                // 3️⃣ Destroy cropper if exists
                 const cropperKey = `${variant}-${imageIndex}`;
                 if (croppers[cropperKey]) {
                     croppers[cropperKey].destroy();
                     delete croppers[cropperKey];
                 }
 
-                // 4️⃣ Reset & SHOW file input again ✅
                 if (fileInput) {
                     fileInput.value = "";
                     fileInput.style.display = "block"; // ⭐ SHOW INPUT
                 }
 
-                // 5️⃣ Hide preview & buttons
                 if (preview) {
                     preview.src = "";
                     preview.style.display = "none";
@@ -585,7 +590,6 @@
                 const variant = wrapper.dataset.variant;
                 const imageIndex = wrapper.dataset.image;
 
-                // 1️⃣ REMOVE current gallery image
                 wrapper.remove();
 
                 const preview = document.getElementById(`preview-${variant}-${imageIndex}`);
@@ -596,20 +600,17 @@
 
                 if (!preview.src) return;
 
-                // 2️⃣ Show crop UI
                 preview.style.display = "block";
                 cropBtn.style.display = "inline-block";
                 cancelBtn.style.display = "inline-block";
 
                 const key = `${variant}-${imageIndex}`;
 
-                // 3️⃣ Reset old cropper
                 if (croppers[key]) {
                     croppers[key].destroy();
                     delete croppers[key];
                 }
 
-                // 4️⃣ Create new cropper
                 croppers[key] = new Cropper(preview, {
                     aspectRatio: 1,
                     viewMode: 1,
@@ -642,25 +643,21 @@
                     `.crop-btn[data-variant="${variantIndex}"][data-image="${imageIndex}"]`
                 );
 
-                // 1️⃣ Destroy cropper if exists
                 const cropperKey = `${variantIndex}-${imageIndex}`;
                 if (croppers[cropperKey]) {
                     croppers[cropperKey].destroy();
                     delete croppers[cropperKey];
                 }
 
-                // 2️⃣ Reset file input
                 if (fileInput) {
                     fileInput.value = "";
                 }
 
-                // 3️⃣ Hide preview image
                 if (previewImg) {
                     previewImg.src = "";
                     previewImg.style.display = "none";
                 }
 
-                // 4️⃣ Hide crop & cancel buttons
                 if (cropBtn) cropBtn.style.display = "none";
                 btn.style.display = "none";
 
@@ -704,7 +701,6 @@
                     if (cropBtn) cropBtn.style.display = "none";
                     if (cancelBtn) cancelBtn.style.display = "none";
                 } else {
-                    // 🔓 Unlock UI
                     if (fileInput) fileInput.style.display = "block";
                 }
             }
@@ -733,6 +729,12 @@
                     isValid = false;
                 } else if (nameInput.value.trim().length < 4) {
                     nameError.textContent = "Name must be at least 4 characters long";
+                    isValid = false;
+                } else if (nameInput.value.trim().length > 100) {
+                    nameError.textContent = "Product name cannot exceed 100 characters";
+                    isValid = false;
+                } else if (!/^[a-zA-Z0-9\s\-()]+$/.test(nameInput.value.trim())) {
+                    nameError.textContent = "Product name contains invalid characters";
                     isValid = false;
                 }
 
@@ -765,19 +767,28 @@
                     if (strapColorInput.value.trim() === "") {
                         strapError.textContent = "Please enter strap color";
                         isValid = false;
+                    } else if (!/^[a-zA-Z\s]+$/.test(strapColorInput.value.trim())) {
+                        strapError.textContent = "Only letters allowed";
+                        isValid = false;
                     }
 
                     if (dialColorInput.value.trim() === "") {
                         dialError.textContent = "Please enter dial color";
+                        isValid = false;
+                    } else if (!/^[a-zA-Z\s]+$/.test(dialColorInput.value.trim())) {
+                        dialError.textContent = "Only letters allowed";
                         isValid = false;
                     }
 
                     if (!priceInput.value || parseFloat(priceInput.value) <= 0) {
                         priceError.textContent = "Please enter a valid price";
                         isValid = false;
+                    } else if (parseFloat(priceInput.value) > 1000000) {
+                        priceError.textContent = "Price too high";
+                        isValid = false;
                     }
 
-                    if (!stockInput.value || parseInt(stockInput.value) < 0) {
+                    if (!stockInput.value === "" || parseInt(stockInput.value) < 0) {
                         stockError.textContent = "Please enter valid stock quantity";
                         isValid = false;
                     }
@@ -793,8 +804,8 @@
                         totalImages += gallery.children.length;
                     });
 
-                    if (totalImages < 1) {
-                        imageError.textContent = "Please upload atleast 1 product images";
+                    if (totalImages < 3) {
+                        imageError.textContent = "Please upload atleast 3 product images";
                         isValid = false;
                     }
 

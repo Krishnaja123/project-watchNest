@@ -59,6 +59,25 @@ const saveProduct = async (req, res) => {
         }
 
         const trimedName = name.trim();
+
+        if (trimedName.length < 4) {
+            return res.json({
+                type: "error",
+                message: "Name must be at least 4 characters long"
+            });
+        }
+
+        if (trimedName.length > 100) {
+            return res.json({
+                type: "error",
+                message: "Product name cannot exceed 100 characters"
+            });
+        }
+
+        if (!/^[a-zA-Z0-9\s\-()]+$/.test(trimedName)) {
+            return res.json({ type: "error", message: "Product name contains invalid characters" });
+        }
+
         const existingProduct = await Product.findOne({
             name: { $regex: `^${trimedName}$`, $options: "i" },
             is_delete: false
@@ -69,6 +88,13 @@ const saveProduct = async (req, res) => {
         }
 
         let variants = req.body.variants;
+
+        if (!variants) {
+            return res.json({
+                type: "error",
+                message: "At least one variant is required"
+            });
+        }
 
         variants = Array.isArray(variants) ? variants : [variants];
 
@@ -291,21 +317,151 @@ const productDetails = async (req, res) => {
     }
 }
 
+// const updateProduct = async (req, res) => {
+//     try {
+//         console.log("get in to update product");
+//         const productId = req.params.id;
+
+//         console.log("req.body: ", req.body);
+
+//         let { name, category, brand, descrip, variants } = req.body;
+
+//         console.log("variants.stock: ", variants[0].stock);
+
+
+//         if (!name || !brand || !category) {
+//             return res.json({ type: "error", message: "Please fill all the mandatory fields" });
+//         }
+
+//         if (typeof variants === "string") {
+//             variants = JSON.parse(variants);
+//         }
+
+//         if (variants && !Array.isArray(variants)) {
+//             variants = Object.values(variants);
+//         }
+
+//         // If still undefined
+//         if (!variants) {
+//             variants = [];
+//         }
+
+//         const product = await Product.findById(productId);
+
+//         if (!product) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Product not found"
+//             });
+//         }
+
+//         const updateProductExist = await Product.findOne({
+//             _id: { $ne: productId },
+//             name: { $regex: `^${name.trim()}$`, $options: "i" }
+//         });
+
+//         if (updateProductExist) {
+//             return res.json({
+//                 success: false,
+//                 message: "Product already exists",
+//                 type: "error"
+//             });
+
+//         }
+//         product.name = name;
+//         product.cat_id = category;
+//         product.brand_id = brand;
+//         product.descrip = descrip;
+
+//         console.log("images:", req.files);
+
+//         const existingVariantsMap = new Map();
+
+//         product.variants.forEach(v => {
+//             existingVariantsMap.set(v._id.toString(), v);
+//         });
+
+//         const updatedVariants = [];
+
+//         for (let i = 0; i < variants.length; i++) {
+//             const variant = variants[i];
+
+//             if (!variant) continue;
+
+//             const existingVariant = variant._id
+//                 ? existingVariantsMap.get(variant._id.toString())
+//                 : null;
+
+//             const existing_cropped = variant?.existing_cropped_images || [];
+//             const existing_original = variant?.existing_original_images || [];
+
+//             const croppedFiles = (req.files || []).filter(file =>
+//                 file.fieldname.includes(`variants[${i}][images]`));
+
+//             const originalFiles = (req.files || []).filter(file =>
+//                 file.fieldname.includes(`variants[${i}][original_images]`));
+
+//             const croppedUrls = [];
+//             const originalUrls = [];
+
+//             for (const file of croppedFiles) {
+//                 const url = await uploadToCloudinary(
+//                     file.buffer,
+//                     "product_images/cropped"
+//                 );
+//                 croppedUrls.push(url);
+//             }
+
+//             for (const file of originalFiles) {
+//                 const url = await uploadToCloudinary(
+//                     file.buffer,
+//                     "product_images/original"
+//                 );
+//                 originalUrls.push(url);
+//             }
+//             console.log("variants: ", variant);
+//             console.log(" stock :", variant.stock);
+
+//             updatedVariants.push({
+//                 _id: variant._id
+//                     ? new mongoose.Types.ObjectId(variant._id)
+//                     : new mongoose.Types.ObjectId(),
+//                 strap_color: variant.strap_color,
+//                 dial_color: variant.dial_color,
+//                 price: variant.price,
+//                 stock: variant.stock !== undefined
+//                     ? Number(variant.stock)
+//                     : existingVariant?.stock || 0,
+//                 images: [...existing_cropped, ...croppedUrls],
+//                 original_images: [...existing_original, ...originalUrls]
+//             })
+//         }
+
+//         product.variants = updatedVariants;
+
+//         await product.save();
+
+//         return res.json({
+//             success: true,
+//             message: "Product updated successfully",
+//             type: "success"
+//         });
+//     } catch (err) {
+//         console.error("Update Error:", err);
+
+//         return res.status(500).json({
+//             success: false,
+//             message: "Server error",
+//             type: "error"
+//         });
+//     }
+// };
+
 const updateProduct = async (req, res) => {
     try {
-        console.log("get in to update product");
         const productId = req.params.id;
 
-        console.log("req.body: ", req.body);
-
         let { name, category, brand, descrip, variants } = req.body;
-
-        console.log("variants.stock: ", variants[0].stock);
-        
-
-        if (!name || !brand || !category) {
-            return res.json({ type: "error", message: "Please fill all the mandatory fields" });
-        }
 
         if (typeof variants === "string") {
             variants = JSON.parse(variants);
@@ -315,9 +471,135 @@ const updateProduct = async (req, res) => {
             variants = Object.values(variants);
         }
 
-        // If still undefined
         if (!variants) {
             variants = [];
+        }
+
+        if (!name || !brand || !category) {
+            return res.json({
+                success: false,
+                type: "error",
+                message: "Please fill all mandatory fields"
+            });
+        }
+
+        if (name.trim().length < 4 || name.trim().length > 100) {
+            return res.json({
+                success: false,
+                type: "error",
+                message: "Product name must be between 4 and 100 characters"
+            });
+        }
+
+        if (!/^[a-zA-Z0-9\s\-()]+$/.test(name.trim())) {
+            return res.json({
+                success: false,
+                type: "error",
+                message: "Product name contains invalid characters"
+            });
+        }
+
+        if (variants.length === 0) {
+            return res.json({
+                success: false,
+                type: "error",
+                message: "At least one variant is required"
+            });
+        }
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+        for (let i = 0; i < variants.length; i++) {
+            const variant = variants[i];
+
+            if (!variant) continue;
+
+            if (
+                !variant.strap_color ||
+                !/^[a-zA-Z\s]+$/.test(variant.strap_color.trim())
+            ) {
+                return res.json({
+                    success: false,
+                    type: "error",
+                    message: `Variant ${i + 1}: Invalid strap color`
+                });
+            }
+
+            if (
+                !variant.dial_color ||
+                !/^[a-zA-Z\s]+$/.test(variant.dial_color.trim())
+            ) {
+                return res.json({
+                    success: false,
+                    type: "error",
+                    message: `Variant ${i + 1}: Invalid dial color`
+                });
+            }
+
+            const price = Number(variant.price);
+
+            if (isNaN(price) || price <= 0) {
+                return res.json({
+                    success: false,
+                    type: "error",
+                    message: `Variant ${i + 1}: Invalid price`
+                });
+            }
+
+            if (price > 1000000) {
+                return res.json({
+                    success: false,
+                    type: "error",
+                    message: `Variant ${i + 1}: Price exceeds maximum limit`
+                });
+            }
+
+            const stock = Number(variant.stock);
+
+            if (isNaN(stock) || stock < 0) {
+                return res.json({
+                    success: false,
+                    type: "error",
+                    message: `Variant ${i + 1}: Invalid stock quantity`
+                });
+            }
+
+            const existingCropped = Array.isArray(
+                variant?.existing_cropped_images
+            )
+                ? variant.existing_cropped_images
+                : variant?.existing_cropped_images
+                    ? [variant.existing_cropped_images]
+                    : [];
+
+            const croppedFiles = (req.files || []).filter(file =>
+                file.fieldname.includes(`variants[${i}][images]`)
+            );
+
+            const totalImages =
+                existingCropped.length + croppedFiles.length;
+
+            if (totalImages < 3) {
+                return res.json({
+                    success: false,
+                    type: "error",
+                    message: `Variant ${i + 1} must contain at least 3 images`
+                });
+            }
+
+            for (const file of croppedFiles) {
+                if (!allowedTypes.includes(file.mimetype)) {
+                    return res.json({
+                        success: false,
+                        type: "error",
+                        message: `Variant ${i + 1}: Only JPG, PNG and WEBP images are allowed`
+                    });
+                }
+            }
         }
 
         const product = await Product.findById(productId);
@@ -325,29 +607,28 @@ const updateProduct = async (req, res) => {
         if (!product) {
             return res.status(404).json({
                 success: false,
+                type: "error",
                 message: "Product not found"
             });
         }
 
-        const updateProductExist = await Product.findOne({
+        const existingProduct = await Product.findOne({
             _id: { $ne: productId },
             name: { $regex: `^${name.trim()}$`, $options: "i" }
         });
 
-        if (updateProductExist) {
+        if (existingProduct) {
             return res.json({
                 success: false,
-                message: "Product already exists",
-                type: "error"
+                type: "error",
+                message: "Product already exists"
             });
-
         }
-        product.name = name;
+
+        product.name = name.trim();
         product.cat_id = category;
         product.brand_id = brand;
         product.descrip = descrip;
-
-        console.log("images:", req.files);
 
         const existingVariantsMap = new Map();
 
@@ -366,14 +647,29 @@ const updateProduct = async (req, res) => {
                 ? existingVariantsMap.get(variant._id.toString())
                 : null;
 
-            const existing_cropped = variant?.existing_cropped_images || [];
-            const existing_original = variant?.existing_original_images || [];
+            const existingCropped = Array.isArray(
+                variant?.existing_cropped_images
+            )
+                ? variant.existing_cropped_images
+                : variant?.existing_cropped_images
+                    ? [variant.existing_cropped_images]
+                    : [];
+
+            const existingOriginal = Array.isArray(
+                variant?.existing_original_images
+            )
+                ? variant.existing_original_images
+                : variant?.existing_original_images
+                    ? [variant.existing_original_images]
+                    : [];
 
             const croppedFiles = (req.files || []).filter(file =>
-                file.fieldname.includes(`variants[${i}][images]`));
+                file.fieldname.includes(`variants[${i}][images]`)
+            );
 
             const originalFiles = (req.files || []).filter(file =>
-                file.fieldname.includes(`variants[${i}][original_images]`));
+                file.fieldname.includes(`variants[${i}][original_images]`)
+            );
 
             const croppedUrls = [];
             const originalUrls = [];
@@ -383,6 +679,7 @@ const updateProduct = async (req, res) => {
                     file.buffer,
                     "product_images/cropped"
                 );
+
                 croppedUrls.push(url);
             }
 
@@ -391,24 +688,34 @@ const updateProduct = async (req, res) => {
                     file.buffer,
                     "product_images/original"
                 );
+
                 originalUrls.push(url);
             }
-            console.log("variants: ", variant);
-            console.log(" stock :", variant.stock);
 
             updatedVariants.push({
                 _id: variant._id
                     ? new mongoose.Types.ObjectId(variant._id)
                     : new mongoose.Types.ObjectId(),
-                strap_color: variant.strap_color,
-                dial_color: variant.dial_color,
-                price: variant.price,
-                stock: variant.stock !== undefined
-                    ? Number(variant.stock)
-                    : existingVariant?.stock || 0,
-                images: [...existing_cropped, ...croppedUrls],
-                original_images: [...existing_original, ...originalUrls]
-            })
+
+                strap_color: variant.strap_color.trim(),
+                dial_color: variant.dial_color.trim(),
+                price: Number(variant.price),
+
+                stock:
+                    variant.stock !== undefined
+                        ? Number(variant.stock)
+                        : existingVariant?.stock || 0,
+
+                images: [
+                    ...existingCropped,
+                    ...croppedUrls
+                ],
+
+                original_images: [
+                    ...existingOriginal,
+                    ...originalUrls
+                ]
+            });
         }
 
         product.variants = updatedVariants;
@@ -417,16 +724,17 @@ const updateProduct = async (req, res) => {
 
         return res.json({
             success: true,
-            message: "Product updated successfully",
-            type: "success"
+            type: "success",
+            message: "Product updated successfully"
         });
+
     } catch (err) {
         console.error("Update Error:", err);
 
         return res.status(500).json({
             success: false,
-            message: "Server error",
-            type: "error"
+            type: "error",
+            message: "Server error"
         });
     }
 };

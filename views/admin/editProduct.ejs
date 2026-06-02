@@ -8,7 +8,7 @@
 
         <!-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> -->
         <!-- jQuery -->
-        <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
         <!-- Select2 JS -->
@@ -17,247 +17,250 @@
     </head>
 
     <div class="container">
-                     <%- include("../partials/admin/sidebar") %>
+        <%- include("../partials/admin/sidebar") %>
 
 
-        <body>
-            <!-- Main Content -->
-            <div class="main">
-                <h1>Edit Product</h1>
+            <body>
+                <!-- Main Content -->
+                <div class="main">
+                    <h1>Edit Product</h1>
 
-                <div class="form-container">
-                    <h2>Product Information</h2>
-                    <form id="productForm" action="/admin/editProduct/<%= product._id %>?page=<%= page %>" method="POST"
-                        enctype="multipart/form-data">
+                    <div class="form-container">
+                        <h2>Product Information</h2>
+                        <form id="productForm" action="/admin/editProduct/<%= product._id %>?page=<%= page %>"
+                            method="POST" enctype="multipart/form-data">
 
-                        <!-- Product ID -->
-                        <!-- <div class="form-group">
+                            <!-- Product ID -->
+                            <!-- <div class="form-group">
                             <label>Product ID</label>
                             <input type="hidden" name="_id" value="<%= product._id %>" readonly>
                         </div> -->
 
-                        <!-- Product Name -->
-                        <div class="form-group">
-                            <label for="productName">Product Name*</label>
-                            <input type="text" id="productName" name="name" value="<%= product.name %>"
-                                class="form-control">
-                            <div id="nameError" class="error-message"></div>
-                        </div>
-
-                        <!-- Category Dropdown -->
-                        <div class="form-group">
-                            <label for="category">Category*</label>
-                            <!-- <% selectedCatId=product.cat_id ? product.cat_id : []; %> -->
-
-                            <select id="category" name="category" class="form-control">
-                                <% if (categories && categories.length> 0) { %>
-                                    <% categories.forEach(category=> { %>
-                                        <option value="<%= category._id %>" <%=product.cat_id &&
-                                            product.cat_id._id.toString()===category._id.toString() ? "selected" : "" %>
-                                            >
-                                            <%= category.name %>
-                                        </option>
-                                        <% }) %>
-                                            <% } else { %>
-                                                <option disabled>No categories available</option>
-                                                <% } %>
-                            </select>
-                            <div id="categoryError" class="error-message"></div>
-                        </div>
-
-                        <!-- Brand -->
-                        <div class="form-group">
-                            <label for="brand">Brand*</label>
-                            <select name="brand" id="brand" class="form-control">
-                                <% if (brands && brands.length> 0) { %>
-                                    <% brands.forEach(brand=> { %>
-                                        <option value="<%= brand._id %>" <%=product.brand_id &&
-                                            product.brand_id._id.toString()===brand._id.toString() ? "selected" : "" %>>
-                                            <%= brand.name %>
-                                        </option>
-                                        <% }) %>
-                                            <% } else { %>
-                                                <option disabled>No brands available</option>
-                                                <% } %>
-                            </select>
-                            <div id="brandError" class="error-message"></div>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="form-group">
-                            <label for="description">Description</label>
-                            <textarea id="description" name="descrip"
-                                class="form-control"><%= product.descrip %></textarea>
-                        </div>
-
-                        <!-- Product Variants -->
-                        <div class="form-group">
-                            <label>Product Variants</label>
-                            <div id="variantsContainer">
-                                <% if (product.variants && product.variants.length> 0) { %>
-                                    <% product.variants.forEach((variant, index)=> { %>
-                                        <div class="variant" id="variant-<%= index + 1 %>">
-                                            <div class="variant-header">
-                                                <hr class="variant-divider">
-                                                <h4>Variant <%= index + 1 %>
-                                                </h4>
-                                                <button type="button" class="remove-variant"
-                                                    data-variant-id="variant-<%= index + 1 %>">
-                                                    Remove Variant
-                                                </button>
-                                            </div>
-
-                                            <div class="variant-content">
-                                                <input type="hidden" name="variants[<%= index %>][_id]"
-                                                    value="<%= variant._id %>" />
-
-                                                <!-- Strap Color -->
-                                                <div class="form-group">
-                                                    <label for="strap_color-<%= index + 1 %>">Strap Color*</label>
-                                                    <input type="text" id="strap_color-<%= index + 1 %>"
-                                                        name="variants[<%= index %>][strap_color]"
-                                                        value="<%= variant.strap_color %>"
-                                                        class="form-control variant-strap_color">
-                                                    <div class="strap_color-error error-message"></div>
-                                                </div>
-
-                                                <!-- Dial Color -->
-                                                <div class="form-group">
-                                                    <label for="dial_color-<%= index + 1 %>">Dial Color*</label>
-                                                    <input type="text" id="dial_color-<%= index + 1 %>"
-                                                        name="variants[<%= index %>][dial_color]"
-                                                        value="<%= variant.dial_color %>"
-                                                        class="form-control variant-dial_color">
-                                                    <div class="dial_color-error error-message"></div>
-                                                </div>
-
-                                                <!-- Price -->
-                                                <div class="form-group">
-                                                    <label for="price-<%= index + 1 %>">Price (₹)*</label>
-                                                    <input type="number" id="price-<%= index + 1 %>"
-                                                        name="variants[<%= index %>][price]"
-                                                        value="<%= variant.price %>" min="1"
-                                                        class="form-control variant-price">
-                                                    <div class="price-error error-message"></div>
-                                                </div>
-
-                                                <!-- Stock -->
-                                                <div class="form-group">
-                                                    <label for="stock-<%= index + 1 %>">Stock Quantity*</label>
-                                                    <input type="number" id="stock-<%= index + 1 %>"
-                                                        name="variants[<%= index %>][stock]"
-                                                        value="<%= variant.stock %>" min="0"
-                                                        class="form-control variant-stock">
-                                                    <div class="stock-error error-message"></div>
-                                                </div>
-
-                                                <!-- Images -->
-                                                <% for (let imgIndex=1; imgIndex <=4; imgIndex++) { %>
-                                                    <div class="form-group">
-                                                        <label>Product Image <%= imgIndex %></label>
-
-                                                        <input type="file" name="variants[<%= index %>][images][]"
-                                                            class="variant-images" data-variant="<%= index + 1 %>"
-                                                            data-image="<%= imgIndex %>"
-                                                            data-original="<%= variant.original_images[imgIndex - 1] %>"
-                                                            accept="image/*" />
-
-                                                        <div class="image-preview-wrapper">
-                                                            <img id="preview-<%= index + 1 %>-<%= imgIndex %>"
-                                                                data-variant="<%= index + 1 %>"
-                                                                data-image="<%= imgIndex %>"
-                                                                style="max-width:300px; display:none;" />
-                                                        </div>
-
-                                                        <div class="image-actions">
-                                                            <button type="button" class="crop-btn"
-                                                                data-variant="<%= index + 1 %>"
-                                                                data-image="<%= imgIndex %>"
-                                                                style="display:none;">Crop</button>
-
-                                                            <button type="button"
-                                                                id="closeBtn-<%= index + 1 %>-<%= imgIndex %>"
-                                                                style="display:none;">Cancel</button>
-                                                        </div>
-
-                                                        <div id="croppedGallery-<%= index + 1 %>-<%= imgIndex %>"
-                                                            class="cropped-gallery" <% if (variant.images &&
-                                                            variant.images[imgIndex - 1]) { %>
-                                                            style="display:flex;"
-                                                            <% } %>
-                                                                >
-                                                                <% if (variant.images && variant.images[imgIndex - 1]) {
-                                                                    %>
-                                                                    <div class="gallery-image-wrapper"
-                                                                        data-variant="<%= index + 1 %>"
-                                                                        data-image="<%= imgIndex %>">
-
-                                                                        <img src="<%= variant.images[imgIndex - 1] %>"
-                                                                            class="existing-image"
-                                                                            data-variant="<%= index + 1 %>"
-                                                                            data-image="<%= imgIndex %>"
-                                                                            data-filename="<%= variant.images[imgIndex - 1] %>" />
-
-                                                                        <input type="file" class="original-image-input"
-                                                                            name="variants[<%= index %>][original_images][]"
-                                                                            style="display:none;">
-
-
-
-                                                                        <div class="gallery-actions">
-                                                                            <button type="button"
-                                                                                class="gallery-edit">✏️</button>
-                                                                            <button type="button"
-                                                                                class="gallery-remove">✖</button>
-                                                                        </div>
-
-                                                                        <input type="hidden"
-                                                                            name="variants[<%= index %>][existing_cropped_images][]"
-                                                                            value="<%= variant.images[imgIndex - 1] %>">
-
-                                                                        <input type="hidden"
-                                                                            name="variants[<%= index %>][existing_original_images][]"
-                                                                            value="<%= variant.images[imgIndex - 1] %>">
-
-
-                                                                    </div>
-                                                                    <% } %>
-                                                        </div>
-
-                                                        <div class="images-error error-message"></div>
-
-                                                    </div>
-                                                    <% } %>
-                                            </div>
-                                        </div>
-                                        <% }) %>
-                                            <% } %>
-
-                                                <!-- Variants will be added here dynamically -->
+                            <!-- Product Name -->
+                            <div class="form-group">
+                                <label for="productName">Product Name*</label>
+                                <input type="text" id="productName" name="name" value="<%= product.name %>"
+                                    class="form-control">
+                                <div id="nameError" class="error-message"></div>
                             </div>
-                        </div>
 
-                        <div class="variant-actions">
-                            <button type="button" class="add-variant-btn" id="addVariantBtn">
-                                + Add Variant
-                            </button>
-                        </div>
+                            <!-- Category Dropdown -->
+                            <div class="form-group">
+                                <label for="category">Category*</label>
+                                <!-- <% selectedCatId=product.cat_id ? product.cat_id : []; %> -->
 
-                        <!-- Actions -->
-                        <div class="button-group">
-                            <button type="button" class="btn btn-outline"
-                                onclick="window.history.back()">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Update Product</button>
-                        </div>
+                                <select id="category" name="category" class="form-control">
+                                    <% if (categories && categories.length> 0) { %>
+                                        <% categories.forEach(category=> { %>
+                                            <option value="<%= category._id %>" <%=product.cat_id &&
+                                                product.cat_id._id.toString()===category._id.toString() ? "selected"
+                                                : "" %>
+                                                >
+                                                <%= category.name %>
+                                            </option>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <option disabled>No categories available</option>
+                                                    <% } %>
+                                </select>
+                                <div id="categoryError" class="error-message"></div>
+                            </div>
+
+                            <!-- Brand -->
+                            <div class="form-group">
+                                <label for="brand">Brand*</label>
+                                <select name="brand" id="brand" class="form-control">
+                                    <% if (brands && brands.length> 0) { %>
+                                        <% brands.forEach(brand=> { %>
+                                            <option value="<%= brand._id %>" <%=product.brand_id &&
+                                                product.brand_id._id.toString()===brand._id.toString() ? "selected" : ""
+                                                %>>
+                                                <%= brand.name %>
+                                            </option>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <option disabled>No brands available</option>
+                                                    <% } %>
+                                </select>
+                                <div id="brandError" class="error-message"></div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea id="description" name="descrip"
+                                    class="form-control"><%= product.descrip %></textarea>
+                            </div>
+
+                            <!-- Product Variants -->
+                            <div class="form-group">
+                                <label>Product Variants</label>
+                                <div id="variantsContainer">
+                                    <% if (product.variants && product.variants.length> 0) { %>
+                                        <% product.variants.forEach((variant, index)=> { %>
+                                            <div class="variant" id="variant-<%= index + 1 %>">
+                                                <div class="variant-header">
+                                                    <hr class="variant-divider">
+                                                    <h4>Variant <%= index + 1 %>
+                                                    </h4>
+                                                    <button type="button" class="remove-variant"
+                                                        data-variant-id="variant-<%= index + 1 %>">
+                                                        Remove Variant
+                                                    </button>
+                                                </div>
+
+                                                <div class="variant-content">
+                                                    <input type="hidden" name="variants[<%= index %>][_id]"
+                                                        value="<%= variant._id %>" />
+
+                                                    <!-- Strap Color -->
+                                                    <div class="form-group">
+                                                        <label for="strap_color-<%= index + 1 %>">Strap Color*</label>
+                                                        <input type="text" id="strap_color-<%= index + 1 %>"
+                                                            name="variants[<%= index %>][strap_color]"
+                                                            value="<%= variant.strap_color %>"
+                                                            class="form-control variant-strap_color">
+                                                        <div class="strap_color-error error-message"></div>
+                                                    </div>
+
+                                                    <!-- Dial Color -->
+                                                    <div class="form-group">
+                                                        <label for="dial_color-<%= index + 1 %>">Dial Color*</label>
+                                                        <input type="text" id="dial_color-<%= index + 1 %>"
+                                                            name="variants[<%= index %>][dial_color]"
+                                                            value="<%= variant.dial_color %>"
+                                                            class="form-control variant-dial_color">
+                                                        <div class="dial_color-error error-message"></div>
+                                                    </div>
+
+                                                    <!-- Price -->
+                                                    <div class="form-group">
+                                                        <label for="price-<%= index + 1 %>">Price (₹)*</label>
+                                                        <input type="number" id="price-<%= index + 1 %>"
+                                                            name="variants[<%= index %>][price]"
+                                                            value="<%= variant.price %>" min="1"
+                                                            class="form-control variant-price">
+                                                        <div class="price-error error-message"></div>
+                                                    </div>
+
+                                                    <!-- Stock -->
+                                                    <div class="form-group">
+                                                        <label for="stock-<%= index + 1 %>">Stock Quantity*</label>
+                                                        <input type="number" id="stock-<%= index + 1 %>"
+                                                            name="variants[<%= index %>][stock]"
+                                                            value="<%= variant.stock %>" min="0"
+                                                            class="form-control variant-stock">
+                                                        <div class="stock-error error-message"></div>
+                                                    </div>
+
+                                                    <!-- Images -->
+                                                    <% for (let imgIndex=1; imgIndex <=4; imgIndex++) { %>
+                                                        <div class="form-group">
+                                                            <label>Product Image <%= imgIndex %></label>
+
+                                                            <input type="file" name="variants[<%= index %>][images][]"
+                                                                class="variant-images" data-variant="<%= index + 1 %>"
+                                                                data-image="<%= imgIndex %>"
+                                                                data-original="<%= variant.original_images[imgIndex - 1] %>"
+                                                                accept="image/*" />
+
+                                                            <div class="image-preview-wrapper">
+                                                                <img id="preview-<%= index + 1 %>-<%= imgIndex %>"
+                                                                    data-variant="<%= index + 1 %>"
+                                                                    data-image="<%= imgIndex %>"
+                                                                    style="max-width:300px; display:none;" />
+                                                            </div>
+
+                                                            <div class="image-actions">
+                                                                <button type="button" class="crop-btn"
+                                                                    data-variant="<%= index + 1 %>"
+                                                                    data-image="<%= imgIndex %>"
+                                                                    style="display:none;">Crop</button>
+
+                                                                <button type="button"
+                                                                    id="closeBtn-<%= index + 1 %>-<%= imgIndex %>"
+                                                                    style="display:none;">Cancel</button>
+                                                            </div>
+
+                                                            <div id="croppedGallery-<%= index + 1 %>-<%= imgIndex %>"
+                                                                class="cropped-gallery" <% if (variant.images &&
+                                                                variant.images[imgIndex - 1]) { %>
+                                                                style="display:flex;"
+                                                                <% } %>
+                                                                    >
+                                                                    <% if (variant.images && variant.images[imgIndex -
+                                                                        1]) { %>
+                                                                        <div class="gallery-image-wrapper"
+                                                                            data-variant="<%= index + 1 %>"
+                                                                            data-image="<%= imgIndex %>">
+
+                                                                            <img src="<%= variant.images[imgIndex - 1] %>"
+                                                                                class="existing-image"
+                                                                                data-variant="<%= index + 1 %>"
+                                                                                data-image="<%= imgIndex %>"
+                                                                                data-filename="<%= variant.images[imgIndex - 1] %>" />
+
+                                                                            <input type="file"
+                                                                                class="original-image-input"
+                                                                                name="variants[<%= index %>][original_images][]"
+                                                                                style="display:none;">
 
 
-                    </form>
+
+                                                                            <div class="gallery-actions">
+                                                                                <button type="button"
+                                                                                    class="gallery-edit">✏️</button>
+                                                                                <button type="button"
+                                                                                    class="gallery-remove">✖</button>
+                                                                            </div>
+
+                                                                            <input type="hidden"
+                                                                                name="variants[<%= index %>][existing_cropped_images][]"
+                                                                                value="<%= variant.images[imgIndex - 1] %>">
+
+                                                                            <input type="hidden"
+                                                                                name="variants[<%= index %>][existing_original_images][]"
+                                                                                value="<%= variant.images[imgIndex - 1] %>">
+
+
+                                                                        </div>
+                                                                        <% } %>
+                                                            </div>
+
+                                                            <div class="images-error error-message"></div>
+
+                                                        </div>
+                                                        <% } %>
+                                                </div>
+                                            </div>
+                                            <% }) %>
+                                                <% } %>
+
+                                                    <!-- Variants will be added here dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="variant-actions">
+                                <button type="button" class="add-variant-btn" id="addVariantBtn">
+                                    + Add Variant
+                                </button>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="button-group">
+                                <button type="button" class="btn btn-outline"
+                                    onclick="window.history.back()">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Update Product</button>
+                            </div>
+
+
+                        </form>
+                    </div>
                 </div>
-            </div>
 
 
 
-        </body>
+            </body>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
@@ -785,6 +788,17 @@
                 } else if (nameInput.value.trim().length < 4) {
                     nameError.textContent = "Name must be at least 4 characters long";
                     isValid = false;
+                } else if (nameInput.value.trim().length > 100) {
+                    nameError.textContent =
+                        "Product name cannot exceed 100 characters";
+                    isValid = false;
+                }
+                else if (
+                    !/^[a-zA-Z0-9\s\-()]+$/.test(nameInput.value.trim())
+                ) {
+                    nameError.textContent =
+                        "Product name contains invalid characters";
+                    isValid = false;
                 }
 
                 if (categoryInput.value.trim() === "") {
@@ -816,15 +830,30 @@
                     if (strapColorInput.value.trim() === "") {
                         strapError.textContent = "Please enter strap color";
                         isValid = false;
+                    } else if (!/^[a-zA-Z\s]+$/.test(strapColorInput.value.trim())) {
+                        strapError.textContent = "Only letters are allowed";
+                        isValid = false;
                     }
 
                     if (dialColorInput.value.trim() === "") {
                         dialError.textContent = "Please enter dial color";
                         isValid = false;
+                    } else if (
+                        !/^[a-zA-Z\s]+$/.test(
+                            dialColorInput.value.trim()
+                        )
+                    ) {
+                        dialError.textContent =
+                            "Only letters are allowed";
+                        isValid = false;
                     }
 
                     if (!priceInput.value || parseFloat(priceInput.value) <= 0) {
                         priceError.textContent = "Please enter a valid price";
+                        isValid = false;
+                    } else if (priceInput.value > 1000000) {
+                        priceError.textContent =
+                            "Price is too high";
                         isValid = false;
                     }
 
@@ -838,10 +867,24 @@
                     //     imageError.textContent = "Please upload at least one image";
                     //     isValid = false;
                     // }
+                    const galleries = variant.querySelectorAll(".cropped-gallery");
+
+let imageCount = 0;
+
+galleries.forEach(gallery => {
+    if (gallery.children.length > 0) {
+        imageCount++;
+    }
+});
+
+if (imageCount < 3) {
+    imageError.textContent =
+        "Please keep at least 3 images for this variant";
+    isValid = false;
+}
                 })
                 return isValid;
             }
-
 
             // Prevent form submission on Enter key
             form.addEventListener("keydown", function (e) {
@@ -912,71 +955,71 @@
             // })
 
             form.addEventListener("submit", async function (e) {
-    e.preventDefault();
+                e.preventDefault();
 
-    try {
-        if (!validateForm()) return;
+                try {
+                    if (!validateForm()) return;
 
-        const id = "<%= product._id %>";
+                    const id = "<%= product._id %>";
 
-        /* ✅ STEP 1: FIX VARIANT INDEXING (IMPORTANT FIX) */
-        const variants = document.querySelectorAll(".variant");
+                    /* ✅ STEP 1: FIX VARIANT INDEXING (IMPORTANT FIX) */
+                    const variants = document.querySelectorAll(".variant");
 
-        variants.forEach((variant, index) => {
-            variant.querySelectorAll("input, select, textarea").forEach(input => {
-                if (input.name) {
-                    input.name = input.name.replace(
-                        /variants\[\d+\]/,
-                        `variants[${index}]`
-                    );
+                    variants.forEach((variant, index) => {
+                        variant.querySelectorAll("input, select, textarea").forEach(input => {
+                            if (input.name) {
+                                input.name = input.name.replace(
+                                    /variants\[\d+\]/,
+                                    `variants[${index}]`
+                                );
+                            }
+                        });
+                    });
+
+                    /* ✅ STEP 2: CREATE FORM DATA AFTER FIX */
+                    const formData = new FormData(form);
+
+                    /* (optional) add original images */
+                    Object.keys(originalImages).forEach(variantIndex => {
+                        originalImages[variantIndex].forEach(file => {
+                            formData.append(
+                                `variants[${variantIndex - 1}][original_images][]`,
+                                file
+                            );
+                        });
+                    });
+
+                    /* ✅ STEP 3: SEND REQUEST */
+                    const response = await fetch(`/admin/editProduct/${id}`, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: data.type || "success",
+                            text: data.message || "Product updated successfully!",
+                            confirmButtonColor: '#007bff',
+                            timer: 2000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = `/admin/products?page=<%= page %>`;
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: data.type || "error",
+                            text: data.message || "Something went wrong",
+                            confirmButtonColor: '#007bff'
+                        });
+                    }
+
+                } catch (error) {
+                    console.error("Form submit error:", error);
                 }
             });
-        });
-
-        /* ✅ STEP 2: CREATE FORM DATA AFTER FIX */
-        const formData = new FormData(form);
-
-        /* (optional) add original images */
-        Object.keys(originalImages).forEach(variantIndex => {
-            originalImages[variantIndex].forEach(file => {
-                formData.append(
-                    `variants[${variantIndex - 1}][original_images][]`,
-                    file
-                );
-            });
-        });
-
-        /* ✅ STEP 3: SEND REQUEST */
-        const response = await fetch(`/admin/editProduct/${id}`, {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            Swal.fire({
-                icon: data.type || "success",
-                text: data.message || "Product updated successfully!",
-                confirmButtonColor: '#007bff',
-                timer: 2000,
-                timerProgressBar: true,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = `/admin/products?page=<%= page %>`;
-            });
-        } else {
-            Swal.fire({
-                icon: data.type || "error",
-                text: data.message || "Something went wrong",
-                confirmButtonColor: '#007bff'
-            });
-        }
-
-    } catch (error) {
-        console.error("Form submit error:", error);
-    }
-});
         })
 
 
