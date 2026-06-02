@@ -169,14 +169,14 @@ const updateCategory = async (req, res) => {
         if(updatedCategoryExist) {
             req.session.message = "Category already exist";
             req.session.type = "error";
-            return res.redirect(`/admin/editCategory/${_id}`);
+            return res.redirect(`/admin/categories/editCategory/${_id}`);
         }
         const upadateCategory = await Category.findByIdAndUpdate(_id, { name, descrip });
 
         if (!upadateCategory) {
             req.session.message = "Category not updated, Please try again.";
             req.session.type = "error";
-            return res.redirect(`/admin/editCategory/${_id}`);
+            return res.redirect(`/admin/categories/editCategory/${_id}`);
 
         }
         req.session.message = "Updated category";

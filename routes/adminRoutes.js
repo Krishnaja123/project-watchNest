@@ -31,8 +31,8 @@ router.get("/category", adminAuth, categoryController.createCategory);
 router.post("/category", adminAuth, categoryController.saveCategory);
 router.get("/categories", adminAuth, categoryController.categories);
 router.get("/fetchCategories", adminAuth, categoryController.fetchCategories);
-router.get("/editCategory/:id", adminAuth, categoryController.categoryDetails);
-router.post("/editCategory/:id", adminAuth, categoryController.updateCategory);
+router.get("/categories/editCategory/:id", adminAuth, categoryController.categoryDetails);
+router.post("/categories/editCategory/:id", adminAuth, categoryController.updateCategory);
 router.put("/categories/:id", adminAuth, categoryController.deleteCategory);
 router.put("/viewCategory/:id", adminAuth, categoryController.viewCategory);
 
@@ -41,8 +41,8 @@ router.get("/brand", adminAuth, brandController.createBrand);
 router.post("/brand", adminAuth, brandController.saveBrand);
 router.get("/brands", adminAuth, brandController.brands);
 router.get("/fetchbrands", adminAuth, brandController.fetchBrands);
-router.get("/editBrand/:id", adminAuth, brandController.brandDetails);
-router.post("/editBrand/:id", adminAuth, brandController.updateBrand);
+router.get("/brands/editBrand/:id", adminAuth, brandController.brandDetails);
+router.post("/brands/editBrand/:id", adminAuth, brandController.updateBrand);
 router.put("/brands/:id", adminAuth, brandController.deleteBrand);
 router.put("/viewBrand/:id", adminAuth, brandController.viewBrand);
 

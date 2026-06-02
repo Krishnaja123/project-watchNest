@@ -7,15 +7,15 @@
 
     <body>
         <div class="container">
+             <%- include("../partials/admin/sidebar") %>
+
             <div class="main">
                 <h1>Edit Brand</h1>
 
                 <div class="form-container">
-                    <form action="/admin/editBrand/<%= brand._id %>?page=<%= page %>" method="POST">
+                    <form action="/admin/brands/editBrand/<%= brand._id %>?page=<%= page %>" method="POST">
 
                         <div class="form-grid">
-
-                            
 
                             <div class="form-group">
                                 <label>Name</label>

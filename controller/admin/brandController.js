@@ -169,7 +169,7 @@ const updateBrand = async (req, res) => {
         if (updatedBrandExist) {
             req.session.message = "Brand already exist";
             req.session.type = "error";
-            return res.redirect(`/admin/editBrand/${_id}`);
+            return res.redirect(`/admin/brands/editBrand/${_id}`);
         }
 
         const upadateBrand = await Brand.findByIdAndUpdate(_id, { name, descrip });

@@ -7,38 +7,40 @@
 
     <body>
         <div class="container">
-            <div class="main">
-                <h1>Edit Category</h1>
+            <%- include("../partials/admin/sidebar") %>
 
-                <div class="form-container">
-                    <form action="/admin/editCategory/<%= category._id %>?page=<%= page %>" method="POST">
+                <div class="main">
+                    <h1>Edit Category</h1>
 
-                        <div class="form-grid">
+                    <div class="form-container">
+                        <form action="/admin/categories/editCategory/<%= category._id %>?page=<%= page %>" method="POST">
 
-                            <div class="form-group">
-                                <label>Name</label>
-                                <input type="text" name="name" value="<%= category.name %>" required>
+                            <div class="form-grid">
+
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" name="name" value="<%= category.name %>" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <input type="hidden" name="_id" value="<%= category._id %>" readonly>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label>Description</label>
+                                    <textarea name="description" rows="4"><%= category.descrip || "" %></textarea>
+                                </div>
+
                             </div>
 
-                            <div class="form-group">
-                                <input type="hidden" name="_id" value="<%= category._id %>" readonly>
+                            <div class="button-group">
+                                <a href="/admin/categories" class="btn btn-cancel">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Update</button>
                             </div>
 
-                            <div class="form-group full-width">
-                                <label>Description</label>
-                                <textarea name="description" rows="4"><%= category.descrip || "" %></textarea>
-                            </div>
-
-                        </div>
-
-                        <div class="button-group">
-                            <a href="/admin/categories" class="btn btn-cancel">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Update</button>
-                        </div>
-
-                    </form>
+                        </form>
+                    </div>
                 </div>
-            </div>
         </div>
 
         <%- include("../partials/admin/footer") %>
