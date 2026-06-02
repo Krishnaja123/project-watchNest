@@ -15,15 +15,17 @@
 
                         <div class="form-grid">
 
-                            <div class="form-group">
-                                <input type="hidden" name="_id" value="<%= brand._id %>">
-                            </div>
+                            
 
                             <div class="form-group">
                                 <label>Name</label>
                                 <input type="text" name="name" value="<%= brand.name %>" required>
                             </div>
 
+                            <div class="form-group">
+                                <input type="hidden" name="_id" value="<%= brand._id %>">
+                            </div>
+                            
                             <div class="form-group full-width">
                                 <label>Description</label>
                                 <textarea name="description" rows="4"><%= brand.descrip || "" %></textarea>
