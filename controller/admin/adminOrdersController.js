@@ -135,7 +135,8 @@ const getOrderDetails = async (req, res) => {
 
 const updateProductStatus = async (req, res) => {
     try {
-        const { status } = req.body;
+        const { status , cancelReason } = req.body;
+
         const orderItemId = req.params.id;
 
         const item = await OrderItem.findById(orderItemId);
@@ -156,6 +157,9 @@ const updateProductStatus = async (req, res) => {
         if (item.status === "processing") {
 
             item.status = status;
+            if(status === "cancelled" && cancelReason) {
+                item.cancelReason = cancelReason;
+            }
             await item.save();
 
             if (status === "cancelled") {
@@ -174,7 +178,7 @@ const updateProductStatus = async (req, res) => {
                 console.log("refund: ", refundAmount);
 
                 const userId = req.user._id;
-                await creditWallet(userId, refundAmount, `Refund for returned product`);
+                await creditWallet(userId, refundAmount, `Refund for cancelled product`);
                 order.refundAmount = (order.refundAmount || 0) + refundAmount;
                 await order.save();
                 }

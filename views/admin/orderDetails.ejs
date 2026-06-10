@@ -163,10 +163,11 @@
                                                     </strong><br>
                                                     Quantity: <%= item.quantity %><br>
                                                         Original Price:
-                                                         ₹<%= item.price %> <br>
-                                                    Offer Price: 
-                                                    <strong>₹<%= item.finalPrice %></strong><br>
-<strong>Total: <%= item.quantity * item.finalPrice %></strong>
+                                                        ₹<%= item.price %> <br>
+                                                            Offer Price:
+                                                            <strong>₹<%= item.finalPrice %></strong><br>
+                                                            <strong>Total: <%= item.quantity * item.finalPrice %>
+                                                                    </strong>
 
                                                 </div>
 
@@ -241,7 +242,8 @@
                                                             method="POST"
                                                             class="statusForm d-flex align-items-center gap-2">
 
-                                                            <select name="status" class="form-select form-select-sm">
+                                                            <select name="status"
+                                                                class="form-select form-select-sm status-select">
 
                                                                 <% productStatusFlow[item.status].forEach(statusOption=>
                                                                     { %>
@@ -361,5 +363,59 @@
                         });
                     })
                 })
+
+                    const statusForms = document.querySelectorAll(".statusForm");
+
+                    statusForms.forEach(form => {
+
+                        form.addEventListener("submit", async function (e) {
+
+                            const selectedStatus =
+                                form.querySelector(".status-select").value;
+
+                            if (selectedStatus !== "cancelled") {
+                                return;
+                            }
+
+                            e.preventDefault();
+
+                            const result = await Swal.fire({
+                                title: "Cancel Order Item",
+                                input: "textarea",
+                                inputLabel: "Cancellation Reason",
+                                inputPlaceholder: "Enter reason for cancellation...",
+                                inputAttributes: {
+                                    maxlength: 300
+                                },
+                                showCancelButton: true,
+                                confirmButtonText: "Submit",
+                                confirmButtonColor: "#dc3545",
+                                inputValidator: (value) => {
+                                    if (!value || !value.trim()) {
+                                        return "Cancellation reason is required";
+                                    }
+                                }
+                            });
+
+                            if (result.isConfirmed) {
+
+                                let hiddenReason =
+                                    form.querySelector("input[name='cancelReason']");
+
+                                if (!hiddenReason) {
+                                    hiddenReason = document.createElement("input");
+                                    hiddenReason.type = "hidden";
+                                    hiddenReason.name = "cancelReason";
+                                    form.appendChild(hiddenReason);
+                                }
+
+                                hiddenReason.value = result.value.trim();
+
+                                form.submit();
+                            }
+                        });
+
+                    });
+
             })
         </script>
