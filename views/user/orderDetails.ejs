@@ -135,7 +135,7 @@
                                 <div class="col-md-2">
                                     <small class="text-muted">PAYMENT STATUS</small><br>
                                     <span
-                                        class="badge <%= order.paymentStatus === 'success' ? 'bg-success' : 'bg-danger' %>">
+                                        class="badge <%= order.paymentStatus === 'paid' ? 'bg-success' : 'bg-danger' %>">
                                         <%= order.paymentStatus %>
                                     </span>
                                 </div>
@@ -148,8 +148,8 @@
                                     </span>
                                 </div>
 
-<div class="col d-flex justify-content-end align-items-start gap-2">                                    <% if (order.paymentStatus !=="failed" && !(order.status==="cancelled" &&
-                                        order.paymentStatus==="pending" )) { %>
+<div class="col d-flex justify-content-end align-items-start gap-2">                                    
+    <% if (order.paymentStatus !=="failed" && !(order.status==="cancelled" )) { %>
                                         <a href="/order/<%= order._id %>/invoice" class="btn btn-primary btn-sm">
                                             Invoice
                                         </a>

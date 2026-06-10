@@ -175,38 +175,26 @@
             </tr>
         </thead>
         <tbody>
-            <% let subtotal=0; let refundAmount=0; %>
 
-                <% orderItems.forEach(item=> {
-                    let total = item.finalPrice * item.quantity;
-                    subtotal += total;
+            <% orderItems.forEach(item=> { %>
 
-                    if (
-                    (item.status === "cancelled" || item.status === "returned") &&
-                    order.paymentStatus === "paid"
-                    ) {
-                    refundAmount += total;
-                    }
-                    %>
-
-                    <tr>
-                        <td>
-                            <%= item.productName %>
-                        </td>
-                        <td class="text-right">₹<%= item.price %>
-                        </td>
-                        <td class="text-right">₹<%= item.offerDiscount %>
-                        </td>
-                        <td class="text-right">₹<%= item.finalPrice %>
-                        </td>
-                        <td class="text-right">
-                            <%= item.quantity %>
-                        </td>
-                        <td class="text-right">₹<%= total %>
-                        </td>
-                    </tr>
-
-                    <% }) %>
+                <tr>
+                    <td>
+                        <%= item.productName %>
+                    </td>
+                    <td class="text-right">₹<%= item.price %>
+                    </td>
+                    <td class="text-right">₹<%= item.offerDiscount %>
+                    </td>
+                    <td class="text-right">₹<%= item.finalPrice %>
+                    </td>
+                    <td class="text-right">
+                        <%= item.quantity %>
+                    </td>
+                    <td class="text-right">₹<%= item.finalPrice * item.quantity %>
+                    </td>
+                </tr>
+                <% }) %>
         </tbody>
     </table>
 
@@ -215,37 +203,41 @@
         <table>
             <tr>
                 <td>Subtotal</td>
-                <td class="text-right">₹<%= subtotal %>
+                <td class="text-right">₹<%= subTotal %>
                 </td>
             </tr>
             <tr>
-                <td>Discount</td>
-                <td class="text-right">₹<%= order.couponDiscount || 0 %>
+                <td>Coupon Discount</td>
+                <td class="text-right">₹<%= Number(discount || 0).toFixed(2) || 0 %>
                 </td>
             </tr>
             <tr>
-                <td>Tax (GST 18%)</td>
-                <td class="text-right">₹<%= order.taxAmount || 0 %>
+                <td>Tax (GST 5%)</td>
+                <td class="text-right">₹<%= Number(tax || 0).toFixed(2) || 0 %>
                 </td>
             </tr>
 
-            <% if(refundAmount> 0) { %>
+
+            <tr>
+                <td>Shipping</td>
+                <td class="text-right">₹<%= order.shippingCharge || 0 %>
+                </td>
+            </tr>
+            <tr class="total-row">
+                <td>Grand Total</td>
+                <td class="text-right">₹<%= Number(subTotal - discount + tax + order.shippingCharge).toFixed(2) %>
+                </td>
+            </tr>
+
+            <br>
+            <br>
+            <% if(refundAmount > 0) { %>
                 <tr>
-                    <td>Refund Amount</td>
+                    <td>Refund Issured</td>
                     <td class="text-right">₹<%= refundAmount %>
                     </td>
                 </tr>
                 <% } %>
-                    <tr>
-                        <td>Shipping</td>
-                        <td class="text-right">₹<%= order.shippingCharge || 0 %>
-                        </td>
-                    </tr>
-                    <tr class="total-row">
-                        <td>Grand Total</td>
-                        <td class="text-right">₹<%= order.totalAmount %>
-                        </td>
-                    </tr>
         </table>
     </div>
 

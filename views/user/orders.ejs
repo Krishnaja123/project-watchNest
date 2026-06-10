@@ -92,7 +92,7 @@
                                         <div class="col-md-2">
                                             <small>PAYMENT STATUS</small><br>
 
-                                            <% if (data.paymentStatus==="failed" ) { %>
+                                            <% if (data.paymentStatus==="failed" && data.status != "cancelled") { %>
                                                 <a href="/retry-payment/<%= data._id %>" class="btn btn-danger btn-sm">
                                                     Retry Payment
                                                 </a>
@@ -158,7 +158,7 @@
                                                 </span>
 
                                                 <!-- ACTION BUTTONS -->
-                                                <% if (item.status==="processing" ) { %>
+                                                <% if (item.status==="processing" && data.paymentStatus !== "failed") { %>
                                                     <button type="button"
                                                         class="btn btn-danger btn-sm cancel-product-btn"
                                                         data-id="<%= item._id %>">

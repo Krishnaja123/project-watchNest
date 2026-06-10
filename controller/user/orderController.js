@@ -175,7 +175,10 @@ const getOrderInvoice = async (req, res) => {
     try {
         const orderId = req.params.id;
 
-        const order = await Order.findOne({ _id: orderId, paymentStatus: { $ne: "failed" } });
+        const order = await Order.findOne({ _id: orderId, 
+            user_id: req.user._id,
+            paymentStatus: { $ne: "failed" },
+            status: { $ne: "cancelled" } });
 
         if (!order) {
             req.session.message = "This order deatails are not available in db";
@@ -186,13 +189,41 @@ const getOrderInvoice = async (req, res) => {
 
         const orderItems = await OrderItem.find({
             order_id: orderId,
-            status: { $in: ["delivered", "cancelled", "returned", "processing"] },
+            status: {  $nin: ["cancelled"] },
             paymentStatus: { $in: ["paid", "pending"] }
         });
+
+        const tax = orderItems.reduce((tax, item) => {
+            const itemTax = item.finalPrice * item.quantity * 0.05;
+            return tax += itemTax;
+        },0);
+
+        const refundAmount = orderItems.reduce((refund, item) => {
+            if(item.status === "returned") {
+                const itemTotal = item.finalPrice * item.quantity;
+                const itemTax = itemTotal * 0.05;
+                refund += itemTotal - item.couponDiscount + itemTax;
+            }
+            return refund;
+        },0);
+
+        const discount = orderItems.reduce((discount, item) => {
+            return discount += item.couponDiscount * item.quantity;
+        },0);
+
+        // console.log("tax: ", tax);
+        
+        const subTotal = orderItems.reduce((total, item) => {
+            return total += item.finalPrice * item.quantity;
+        },0);
 
         return res.render("user/orderInvoice", {
             order,
             orderItems,
+            tax,
+            discount, 
+            subTotal,
+            refundAmount
         });
     } catch (error) {
         console.error(error);
