@@ -68,12 +68,20 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="fw-bold" style="color:#333;">Our Collection</h4>
 
-                        <select id="sortSelect" class="form-select w-auto">
-                            <option value="" disabled selected>Sort</option>
-                            <option value="low-high">Price: Low to High</option>
-                            <option value="high-low">Price: High to Low</option>
-                            <option value="newest">Newest</option>
-                        </select>
+                        <div class="d-flex gap-2">
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchInput" class="search-input"
+                                    placeholder="Search for products...">
+                            </div>
+                            
+                            <select id="sortSelect" class="form-select w-auto">
+                                <option value="" disabled selected>Sort</option>
+                                <option value="low-high">Price: Low to High</option>
+                                <option value="high-low">Price: High to Low</option>
+                                <option value="newest">Newest</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- BANNER IMAGE -->
@@ -85,7 +93,8 @@
 
                             <!-- PRODUCTS GRID -->
                             <div class="products-wrapper">
-                                <%- include("../partials/user/productSection", { variants, currentPage, totalPages, wishlistVariantIds }) %>
+                                <%- include("../partials/user/productSection", { variants, currentPage, totalPages,
+                                    wishlistVariantIds }) %>
                             </div>
 
                 </main>
@@ -120,6 +129,7 @@
                 const applyPriceBtn = document.getElementById("applyPrice");
 
                 const sortSelect = document.getElementById("sortSelect");
+                const searchInput = document.getElementById("searchInput");
 
                 async function applyFilters(page = 1) {
 
@@ -135,6 +145,8 @@
                     const maxPrice = maxPriceInput.value || Infinity;
 
                     const sort = sortSelect.value;
+
+                    const search = searchInput.value.trim();
 
                     const params = new URLSearchParams();
 
@@ -158,6 +170,9 @@
                         params.append("sort", sort);
                     }
 
+                    if (search) {
+                        params.append("search", search);
+                    }
                     params.append("page", page);
                     params.append("limit", 12);
 
@@ -191,6 +206,16 @@
 
                     productsWrapper.innerHTML = html;
                 })
+
+                let searchTimeout;
+
+                searchInput.addEventListener("input", () => {
+                    clearTimeout(searchTimeout);
+
+                    searchTimeout = setTimeout(() => {
+                        applyFilters();
+                    }, 500);
+                });
 
                 document.addEventListener("click", function (e) {
                     if (e.target.classList.contains("pagination-btn")) {
@@ -251,8 +276,8 @@
                     }
 
                 });
-            
-                
+
+
                 document.querySelectorAll(".wishlist").forEach(button => {
                     button.addEventListener("click", async function () {
                         const productId = this.dataset.productId;
@@ -304,7 +329,7 @@
                         }
                     });
                 });
-  
+
             </script>
 
     </body>

@@ -9,29 +9,38 @@ async function getPaginatedProducts(query) {
 
     let filter = { is_delete: false };
 
+    const search = query.search?.trim() || "";
+    
+    if (search) {
+        filter.name = {
+            $regex: search,
+            $options: "i"
+        };
+    }
+
     const categoryIds = (query.category || "")
-    .split(",")
-    .filter(id => id)
-    .map(id => new mongoose.Types.ObjectId(id));
+        .split(",")
+        .filter(id => id)
+        .map(id => new mongoose.Types.ObjectId(id));
 
-if (categoryIds.length > 0) {
-    filter.cat_id = { $in: categoryIds };
-}
+    if (categoryIds.length > 0) {
+        filter.cat_id = { $in: categoryIds };
+    }
     const brandIds = (query.brand || "")
-    .split(",")
-    .filter(id => id)
-    .map(id => new mongoose.Types.ObjectId(id));
+        .split(",")
+        .filter(id => id)
+        .map(id => new mongoose.Types.ObjectId(id));
 
-if (brandIds.length > 0) {
-    filter.brand_id = { $in: brandIds };
-}
+    if (brandIds.length > 0) {
+        filter.brand_id = { $in: brandIds };
+    }
 
     let sortOption = { created_at: -1 };
 
-    if(query.sort === "low-high"){
-        sortOption = { "variants.price": 1};
-    } else if(query.sort === "high-low"){
-        sortOption = { "variants.price": -1};
+    if (query.sort === "low-high") {
+        sortOption = { "variants.price": 1 };
+    } else if (query.sort === "high-low") {
+        sortOption = { "variants.price": -1 };
     }
     const pipeline = [
         { $match: filter },
@@ -39,19 +48,20 @@ if (brandIds.length > 0) {
         { $match: { "variants.view": true } }
     ];
 
-    if(query.minPrice || query.maxPrice) {
+    if (query.minPrice || query.maxPrice) {
         let priceFilter = {};
 
-        if(query.minPrice) {
+        if (query.minPrice) {
             priceFilter.$gte = Number(query.minPrice);
         }
-        if(query.maxPrice) {
+        if (query.maxPrice) {
             priceFilter.$lte = Number(query.maxPrice);
         }
         pipeline.push({
-            $match: { "variants.price": priceFilter}
+            $match: { "variants.price": priceFilter }
         });
     }
+
     const countPipeline = [...pipeline];
 
     pipeline.push({
@@ -62,47 +72,47 @@ if (brandIds.length > 0) {
             as: "brand"
         }
     },
-    { $unwind: "$brand" },
-    { $sort: sortOption },
-    { $skip: skip },
-    { $limit: limit }
-);
-const variants = await Product.aggregate(pipeline);
+        { $unwind: "$brand" },
+        { $sort: sortOption },
+        { $skip: skip },
+        { $limit: limit }
+    );
+    const variants = await Product.aggregate(pipeline);
 
-const processedVariants = await Promise.all(
-    variants.map(async (item) => {
+    const processedVariants = await Promise.all(
+        variants.map(async (item) => {
 
-        const price = Number(item.variants.price);
+            const price = Number(item.variants.price);
 
-        // pass full product OR required fields
-        const bestDiscount = await getOffer(item, price);
+            // pass full product OR required fields
+            const bestDiscount = await getOffer(item, price);
 
-        const finalPrice = price - bestDiscount;
+            const finalPrice = price - bestDiscount;
 
-        return {
-            ...item,
-            price,
-            finalPrice,
-            discount: bestDiscount
-        };
-    })
-)
+            return {
+                ...item,
+                price,
+                finalPrice,
+                discount: bestDiscount
+            };
+        })
+    )
 
-const totalDocs = await Product.aggregate([
-    ...countPipeline,
-    { $count: "total" }
-]);
+    const totalDocs = await Product.aggregate([
+        ...countPipeline,
+        { $count: "total" }
+    ]);
 
-const totalVariants = totalDocs.length > 0 ? totalDocs[0].total : 0;
-const totalPages = Math.ceil(totalVariants / limit);
+    const totalVariants = totalDocs.length > 0 ? totalDocs[0].total : 0;
+    const totalPages = Math.ceil(totalVariants / limit);
 
-return { 
-    variants: processedVariants, 
-    currentPage: page,
-    totalPages
-};
+    return {
+        variants: processedVariants,
+        currentPage: page,
+        totalPages
+    };
 }
 
-module.exports = { 
+module.exports = {
     getPaginatedProducts,
 }
