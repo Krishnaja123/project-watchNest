@@ -148,8 +148,8 @@
                                     </span>
                                 </div>
 
-<div class="col d-flex justify-content-end align-items-start gap-2">                                    
-    <% if (order.paymentStatus !=="failed" && !(order.status==="cancelled" )) { %>
+                                <div class="col d-flex justify-content-end align-items-start gap-2">
+                                    <% if (order.paymentStatus !=="failed" && !(order.status==="cancelled" )) { %>
                                         <a href="/order/<%= order._id %>/invoice" class="btn btn-primary btn-sm">
                                             Invoice
                                         </a>
@@ -188,6 +188,7 @@
                                                 </strong><br>
                                                 Qty: <%= item.quantity %><br>
                                                     Price: ₹<%= item.finalPrice %> <br>
+                                                        Tax: ₹<%= (item.finalPrice * 0.05).toFixed(2) %>
                                             </a>
                                         </div>
 
@@ -210,39 +211,38 @@
 
                                     <div class="d-flex align-items-center gap-3">
 
-                                                <!-- ACTION BUTTONS -->
-                                                <% if (item.status==="processing" ) { %>
+                                        <!-- ACTION BUTTONS -->
+                                        <% if (item.status==="processing" ) { %>
+                                            <button type="button" class="btn btn-danger btn-sm cancel-product-btn"
+                                                data-id="<%= item._id %>">
+                                                Cancel
+                                            </button>
+                                            <% } else if (item.status==="delivered" ) { %>
+                                                <% if (!item.returnRequested && !item.returnAccepted &&
+                                                    !item.returnRejected) { %>
                                                     <button type="button"
-                                                        class="btn btn-danger btn-sm cancel-product-btn"
+                                                        class="btn btn-outline-danger btn-sm return-product-btn"
                                                         data-id="<%= item._id %>">
-                                                        Cancel
+                                                        Return
                                                     </button>
-                                                    <% } else if (item.status==="delivered" ) { %>
-                                                        <% if (!item.returnRequested && !item.returnAccepted &&
-                                                            !item.returnRejected) { %>
-                                                            <button type="button"
-                                                                class="btn btn-outline-danger btn-sm return-product-btn"
-                                                                data-id="<%= item._id %>">
-                                                                Return
-                                                            </button>
-                                                            <% } else if(item.returnRequested && !item.returnAccepted &&
-                                                                !item.returnRejected) { %>
+                                                    <% } else if(item.returnRequested && !item.returnAccepted &&
+                                                        !item.returnRejected) { %>
+                                                        <span class="badge bg-danger">
+                                                            Return Requested
+                                                        </span>
+                                                        <% } else if(item.returnAccepted) { %>
+                                                            <span class="badge bg-success">
+                                                                Return Accepted
+                                                            </span>
+                                                            <% } else if(item.returnRejected) { %>
                                                                 <span class="badge bg-danger">
-                                                                    Return Requested
+                                                                    Return Rejected
                                                                 </span>
-                                                                <% } else if(item.returnAccepted) { %>
-                                                                    <span class="badge bg-success">
-                                                                        Return Accepted
-                                                                    </span>
-                                                                    <% } else if(item.returnRejected) { %>
-                                                                        <span class="badge bg-danger">
-                                                                            Return Rejected
-                                                                        </span>
-                                                                        <% } %>
+                                                                <% } %>
 
-                                                                            <% } %>
+                                                                    <% } %>
 
-                                            </div>
+                                    </div>
                                 </div>
 
                                 <hr>
