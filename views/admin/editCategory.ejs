@@ -13,7 +13,8 @@
                     <h1>Edit Category</h1>
 
                     <div class="form-container">
-                        <form action="/admin/categories/editCategory/<%= category._id %>?page=<%= page %>" method="POST">
+                        <form action="/admin/categories/editCategory/<%= category._id %>?page=<%= page %>" method="POST"
+                            id="editCategoryForm">
 
                             <div class="form-grid">
 
@@ -28,7 +29,7 @@
 
                                 <div class="form-group full-width">
                                     <label>Description</label>
-                                    <textarea name="description" rows="4"><%= category.descrip || "" %></textarea>
+                                    <textarea name="descrip" rows="4"><%= category.descrip || "" %></textarea>
                                 </div>
 
                             </div>
@@ -47,14 +48,73 @@
 
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
-                    const message = "<%= message %>";
-                    const type = "<%= type %>";
-                    if (message) {
-                        Swal.fire({
-                            icon: type,
-                            text: message,
-                            confirmButtonColor: '#007bff'
-                        });
-                    }
-                })
+
+                    const form = document.getElementById("editCategoryForm");
+
+                    form.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+
+                        const data = {
+                            _id: form.querySelector('input[name="_id"]').value,
+                            name: form.querySelector('input[name="name"]').value.trim(),
+                            descrip: form.querySelector('textarea[name="descrip"]').value.trim()
+                        };
+
+                        if (!data.name) {
+                            Swal.fire({
+                                icon: "error",
+                                text: "Please enter category name"
+                            });
+                            return;
+                        }
+
+                        if (data.name.length < 3) {
+                            Swal.fire({
+                                icon: "error",
+                                text: "Category name must be at least 3 characters"
+                            });
+                            return;
+                        }
+
+                        if (data.descrip.length > 200) {
+                            Swal.fire({
+                                icon: "error",
+                                text: "Description cannot exceed 200 characters"
+                            });
+                            return;
+                        }
+
+                        try {
+                            const response = await fetch(form.action, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(data)
+                            });
+
+                            const result = await response.json();
+
+                            Swal.fire({
+                                icon: result.type,
+                                text: result.message,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            }).then(() => {
+                                if (result.success) {
+                                    window.location.href = `/admin/categories?page=<%= page %>`;
+                                }
+                            });
+
+                        } catch (error) {
+                            console.error(error);
+                            Swal.fire({
+                                icon: "error",
+                                text: "Something went wrong!"
+                            });
+                        }
+                    });
+
+                });
             </script>

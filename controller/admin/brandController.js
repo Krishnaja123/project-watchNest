@@ -19,30 +19,43 @@ const saveBrand = async (req, res) => {
         const { name, descrip } = req.body;
         //console.log(name, descrip);
 
-        if (!name) {
-            req.session.message = "Please enter brand name";
-            req.session.type = "warning";
-            return res.redirect("/admin/brand");
+        if (!name || !name.trim()) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Please fill Brand name"
+            });
         }
 
         const trimedName = name.trim();
-        const existingBrand = await Brand.findOne({ name: { $regex: trimedName, $options: "i" }, is_delete: false });
+        const existingBrand = await Brand.findOne({
+            name: { $regex: `^${trimedName}$`, $options: "i" },
+            is_delete: false
+        });
         if (existingBrand) {
-            req.session.message = "Brand already exist";
-            req.session.type = "error";
-            return res.redirect("/admin/brand");
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Brand name already exists, Please change name"
+            });
         }
-        const newBrand = await new Brand({
-            name,
+        await Brand.create({
+            name: trimedName,
             descrip
         });
-        newBrand.save();
-        req.session.message = "Successfully created Brand";
-        req.session.type = "success";
-        return res.redirect("/admin/brands");
+        return res.status(201).json({
+            success: true,
+            type: "success",
+            message: "Successfully created Brand"
+        });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+
+        return res.status(500).json({
+            success: false,
+            type: "error",
+            message: "Internal server error"
+        });
     }
 }
 
@@ -108,7 +121,7 @@ const deleteBrand = async (req, res) => {
         console.log("id: ", id);
 
         const brand = await Brand.findByIdAndUpdate(id, { is_delete: true }, { new: true });
-        console.log("deleted category: ", brand);
+        console.log("deleted brand: ", brand);
         const brands = await Brand.find({ is_delete: false });
         console.log("remaining categories:", brands);
 
@@ -155,34 +168,37 @@ const updateBrand = async (req, res) => {
         const page = parseInt(req.query.page);
         const existingBrand = await Brand.findById(_id);
         if (!existingBrand) {
-            req.session.message = "No brand found with this ID";
-            req.session.type = "error";
-            return res.redirect("/admin/brands")
+            return res.status(404).json({
+                success: false,
+                type: "error",
+                message: "No brand found with this ID"
+            });
         }
+
+        const trimedName = name.trim();
 
         const updatedBrandExist = await Brand.findOne({
             _id: { $ne: _id },
             is_delete: false,
-            name: { $regex: name.trim(), $options: "i" }
+            name: { $regex: `^${name.trim()}$`, $options: "i" }
         });
 
         if (updatedBrandExist) {
-            req.session.message = "Brand already exist";
-            req.session.type = "error";
-            return res.redirect(`/admin/brands/editBrand/${_id}`);
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Brand name already exists"
+            });
         }
 
         const upadateBrand = await Brand.findByIdAndUpdate(_id, { name, descrip });
 
-        if (!upadateBrand) {
-            req.session.message = "Brand not updated, Please try again.";
-            req.session.type = "error";
-            return res.redirect(`/admin/editBrand/${_id}`);
-        }
+        return res.json({
+            success: true,
+            type: "success",
+            message: "Brand updated successfully"
+        });
 
-        req.session.message = "Updated brand";
-        req.session.type = "success";
-        res.redirect(`/admin/brands/?page=${page}`);
 
     } catch (error) {
         console.log("server error", error);

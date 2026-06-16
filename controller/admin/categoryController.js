@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Category = require("../../models/categoryModel");
+// const { options } = require("pdfkit");
 
 const createCategory = async (req, res) => {
     try {
@@ -14,37 +15,88 @@ const createCategory = async (req, res) => {
     }
 }
 
+// const saveCategory = async (req, res) => {
+//     try {
+//         const { name, descrip } = req.body;
+
+//         if (!name) {
+//             req.session.message = "Please fill Category name";
+//             req.session.type = "error";
+//             return res.redirect("/admin/category");
+//         }
+//         const trimedName = name.trim();
+//         const existingCategory = await Category.findOne({ name: { $regex: trimedName, $options: "i" }, is_delete: false });
+//         if (existingCategory) {
+//             req.session.message = "Category already exist";
+//             req.session.type = "error";
+//             return res.redirect("/admin/category");
+//         }
+//         const newCategory = await new Category({
+//             name,
+//             descrip
+//         });
+//         newCategory.save();
+//         req.session.message = "Successfully created Category";
+//         req.session.type = "success";
+//         return res.redirect("/admin/categories")
+
+//     } catch (error) {
+//         console.log("server error", error);
+//         res.status(500).send("server error")
+
+//     }
+// }
+
 const saveCategory = async (req, res) => {
+    console.log("req body", req.body);
+
     try {
         const { name, descrip } = req.body;
 
-        if (!name) {
-            req.session.message = "Please fill Category name";
-            req.session.type = "error";
-            return res.redirect("/admin/category");
+        if (!name || !name.trim()) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Please fill Category name"
+            });
         }
-        const trimedName = name.trim();
-        const existingCategory = await Category.findOne({ name: { $regex: trimedName, $options: "i" }, is_delete: false });
+
+        const trimmedName = name.trim();
+
+        const existingCategory = await Category.findOne({
+            name: { $regex: `^${trimmedName}$`, $options: "i" },
+            is_delete: false
+        });
+
         if (existingCategory) {
-            req.session.message = "Category already exist";
-            req.session.type = "error";
-            return res.redirect("/admin/category");
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Category name already exists, Please change name"
+            });
         }
-        const newCategory = await new Category({
-            name,
+
+        await Category.create({
+            name: trimmedName,
             descrip
         });
-        newCategory.save();
-        req.session.message = "Successfully created Category";
-        req.session.type = "success";
-        return res.redirect("/admin/categories")
+
+        return res.status(201).json({
+            success: true,
+            type: "success",
+            message: "Successfully created category"
+        });
 
     } catch (error) {
-        console.log("server error", error);
-        res.status(500).send("server error")
+        console.error("Server Error:", error);
 
+        return res.status(500).json({
+            success: false,
+            type: "error",
+            message: "Internal server error"
+        });
     }
-}
+};
 
 const categories = async (req, res) => {
     try {
@@ -151,37 +203,41 @@ const categoryDetails = async (req, res) => {
 const updateCategory = async (req, res) => {
     try {
         const { _id, name, descrip } = req.body;
+
         const page = parseInt(req.query.page);
+
         const existingCategory = await Category.findById(_id);
         console.log("existingCategory: ", existingCategory);
 
         if (!existingCategory) {
-            req.session.message = "No category found with this ID";
-            req.session.type = "error";
-            return res.redirect("/admin/categories")
+            return res.status(404).json({
+                success: false,
+                type: "error",
+                message: "No category found with this ID"
+            });
         }
 
+        const trimmedName = name.trim();
+
         const updatedCategoryExist = await Category.findOne({
-            _id: {$ne: _id},
-            name: { $regex: `^${name.trim()}$`, $options: "i" }
+            _id: { $ne: _id },
+            name: { $regex: `^${trimmedName}$`, $options: "i" }
         });
 
-        if(updatedCategoryExist) {
-            req.session.message = "Category already exist";
-            req.session.type = "error";
-            return res.redirect(`/admin/categories/editCategory/${_id}`);
+        if (updatedCategoryExist) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Category name already exists"
+            });
         }
         const upadateCategory = await Category.findByIdAndUpdate(_id, { name, descrip });
 
-        if (!upadateCategory) {
-            req.session.message = "Category not updated, Please try again.";
-            req.session.type = "error";
-            return res.redirect(`/admin/categories/editCategory/${_id}`);
-
-        }
-        req.session.message = "Updated category";
-        req.session.type = "success";
-        res.redirect(`/admin/categories/?page=${page}`);
+        return res.json({
+            success: true,
+            type: "success",
+            message: "Category updated successfully"
+        });
 
     } catch (error) {
         console.log("server error", error);

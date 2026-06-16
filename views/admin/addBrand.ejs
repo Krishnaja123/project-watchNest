@@ -1,4 +1,4 @@
-<!-- views/addCategory.ejs -->
+<!-- views/addBrand.ejs -->
 <%- include("../partials/admin/header") %>
 
     <head>
@@ -15,7 +15,7 @@
                 <div class="header">Add Brand</div>
 
                 <div class="form-container">
-                    <form action="/admin/brand" method="POST">
+                    <form action="/admin/brand" method="POST" id="brandForm">
 
                         <div class="form-group">
                             <label for="brandName">Brand Name</label>
@@ -41,14 +41,83 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
-                const message = "<%= message %>";
-                const type = "<%= type %>";
-                if (message) {
-                    Swal.fire({
-                        icon: type,
-                        text: message,
-                        confirmButtonColor: '#007bff'
-                    });
-                }
+                // const message = "<%= message %>";
+                // const type = "<%= type %>";
+                // if (message) {
+                //     Swal.fire({
+                //         icon: type,
+                //         text: message,
+                //         confirmButtonColor: '#007bff'
+                //     });
+                // }
+
+                const form = document.getElementById("brandForm");
+                const nameInput = document.getElementById("brandName");
+                const descriptionInput = document.getElementById("descrip");
+
+                form.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    const name = nameInput.value.trim();
+                    const description = descriptionInput.value.trim();
+
+                    if (!name) {
+                        Swal.fire({
+                            icon: "error",
+                            text: "Please enter brand name"
+                        });
+                        return;
+                    }
+
+                    if (name.length < 3) {
+                        Swal.fire({
+                            icon: "error",
+                            text: "Brand name must be at least 3 characters"
+                        });
+                        return;
+                    }
+
+                    if (description.length > 200) {
+                        Swal.fire({
+                            icon: "error",
+                            text: "Description cannot exceed 200 characters"
+                        });
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(form.action, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                name,
+                                descrip: description
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        Swal.fire({
+                            icon: result.type,
+                            text: result.message,
+                            timer: 2000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        }).then(() => {
+                            if (result.success) {
+                                window.location.href = "/admin/brands";
+                            }
+                        });
+                    } catch (error) {
+                        Swal.fire({
+                            icon: "error",
+                            text: "Something went wrong"
+                        });
+                    }
+                })
+
+
             })
         </script>
