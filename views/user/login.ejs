@@ -66,7 +66,7 @@
 
       emailInput.addEventListener('input', validateEmail);
 
-      form.addEventListener('submit', function (event) {
+      form.addEventListener('submit', async function (event) {
         event.preventDefault();
 
         const isEmailValid = validateEmail();
@@ -74,7 +74,29 @@
 
 
         if (isEmailValid && isPasswordValid) {
-          form.submit();
+          // form.submit();
+          const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              email: emailInput.value.trim(),
+              password: passwordInput.value
+            })
+          });
+
+          const data = await response.json();
+
+          if (!data.success) {
+            Swal.fire({
+              icon: 'error',
+              text: data.message
+            });
+          } else {
+            window.location.href = data.redirect;
+          }
+
         }
 
       });
@@ -112,7 +134,7 @@
     const message = "<%= message %>";
     const type = "<%= type %>";
 
-    if (message || message.trim() !== '') {
+    if (message && message.trim() !== '') {
       Swal.fire({
         icon: type,
         text: message,

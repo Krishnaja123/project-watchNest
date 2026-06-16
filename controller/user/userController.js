@@ -138,6 +138,29 @@ const registerUser = async (req, res) => {
     }
 }
 
+const checkEmail = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
+            return res.json({
+                exists: true
+            });
+        }
+
+        return res.json({
+            exists: false
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            exists: false
+        });
+    }
+};
+
 const generateOtp = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -529,8 +552,10 @@ const loginUser = async (req, res, next) => {
         req.session.message = "";
         const { email, password } = req.body;
         if (!email || !password) {
-            req.session.message = "Please fill required fields";
-            return res.redirect("/login");
+            return res.json({
+                success: false,
+                message: "Please fill required fields"
+            });
         }
         console.log("checked fields");
 
@@ -539,36 +564,46 @@ const loginUser = async (req, res, next) => {
 
         if (!emailRegex.test(email)) {
             console.log("inside email check");
-
-            req.session.message = 'Please enter a valid email address';
-            return res.redirect("/login");
+            return res.json({
+                success: false,
+                message: "Please enter a valid email address"
+            });
         }
         console.log("checked regex");
 
 
         const PasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
         if (!PasswordRegex.test(password)) {
-            req.session.message = 'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
-            return res.redirect("/login");
+            return res.json({
+                success: false,
+                message: 'Password must be at least 8 characters, include uppercase, lowercase, number, and special character'
+            });
         }
 
         const existingUser = await User.findOne({ email }).select('+password_hash');
         if (!existingUser) {
-            req.session.message = "User with this email not found. Please signup";
-            return res.redirect("/login");
+            return res.json({
+                success: false,
+                message: "Invalid email or password"
+            });
         }
         console.log(existingUser);
         console.log(password);
         console.log(existingUser.password_hash);
 
         if (existingUser.userStatus === "Blocked") {
-            req.session.message = "You are blocked by admin";
-            return res.redirect("/login");
+            return res.json({
+                success: false,
+                message: "You are blocked by admin"
+            });
         }
 
         if (!existingUser.password_hash && existingUser.googleId !== null) {
-            req.session.message = "Please login using Google";
-            return res.redirect("/login");
+            return res.json({
+                success: false,
+                message: "Please login using Google"
+            });
         }
 
         const isMatch = await bcrypt.compare(password, existingUser.password_hash);
@@ -577,8 +612,10 @@ const loginUser = async (req, res, next) => {
         if (!isMatch) {
             console.log("ismatch not working");
 
-            req.session.message = "Invalid password";
-            return res.redirect("/login");
+            return res.json({
+                success: false,
+                message: "Invalid email or password"
+            });
         }
 
         // req.session.user = {
@@ -589,9 +626,17 @@ const loginUser = async (req, res, next) => {
 
         console.log("existing User: ", existingUser);
         req.login(existingUser, (err) => {
-            if (err) return next(err);
-            console.log("LOGIN SUCCESS");
-            return res.redirect("/home");
+            if (err) {
+                return res.json({
+                    success: false,
+                    message: "Login failed"
+                });
+            }
+
+            return res.json({
+                success: true,
+                redirect: "/home"
+            });
         });
 
         //return res.redirect("/home");
@@ -619,7 +664,7 @@ const generateReferralCode = (username) => {
     const random = Math.floor(1000 + Math.random() * 9000);
 
     const name = username.trim();
-    const namePart = name ? name.substring(0,3).toUpperCase(): "USR";
+    const namePart = name ? name.substring(0, 3).toUpperCase() : "USR";
     return `${namePart}${random}`;
 };
 
@@ -628,6 +673,7 @@ const generateReferralCode = (username) => {
 module.exports = {
     loadRegister,
     registerUser,
+    checkEmail,
     loadVerifyOtp,
     verifyOtp,
     resendOtp,

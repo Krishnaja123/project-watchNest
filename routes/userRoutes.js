@@ -28,6 +28,7 @@ router.get('/forgotPassword', userAuth, userController.loadForgotPassword);
 router.post('/forgotPassword', userAuth, userController.forgotPassword);
 router.get('/reset-password', userAuth, userController.resetPassword);
 router.post('/reset-password', userAuth, userController.saveNewPassword);
+router.post("/check-email", userAuth, userController.checkEmail);
 
 
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));

@@ -102,6 +102,7 @@
 
       usernameInput.addEventListener('input', validateUsername);
       emailInput.addEventListener('input', validateEmail);
+      emailInput.addEventListener('blur', checkEmailExists);
       passwordInput.addEventListener('input', validatePassword);
       confirmPasswordInput.addEventListener('input', validateConfirmPassword);
 
@@ -144,8 +145,8 @@
         const regex = /^[A-Za-z\s'-]+$/;
 
         if (!regex.test(username)) {
-          usernameError.textContent =  "Invalid name format";
-          return false; 
+          usernameError.textContent = "Invalid name format";
+          return false;
         }
 
         if (/\s{2,}/.test(username)) {
@@ -167,6 +168,33 @@
         return true;
       }
 
+      async function checkEmailExists() {
+
+        const email = emailInput.value.trim();
+
+        if (!email) return;
+
+        try {
+
+          const response = await fetch('/check-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email })
+          });
+
+          const data = await response.json();
+
+          if (data.exists) {
+
+            emailError.textContent = 'Email already in use';
+          }
+
+        } catch (err) {
+          emailError.textContent = '';
+        }
+      }
       function validatePassword() {
         const password = passwordInput.value;
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
