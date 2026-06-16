@@ -4,6 +4,8 @@ const Order = require("../../models/orderModel");
 const OrderItem = require("../../models/orderItemsModel");
 
 const { getSessionMessage } = require("../../utils/sessionHelper");
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 const getSalesReport = async (req, res) => {
     try {
@@ -19,7 +21,7 @@ const getSalesReport = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send(error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(error);
     }
 }
 
@@ -148,7 +150,7 @@ console.log("totalRevenue: ", summary.totalRevenue);
 
     } catch (error) {
         console.log("Sales Report Error:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: MESSAGES.SERVER_ERROR });
     }
 };
 
@@ -232,7 +234,7 @@ const exportSalesExcel = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).send("Excel export failed");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Excel export failed");
     }
 };
 
@@ -331,10 +333,9 @@ const exportSalesPDF = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).send("PDF export failed");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("PDF export failed");
     }
 };
-
 
 module.exports = {
     getSalesReport,

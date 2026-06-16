@@ -2,7 +2,8 @@
 const Order = require("../../models/orderModel");
 const User = require("../../models/userModel");
 const OrderItem = require("../../models/orderItemsModel");
-
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 const loadDashboard = async (req, res) => {
     try {
@@ -168,7 +169,7 @@ const getDashboardData = async (req, res) => {
 
     } catch (error) {
         console.log("Dashboard error:", error);
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Failed to load dashboard data"
         });

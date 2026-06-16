@@ -2,10 +2,12 @@ const mongoose = require("mongoose");
 const Order = require("../../models/orderModel");
 const OrderItem = require("../../models/orderItemsModel");
 const Product = require("../../models/productModel");
+const STATUS_CODES = require("../../constants/statusCodes");
 
 const { calculateOrderStatus } = require("../../utils/orderStatusHelper");
 const { getSessionMessage } = require("../../utils/sessionHelper");
 const { creditWallet } = require("../../services/walletServices");
+const MESSAGES = require("../../constants/messages");
 
 
 const getOrders = async (req, res) => {
@@ -32,7 +34,7 @@ const getOrders = async (req, res) => {
     } catch (error) {
 
         console.log("server error", error);
-        return res.status(500).send("server error");
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
 
     }
 }
@@ -77,7 +79,7 @@ const fetchOrders = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -110,7 +112,7 @@ const getOrderDetails = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).send("Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 };
 
@@ -143,7 +145,7 @@ const updateProductStatus = async (req, res) => {
 
         if (!item) {
             console.log("No item found for id:", orderItemId);
-            return res.status(404).json({ error: "Item not found" });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ error: "Item not found" });
         }
 
         const order = await Order.findById(item.order_id);
@@ -261,7 +263,7 @@ const updateProductStatus = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).send("Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -274,11 +276,11 @@ const returnAcceptOrReject = async (req, res) => {
 
     if (!item) {
         console.log("No item found for id:", orderItemId);
-        return res.status(404).json({ error: "Item not found" });
+        return res.status(STATUS_CODES.NOT_FOUND).json({ error: "Item not found" });
     }
 
     if (!action) {
-        return res.status(404).json({ error: "No action found" });
+        return res.status(STATUS_CODES.NOT_FOUND).json({ error: "No action found" });
     }
 
     if (action === "acceptReturn") {

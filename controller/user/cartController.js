@@ -4,6 +4,8 @@ const Product = require("../../models/productModel");
 
 const { getSessionMessage } = require("../../utils/sessionHelper");
 const { getOffer } = require("../../services/offerService");
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 const getCart = async (req, res) => {
     try {
@@ -94,7 +96,7 @@ const getCart = async (req, res) => {
     } catch (error) {
 
         console.error(error);
-        res.status(500).send("Something went wrong");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SOMETHING_WENT_WRONG);
 
     }
 };
@@ -173,7 +175,7 @@ const addToCart = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false });
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false });
     }
 }
 

@@ -13,6 +13,9 @@ const { createOrderService } = require("../../services/createOrderService");
 const { creditWallet } = require("../../services/walletServices");
 const { getOffer } = require("../../services/offerService");
 
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
+const PAYMENT_STATUS = require("../../constants/paymentStatus");
 
 const createOrder = async (req, res) => {
     try {
@@ -52,7 +55,7 @@ const createOrder = async (req, res) => {
     } catch (error) {
         console.error(error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: error.message
         });
@@ -74,7 +77,7 @@ const orderSuccess = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
 
     }
 }
@@ -125,7 +128,7 @@ const getOrders = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
 
     }
 
@@ -165,7 +168,7 @@ const getOrderDetails = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
 
     }
 
@@ -227,7 +230,7 @@ const getOrderInvoice = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -242,7 +245,7 @@ const cancelProduct = async (req, res) => {
         console.log("reason: ", reason);
 
         if (!reason || !reason.trim()) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Cancellation reason is required"
             });
@@ -252,7 +255,7 @@ const cancelProduct = async (req, res) => {
         console.log("item: ", item);
         if (!item) {
             console.log("No item found for id:", orderItemId);
-            return res.status(404).json({ error: "Item not found" });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ error: "Item not found" });
         }
 
         if (item.status != "processing") {
@@ -311,7 +314,7 @@ const cancelProduct = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -327,7 +330,7 @@ const cancelOrder = async (req, res) => {
 
 
         if (!reason || !reason.trim()) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Cancellation reason is required"
             });
@@ -337,7 +340,7 @@ const cancelOrder = async (req, res) => {
 
         if (!order) {
             console.log("No order found for id:", order_id);
-            return res.status(404).json({ error: "Item not found" });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ error: "Item not found" });
         };
 
         if (order.status === "shipped" || order.status === "delivered") {
@@ -392,7 +395,7 @@ const cancelOrder = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -405,7 +408,7 @@ const productReturnRequest = async (req, res) => {
         const { reason } = req.body;
 
         if (!reason || !reason.trim()) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Cancellation reason is required"
             });
@@ -416,7 +419,7 @@ const productReturnRequest = async (req, res) => {
 
         if (!item) {
             console.log("No item found for id:", itemId);
-            return res.status(404).json({ error: "Item not found" });
+            return res.status(statusbar.NOT_FOUND).json({ error: "Item not found" });
         }
 
         if (item.status != "delivered") {
@@ -452,7 +455,7 @@ const productReturnRequest = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -470,7 +473,7 @@ const showCoupons = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAFES.SERVER_ERROR);
     }
 };
 

@@ -6,6 +6,9 @@ require("dotenv").config();
 
 const { creditWallet } = require("../../services/walletServices");
 
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
+
 const loadRegister = (req, res) => {
     try {
         //console.log(req.session.message);
@@ -24,7 +27,7 @@ const loadRegister = (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -134,7 +137,7 @@ const registerUser = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -155,7 +158,7 @@ const checkEmail = async (req, res) => {
         });
 
     } catch (error) {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             exists: false
         });
     }
@@ -217,7 +220,7 @@ const loadVerifyOtp = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -361,7 +364,7 @@ const loadForgotPassword = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -417,7 +420,7 @@ const forgotPassword = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -437,7 +440,7 @@ const resetPassword = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -488,7 +491,7 @@ const saveNewPassword = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -508,7 +511,7 @@ const loadLogin = (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -539,9 +542,9 @@ const resendOtp = async (req, res) => {
 
     } catch (error) {
         console.error(`Resend OTP error, ${error}`);
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: 'Internal server error'
+            message: MESSAGES.SERVER_ERROR
         });
     }
 }
@@ -643,7 +646,7 @@ const loginUser = async (req, res, next) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 

@@ -2,6 +2,8 @@ const Wallet = require("../../models/walletModel");
 const WalletTransaction = require("../../models/walletTransactionModel");
 const { getSessionMessage } = require("../../utils/sessionHelper");
 
+const STATUS_CODES = require("../../constants/statusCodes");
+
 const getWalletPage = async (req, res) => {
     try {
 

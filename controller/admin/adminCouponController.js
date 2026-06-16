@@ -1,7 +1,8 @@
 const Coupon = require("../../models/couponSchema");
 const { couponSchema } = require("../../validations/couponValidation");
 const { getSessionMessage } = require("../../utils/sessionHelper");
-
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 const createCoupon = async (req, res) => {
     try {
@@ -14,7 +15,7 @@ const createCoupon = async (req, res) => {
         });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send(error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(error);
     }
 }
 
@@ -96,7 +97,7 @@ const saveCoupon = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Server error"
         });
@@ -111,7 +112,7 @@ const listCoupons = async (req, res) => {
         return res.render("admin/coupons", { message, type, page });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("Server error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
     }
 }
 
@@ -155,7 +156,7 @@ const fetchCoupons = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("server error")
     }
 }
 
@@ -173,12 +174,12 @@ const deleteCoupon = async (req, res) => {
 
         if (!coupon) {
             console.log("No coupon found for id:", id);
-            return res.status(404).json({ error: "Coupon not found" });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ error: "Coupon not found" });
         }
         else return res.json({ message: "Coupon deleted successfully", coupons });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("server error")
     }
 }
 
@@ -207,7 +208,7 @@ const editCouponPage = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).send("Server error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
     }
 };
 
@@ -275,7 +276,7 @@ const updateCoupon = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("server error");
     }
 };
 

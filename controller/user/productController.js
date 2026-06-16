@@ -9,6 +9,8 @@ const { getOffer } = require("../../services/offerService");
 // const { find } = require("../../models/orderModel");
 // const { maxLength } = require("zod");
 
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 const getHomePage = async (req, res) => {
     try {
@@ -75,7 +77,7 @@ const getHomePage = async (req, res) => {
         // console.log(req.session.message);
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -115,7 +117,7 @@ const showProductsPage = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -141,7 +143,7 @@ const filterProducts = async (req, res) => {
 
     } catch (err) {
         console.log(err);
-        res.status(500).send("server error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
 
     }
 
@@ -162,7 +164,7 @@ const getProductDetails = async (req, res) => {
             .populate("brand_id", "name");
 
         if (!product) {
-            return res.status(404).render("user/404", {
+            return res.status(STATUS_CODES.NOT_FOUND).render("user/404", {
                 message: "Product not found"
             });
         }
@@ -170,7 +172,7 @@ const getProductDetails = async (req, res) => {
         const viewedVariants = product.variants.filter(variant => variant.view === true);
 
         if (viewedVariants.length === 0) {
-            return res.status(404).render("user/404", {
+            return res.status(STATUS_CODES.NOT_FOUND).render("user/404", {
                 message: "Product not available"
             });
         }
@@ -253,7 +255,7 @@ updatedVariants: updatedVariants,
         })
     } catch (error) {
         console.log(error);
-        res.status(500).send("Server error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 
 }

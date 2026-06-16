@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const User = require("../../models/userModel");
 //const bcrypt = require("bcryptjs");
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 const loadCustomer = async (req, res) => {
     try {
@@ -10,7 +12,7 @@ const loadCustomer = async (req, res) => {
         res.render('admin/customer', { message, page });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 
 }
@@ -55,7 +57,7 @@ const fetchUser = async (req, res) => {
         });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -71,12 +73,12 @@ const userDetails = async (req, res) => {
         const user = await User.findOne({ _id: userId });
         if (!user) {
             req.session.message = "User not found";
-            return res.status(404).send("User not found");
+            return res.status(STATUS_CODES.NOT_FOUND).send("User not found");
         }
         res.render('admin/editCustomer', { message, type, user, page });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -101,7 +103,7 @@ const updateUser = async (req, res) => {
         res.redirect(`/admin/customer/?page=${page}`);
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 

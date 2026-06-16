@@ -8,6 +8,9 @@ const multer = require("multer");
 const uploadToCloudinary = require("../../utils/cloudinaryUpload");
 const { getSessionMessage } = require("../../utils/sessionHelper");
 
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
+
 require("dotenv").config();
 
 const loadProfile = async (req, res) => {
@@ -33,7 +36,7 @@ const loadProfile = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -55,7 +58,7 @@ const getEditProfile = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
 
     }
 }
@@ -117,7 +120,7 @@ const changeUserName = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -192,7 +195,7 @@ const changeEmail = async (req, res) => {
         }
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -217,7 +220,7 @@ const getChangePasswordPage = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -289,7 +292,7 @@ const changePassword = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 

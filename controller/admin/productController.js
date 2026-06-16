@@ -5,6 +5,8 @@ const Brand = require("../../models/brandModel")
 const multer = require("multer");
 const cloudinary = require("../../config/cloudinary");
 const { urlencoded } = require("express");
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 function uploadToCloudinary(buffer, folder = "products") {
     return new Promise((resolve, reject) => {
@@ -37,7 +39,7 @@ const createProduct = async (req, res) => {
         })
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
 
     }
 }
@@ -139,7 +141,7 @@ const saveProduct = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.SERVER_ERROR });
     }
 }
 
@@ -154,7 +156,7 @@ const checkProductName = async function (req, res) {
         return res.json({ exists: false });
     } catch (error) {
         console.error(err);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: MESSAGES.SERVER_ERROR });
     }
 }
 
@@ -171,7 +173,7 @@ const products = async function (req, res) {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -225,7 +227,7 @@ const fetchProducts = async (req, res) => {
         })
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -237,12 +239,12 @@ const viewProduct = async (req, res) => {
         const product = await Product.findById(productId);
 
         if (!product) {
-            res.status(400).json({ success: false, message: "Product not found" });
+            res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: "Product not found" });
         }
 
         const variant = await product.variants.id(variantId);
         if (!variant) {
-            return res.status(404).json({ success: false, message: "Variant not found" });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: "Variant not found" });
         }
 
         variant.view = !variant.view;
@@ -257,7 +259,7 @@ const viewProduct = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.SERVER_ERROR });
     }
 }
 
@@ -273,14 +275,14 @@ const deleteProduct = async (req, res) => {
 
         if (!product) {
             console.log("No product found for id:", id);
-            return res.status(404).json({ error: "Product not found" });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ error: "Product not found" });
         }
 
         const products = await Product.find({ is_delete: false });
         return res.json({ message: "Product deleted successfully", products });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.SERVER_ERROR });
     }
 }
 
@@ -298,7 +300,7 @@ const productDetails = async (req, res) => {
         let brands = await Brand.find({ view: true });
         if (!product) {
             req.session.message = "Brand not found";
-            return res.status(404).send("Brand not found");
+            return res.status(STATUS_CODES.NOT_FOUND).send("Brand not found");
         }
         console.log("product : ", product);
 
@@ -312,7 +314,7 @@ const productDetails = async (req, res) => {
         })
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
 
     }
 }
@@ -605,7 +607,7 @@ const updateProduct = async (req, res) => {
         const product = await Product.findById(productId);
 
         if (!product) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 type: "error",
                 message: "Product not found"
@@ -731,10 +733,10 @@ const updateProduct = async (req, res) => {
     } catch (err) {
         console.error("Update Error:", err);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             type: "error",
-            message: "Server error"
+            message: MESSAGES.SERVER_ERROR
         });
     }
 };

@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const Brand = require("../../models/brandModel")
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 const createBrand = async (req, res) => {
     try {
@@ -10,7 +12,7 @@ const createBrand = async (req, res) => {
         return res.render("admin/addBrand", { message, type });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -20,7 +22,7 @@ const saveBrand = async (req, res) => {
         //console.log(name, descrip);
 
         if (!name || !name.trim()) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 type: "error",
                 message: "Please fill Brand name"
@@ -33,7 +35,7 @@ const saveBrand = async (req, res) => {
             is_delete: false
         });
         if (existingBrand) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 type: "error",
                 message: "Brand name already exists, Please change name"
@@ -43,7 +45,7 @@ const saveBrand = async (req, res) => {
             name: trimedName,
             descrip
         });
-        return res.status(201).json({
+        return res.status(STATUS_CODES.CREATED).json({
             success: true,
             type: "success",
             message: "Successfully created Brand"
@@ -51,10 +53,10 @@ const saveBrand = async (req, res) => {
     } catch (error) {
         console.log("server error", error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             type: "error",
-            message: "Internal server error"
+            message: MESSAGES.SERVER_ERROR
         });
     }
 }
@@ -69,7 +71,7 @@ const brands = async (req, res) => {
         return res.render("admin/brands", { message, type, page });
     } catch (error) {
         console.log("server error", error);
-        return res.status(500).send("server error");
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -111,7 +113,7 @@ const fetchBrands = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -127,12 +129,12 @@ const deleteBrand = async (req, res) => {
 
         if (!brand) {
             console.log("No brand found for id:", id);
-            return res.status(404).json({ error: "Brand not found" });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ error: "Brand not found" });
         }
         else return res.json({ message: "Brand deleted successfully", brands });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -147,7 +149,7 @@ const brandDetails = async (req, res) => {
         const brand = await Brand.findById(brand_id);
         if (!brand) {
             req.session.message = "Brand not found";
-            return res.status(404).send("Brand not found");
+            return res.status(STATUS_CODES.NOT_FOUND).send("Brand not found");
         }
 
         return res.render("admin/editBrand", {
@@ -158,7 +160,7 @@ const brandDetails = async (req, res) => {
         });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -168,7 +170,7 @@ const updateBrand = async (req, res) => {
         const page = parseInt(req.query.page);
         const existingBrand = await Brand.findById(_id);
         if (!existingBrand) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 type: "error",
                 message: "No brand found with this ID"
@@ -184,7 +186,7 @@ const updateBrand = async (req, res) => {
         });
 
         if (updatedBrandExist) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 type: "error",
                 message: "Brand name already exists"
@@ -202,7 +204,7 @@ const updateBrand = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -218,7 +220,7 @@ const viewBrand = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Category = require("../../models/categoryModel");
-// const { options } = require("pdfkit");
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 const createCategory = async (req, res) => {
     try {
@@ -11,7 +12,7 @@ const createCategory = async (req, res) => {
         return res.render("admin/addCategory", { message, type });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -54,7 +55,7 @@ const saveCategory = async (req, res) => {
         const { name, descrip } = req.body;
 
         if (!name || !name.trim()) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 type: "error",
                 message: "Please fill Category name"
@@ -69,7 +70,7 @@ const saveCategory = async (req, res) => {
         });
 
         if (existingCategory) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 type: "error",
                 message: "Category name already exists, Please change name"
@@ -81,7 +82,7 @@ const saveCategory = async (req, res) => {
             descrip
         });
 
-        return res.status(201).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
             type: "success",
             message: "Successfully created category"
@@ -90,10 +91,10 @@ const saveCategory = async (req, res) => {
     } catch (error) {
         console.error("Server Error:", error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             type: "error",
-            message: "Internal server error"
+            message: MESSAGES.SERVER_ERROR
         });
     }
 };
@@ -109,7 +110,7 @@ const categories = async (req, res) => {
         return res.render("admin/categories", { message, type, page });
     } catch (error) {
         console.log("server error", error);
-        return res.status(500).send("server error");
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -152,7 +153,7 @@ const fetchCategories = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -165,12 +166,12 @@ const deleteCategory = async (req, res) => {
         //console.log("remaining categories:", categories);
 
         if (!category) {
-            return res.status(404).json({ error: "Category not found" });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ error: "Category not found" });
         }
         else return res.json({ message: "Category deleted successfully", categories });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -185,7 +186,7 @@ const categoryDetails = async (req, res) => {
         const category = await Category.findById(category_id);
         if (!category) {
             req.session.message = "Category not found";
-            return res.status(404).send("Category not found");
+            return res.status(STATUS_CODES.NOT_FOUND).send("Category not found");
         }
 
         return res.render("admin/editCategory", {
@@ -196,7 +197,7 @@ const categoryDetails = async (req, res) => {
         });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 
@@ -210,7 +211,7 @@ const updateCategory = async (req, res) => {
         console.log("existingCategory: ", existingCategory);
 
         if (!existingCategory) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 type: "error",
                 message: "No category found with this ID"
@@ -225,7 +226,7 @@ const updateCategory = async (req, res) => {
         });
 
         if (updatedCategoryExist) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 type: "error",
                 message: "Category name already exists"
@@ -241,7 +242,7 @@ const updateCategory = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 
 }
@@ -259,7 +260,7 @@ const viewCategory = async (req, res) => {
 
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 }
 

@@ -4,6 +4,8 @@ const { getSessionMessage } = require("../../utils/sessionHelper");
 const { indiaStates } = require("../../utils/states");
 const { validateAddress } = require("../../utils/validationHelper");
 const { createAddress } = require("../../services/addressService");
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 
 const getAddress = async (req, res) => {
@@ -31,7 +33,7 @@ const getAddress = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 };
 
@@ -77,7 +79,7 @@ const saveAddress = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 };
 
@@ -129,7 +131,7 @@ const deleteAddress = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 };
 

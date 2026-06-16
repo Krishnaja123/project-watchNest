@@ -5,6 +5,9 @@ const Product = require("../../models/productModel");
 
 const { getSessionMessage } = require("../../utils/sessionHelper");
 
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
+
 const getWishlist = async (req, res) => {
     try {
         const { message, type } = getSessionMessage(req);
@@ -55,7 +58,7 @@ const getWishlist = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Something went wrong");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 };
 
@@ -104,7 +107,7 @@ const toggleWishlist = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).json({ success: false });
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false });
     }
 }
 
@@ -192,7 +195,7 @@ const moveToCart = async (req, res) => {
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false });
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false });
     }
 };
 
@@ -229,7 +232,7 @@ const removeProduct = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false });
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false });
 
     }
 }

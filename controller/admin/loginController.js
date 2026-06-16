@@ -1,7 +1,8 @@
 const User = require("../../models/userModel");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 const loadLogin = (req, res) => {
     try {
@@ -14,7 +15,7 @@ const loadLogin = (req, res) => {
         res.render('admin/login', { message, type });
     } catch (error) {
         console.log("server error", error);
-        res.status(500).send("server error")
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -66,7 +67,7 @@ const logout = async (req, res) => {
         req.session.destroy(err => {
             if(err){
                 console.log("Error in destroying session", err);
-                return res.status(500).send("Logout failed");
+                return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Logout failed");
             }
 
             res.clearCookie("connect.sid");
@@ -75,7 +76,7 @@ const logout = async (req, res) => {
         })
     } catch (error) {
         console.log("unexpected error during logout", error);
-        return res.status(500).send("Logout error");
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Logout error");
 
     }
 }

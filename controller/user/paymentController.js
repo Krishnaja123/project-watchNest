@@ -6,6 +6,9 @@ const OrderItem = require("../../models/orderItemsModel");
 
 const { createOrderService } = require("../../services/createOrderService");
 
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
+
 const crypto = require("crypto");
 
 const createRazorpayOrder = async (req, res) => {
@@ -46,7 +49,7 @@ const createRazorpayOrder = async (req, res) => {
     } catch (error) {
         console.error(error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: error.message
         });
@@ -183,7 +186,7 @@ const verifyPayment = async (req, res) => {
 
         const order = await Order.findById(orderId);
         if (!order) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 message: "Order not found"
             });
@@ -204,7 +207,7 @@ const verifyPayment = async (req, res) => {
             coupon = await Coupon.findOne({ code: formattedCode });
 
             if (!coupon) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message: "Invalid coupon code"
                 });
@@ -227,7 +230,7 @@ const verifyPayment = async (req, res) => {
             );
 
             if (updated.modifiedCount === 0) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message: "Stock not available"
                 });
@@ -259,9 +262,9 @@ const verifyPayment = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Server error"
+            message: MESSAGES.SERVER_ERROR
         });
     }
 };

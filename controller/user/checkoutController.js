@@ -5,8 +5,8 @@ const Address = require("../../models/addressModel");
 const { indiaStates } = require("../../utils/states");
 const { getSessionMessage } = require("../../utils/sessionHelper");
 const { getOffer } = require("../../services/offerService");
-
-
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 const getCheckout = async (req, res) => {
     try {
@@ -75,7 +75,7 @@ const getCheckout = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 };
 
